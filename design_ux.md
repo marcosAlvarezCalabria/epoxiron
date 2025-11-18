@@ -228,9 +228,38 @@ Tabla editable con las siguientes columnas:
 - **Color RAC o especial**
 - **Precio** _(opcional)_
 
-#### Funcionalidades de Edición
-- ✏️ **Edición inline:** Al tocar cada fila
-- 🔲 **Modal opcional:** Para edición avanzada con más detalles
+#### Funcionalidades de Edición Inline
+
+**Patrón optimizado para tablet:**
+
+1. **Activar edición:**
+   - Touch en icono ✏️ de la fila → Toda la fila se vuelve editable
+   - Solo una fila editable a la vez
+
+2. **Controles por fila (touch-friendly):**
+   - ✅ Botón "Guardar" (verde, mínimo 44px)
+   - ❌ Botón "Cancelar" (gris, mínimo 44px)
+   - Ubicados al final de la fila
+
+3. **Atajos de teclado (opcional, para desktop):**
+   - `Enter` → Guarda cambios
+   - `Escape` → Cancela edición
+
+4. **Validación:**
+   - En tiempo real mientras edita
+   - Mensajes de error bajo el campo
+
+5. **Estados visuales:**
+   - Fila en edición: Borde destacado (azul/verde)
+   - Inputs touch-friendly: Mínimo 48-52px de altura
+   - Scroll horizontal si la tabla es muy ancha
+
+6. **Comportamiento:**
+   - Touch fuera de la fila en edición → Mostrar confirmación si hay cambios sin guardar
+   - "¿Guardar cambios? [Guardar] [Descartar] [Cancelar]"
+
+7. **Alternativa modal:**
+   - 🔲 **Modal opcional:** Para edición avanzada con más detalles si se requiere
 
 ### 🎛️ Botones de Acción
 
