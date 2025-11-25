@@ -1,8 +1,234 @@
 # CLAUDE.md
 
-## Architecture: Scope Rule
-- **Global**: Used by 2+ features
-- **Local**: Used by 1 feature only
+## Architecture: Clean Architecture + Scope Rule
+
+### Clean Architecture Layers
+
+```
+┌─────────────────────────────────────────┐
+│         UI Layer (React)                │  ← Pantallas, componentes
+│  src/features/*/components/             │
+│  src/shared/components/                 │
+├─────────────────────────────────────────┤
+│         Application Layer               │  ← Hooks, state, lógica UI
+│  src/features/*/hooks/                  │
+│  src/features/*/stores/                 │
+│  src/shared/hooks/                      │
+├─────────────────────────────────────────┤
+│         Domain Layer                    │  ← Tipos, interfaces, reglas
+│  src/features/*/types/                  │
+│  src/shared/types/                      │
+│  src/features/*/schemas/                │  (Zod schemas)
+├─────────────────────────────────────────┤
+│         Infrastructure Layer            │  ← API, localStorage, external
+│  src/features/*/api/                    │
+│  src/shared/api/                        │
+│  src/shared/utils/                      │
+└─────────────────────────────────────────┘
+```
+
+**Dependency Rule (CRITICAL):**
+- ⬇️ Dependencies flow INWARD (outer layers depend on inner)
+- ❌ Inner layers NEVER depend on outer layers
+- ✅ Domain (types) is the center - no dependencies
+- ✅ Infrastructure depends on Domain
+- ✅ Application depends on Domain
+- ✅ UI depends on Application + Domain
+
+**Examples:**
+
+✅ **GOOD:**
+```typescript
+// UI uses Application (hook)
+import { useAlbaranes } from '@/features/albaranes/hooks/useAlbaranes'
+
+// Hook uses Domain (types)
+import type { Albaran } from '@/features/albaranes/types/Albaran'
+
+// Hook uses Infrastructure (API)
+import { fetchAlbaranes } from '@/features/albaranes/api/albaranesApi'
+```
+
+❌ **BAD:**
+```typescript
+// Domain importing from Infrastructure - WRONG!
+import { api } from '@/shared/api/client' // ❌ Types shouldn't know about API
+```
+
+### Scope Rule
+- **Global**: Used by 2+ features → `src/shared/`
+- **Local**: Used by 1 feature only → `src/features/[feature]/`
+
+**Decision tree:**
+```
+Is this used by 2+ features?
+├─ YES → src/shared/
+└─ NO  → src/features/[specific-feature]/
+```
+
+### Folder Structure per Feature
+
+```
+src/features/albaranes/
+├── components/          # UI Layer - React components
+│   ├── AlbaranForm.tsx
+│   ├── AlbaranTable.tsx
+│   └── __tests__/
+├── hooks/              # Application Layer - Business logic
+│   ├── useAlbaranes.ts
+│   ├── useAlbaranForm.ts
+│   └── __tests__/
+├── stores/             # Application Layer - State
+│   ├── albaranesStore.ts
+│   └── __tests__/
+├── types/              # Domain Layer - Types & Interfaces
+│   ├── Albaran.ts
+│   └── AlbaranFilters.ts
+├── schemas/            # Domain Layer - Validation
+│   └── albaranSchema.ts
+└── api/                # Infrastructure Layer - External calls
+    ├── albaranesApi.ts
+    └── __tests__/
+```
+
+### Import Aliases (tsconfig.json)
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/shared/*": ["./src/shared/*"]
+    }
+  }
+}
+```
+
+**Usage:**
+```typescript
+// ✅ Clean imports with aliases
+import { Button } from '@/shared/components/Button'
+import { useAlbaranes } from '@/features/albaranes/hooks/useAlbaranes'
+import type { Albaran } from '@/features/albaranes/types/Albaran'
+
+// ❌ Avoid relative imports
+import { Button } from '../../../shared/components/Button'
+```
+
+### Layer Responsibilities
+
+**UI Layer (components/):**
+- 🎨 Render UI elements
+- 📝 Handle user interactions
+- ❌ NO business logic
+- ❌ NO API calls
+- ✅ Uses hooks from Application layer
+
+**Application Layer (hooks/, stores/):**
+- 🧠 Business logic
+- 📊 State management
+- 🔄 Orchestration (combine multiple operations)
+- ✅ Uses types from Domain
+- ✅ Uses API from Infrastructure
+
+**Domain Layer (types/, schemas/):**
+- 📐 Data structures (interfaces, types)
+- ✅ Validation rules (Zod schemas)
+- 🎯 Business rules (pure functions)
+- ❌ NO framework dependencies
+- ❌ NO external dependencies (except Zod)
+
+**Infrastructure Layer (api/, utils/):**
+- 🌐 API calls
+- 💾 LocalStorage/IndexedDB
+- 🔧 External services
+- ✅ Uses types from Domain
+- ❌ NO UI knowledge
+
+### Example: Albaran Feature (Clean Architecture)
+
+**1. Domain Layer - Types:**
+```typescript
+// src/features/albaranes/types/Albaran.ts
+// 📝 Pure TypeScript - No dependencies
+export interface Albaran {
+  id: string
+  clienteId: string
+  fecha: Date
+  estado: 'borrador' | 'pendiente' | 'revisado'
+  piezas: Pieza[]
+}
+```
+
+**2. Domain Layer - Schema:**
+```typescript
+// src/features/albaranes/schemas/albaranSchema.ts
+// 📝 Validation rules - Only depends on Zod
+import { z } from 'zod'
+
+export const albaranSchema = z.object({
+  clienteId: z.string().min(1),
+  fecha: z.date(),
+  piezas: z.array(piezaSchema).min(1)
+})
+```
+
+**3. Infrastructure Layer - API:**
+```typescript
+// src/features/albaranes/api/albaranesApi.ts
+// 📝 External calls - Uses Domain types
+import type { Albaran } from '../types/Albaran'
+
+export async function fetchAlbaranes(): Promise<Albaran[]> {
+  // API call here
+}
+```
+
+**4. Application Layer - Hook:**
+```typescript
+// src/features/albaranes/hooks/useAlbaranes.ts
+// 📝 Business logic - Orchestrates Infrastructure + Domain
+import { useQuery } from '@tanstack/react-query'
+import { fetchAlbaranes } from '../api/albaranesApi'
+import type { Albaran } from '../types/Albaran'
+
+export function useAlbaranes() {
+  return useQuery<Albaran[]>({
+    queryKey: ['albaranes'],
+    queryFn: fetchAlbaranes
+  })
+}
+```
+
+**5. UI Layer - Component:**
+```typescript
+// src/features/albaranes/components/AlbaranList.tsx
+// 📝 UI only - Uses Application hook
+import { useAlbaranes } from '../hooks/useAlbaranes'
+
+export function AlbaranList() {
+  const { data: albaranes, isLoading } = useAlbaranes()
+  // Render UI
+}
+```
+
+### Rules for Clean Architecture
+
+**ALWAYS:**
+- ✅ Keep layers separated
+- ✅ Import from inner layers (Domain, Infrastructure)
+- ✅ Use dependency injection when needed
+- ✅ Keep components dumb (UI only)
+- ✅ Keep hooks smart (business logic)
+
+**NEVER:**
+- ❌ Import from outer layers
+- ❌ Put business logic in components
+- ❌ Put API calls in components
+- ❌ Mix layers in same file
+
+---
 
 ## Tech Stack
 - React 19 + TypeScript
