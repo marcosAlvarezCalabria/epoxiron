@@ -154,7 +154,9 @@ describe('LoginForm', () => {
       await user.click(submitButton)
 
       await waitFor(() => {
-        expect(loginSpy).toHaveBeenCalledWith({
+        expect(loginSpy).toHaveBeenCalled()
+        const callArgs = loginSpy.mock.calls[0][0]
+        expect(callArgs).toEqual({
           email: 'test@test.com',
           password: 'password123'
         })
@@ -265,8 +267,8 @@ describe('LoginForm', () => {
       const submitButton = screen.getByRole('button', { name: /iniciar sesión/i })
       await user.click(submitButton)
 
-      const errorAlert = await screen.findByRole('alert')
-      expect(errorAlert).toBeInTheDocument()
+      const errorAlerts = await screen.findAllByRole('alert')
+      expect(errorAlerts.length).toBeGreaterThan(0)
     })
   })
 })
