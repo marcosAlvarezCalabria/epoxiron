@@ -1,90 +1,50 @@
-import { useState, type FormEvent } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
 import { useLogin } from '../hooks/useLogin'
 
 export function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [emailError, setEmailError] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-
   const { login, isLoading, error } = useLogin()
 
-  const validateEmail = (email: string): boolean => {
-    if (!email.trim()) {
-      setEmailError('Email es requerido')
-      return false
-    }
+  // useForm = Hook de React Hook Form
+  // Maneja TODO el formulario automáticamente
+  const {
+    register,      // Función para "registrar" inputs
+    handleSubmit,  // Función para manejar submit
+    formState: { errors }  // Objeto con errores de validación
+  } = useForm<LoginFormData>({
+    // resolver = "resolvedor" - conecta Zod con React Hook Form
+    // zodResolver lee el schema y valida automáticamente
+    resolver: zodResolver(loginSchema)
+  })
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setEmailError('Email no es válido')
-      return false
-    }
-
-    setEmailError('')
-    return true
-  }
-
-  const validatePassword = (password: string): boolean => {
-    if (!password.trim()) {
-      setPasswordError('Contraseña es requerida')
-      return false
-    }
-
-    if (password.length < 6) {
-      setPasswordError('Contraseña debe tener al menos 6 caracteres')
-      return false
-    }
-
-    setPasswordError('')
-    return true
-  }
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const isEmailValid = validateEmail(email)
-    const isPasswordValid = validatePassword(password)
-
-    if (isEmailValid && isPasswordValid) {
-      login({ email, password })
-    }
-  }
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value)
-    if (emailError || error) {
-      setEmailError('')
-    }
-  }
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value)
-    if (passwordError || error) {
-      setPasswordError('')
-    }
+  // Esta función se ejecuta SOLO si la validación pasa
+  const onSubmit = (data: LoginFormData) => {
+    // data ya está validado por Zod
+    // data = { email: "...", password: "..." }
+    login(data)
   }
 
   return (
     <div>
       <h1>Login</h1>
 
-      <form onSubmit={handleSubmit} noValidate>
+      {/* handleSubmit(onSubmit) = valida y luego ejecuta onSubmit */}
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div>
           <label htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
-            value={email}
-            onChange={handleEmailChange}
+            {...register('email')}
             disabled={isLoading}
             required
-            aria-invalid={!!emailError}
-            aria-describedby={emailError ? 'email-error' : undefined}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? 'email-error' : undefined}
           />
-          {emailError && (
+          {errors.email && (
             <div id="email-error" role="alert" style={{ color: 'red' }}>
-              {emailError}
+              {errors.email.message}
             </div>
           )}
         </div>
@@ -94,16 +54,15 @@ export function LoginForm() {
           <input
             id="password"
             type="password"
-            value={password}
-            onChange={handlePasswordChange}
+            {...register('password')}
             disabled={isLoading}
             required
-            aria-invalid={!!passwordError}
-            aria-describedby={passwordError ? 'password-error' : undefined}
+            aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? 'password-error' : undefined}
           />
-          {passwordError && (
+          {errors.password && (
             <div id="password-error" role="alert" style={{ color: 'red' }}>
-              {passwordError}
+              {errors.password.message}
             </div>
           )}
         </div>
