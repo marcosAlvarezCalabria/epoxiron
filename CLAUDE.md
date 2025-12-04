@@ -1,94 +1,190 @@
 # CLAUDE.md
 
-## Architecture: Clean Architecture + Scope Rule
+## Architecture: Pure Clean Architecture + DDD
 
-### Clean Architecture Layers
+### Clean Architecture Layers (4 Layers)
 
 ```
 ┌─────────────────────────────────────────┐
-│         UI Layer (React)                │  ← Pantallas, componentes
-│  src/features/*/components/             │
-│  src/shared/components/                 │
+│   Presentation Layer (React)            │  ← UI, Hooks, Stores
+│   src/features/*/components/            │
+│   src/features/*/hooks/                 │
+│   src/features/*/stores/                │
+│   src/pages/                            │
 ├─────────────────────────────────────────┤
-│         Application Layer               │  ← Hooks, state, lógica UI
-│  src/features/*/hooks/                  │
-│  src/features/*/stores/                 │
-│  src/shared/hooks/                      │
+│   Application Layer                     │  ← Use Cases (orchestration)
+│   src/application/use-cases/            │
 ├─────────────────────────────────────────┤
-│         Domain Layer                    │  ← Tipos, interfaces, reglas
-│  src/features/*/types/                  │
-│  src/shared/types/                      │
-│  src/features/*/schemas/                │  (Zod schemas)
+│   Domain Layer                          │  ← Entities, Value Objects, Rules
+│   src/domain/entities/                  │
+│   src/domain/value-objects/             │
+│   src/domain/exceptions/                │
 ├─────────────────────────────────────────┤
-│         Infrastructure Layer            │  ← API, localStorage, external
-│  src/features/*/api/                    │
-│  src/shared/api/                        │
-│  src/shared/utils/                      │
+│   Infrastructure Layer                  │  ← APIs, Repositories, External
+│   src/infrastructure/repositories/      │
+│   src/infrastructure/api/               │
 └─────────────────────────────────────────┘
 ```
 
 **Dependency Rule (CRITICAL):**
 - ⬇️ Dependencies flow INWARD (outer layers depend on inner)
 - ❌ Inner layers NEVER depend on outer layers
-- ✅ Domain (types) is the center - no dependencies
-- ✅ Infrastructure depends on Domain
-- ✅ Application depends on Domain
-- ✅ UI depends on Application + Domain
+- ✅ Domain is the center - ZERO dependencies (pure TypeScript)
+- ✅ Application depends ONLY on Domain
+- ✅ Infrastructure depends ONLY on Domain
+- ✅ Presentation depends on Application + Domain + Infrastructure
 
-**Examples:**
+**Dependency Flow:**
+```
+Presentation → Application → Domain
+     ↓              ↓
+Infrastructure ────┘
+```
 
-✅ **GOOD:**
+### Domain-Driven Design (DDD) Concepts
+
+**1. Entities** - Objects with unique identity and lifecycle
 ```typescript
-// UI uses Application (hook)
-import { useAlbaranes } from '@/features/albaranes/hooks/useAlbaranes'
+// src/domain/entities/User.ts
+export class User {
+  private readonly _id: string
+  private _email: Email
+  private _name: string
+  private _role: UserRole
 
-// Hook uses Domain (types)
-import type { Albaran } from '@/features/albaranes/types/Albaran'
+  // Business logic methods
+  esAdmin(): boolean {
+    return this._role === 'admin'
+  }
 
-// Hook uses Infrastructure (API)
-import { fetchAlbaranes } from '@/features/albaranes/api/albaranesApi'
+  puedeEliminarClientes(): boolean {
+    return this._role === 'admin'
+  }
+}
 ```
 
-❌ **BAD:**
+**2. Value Objects** - Immutable objects without identity
 ```typescript
-// Domain importing from Infrastructure - WRONG!
-import { api } from '@/shared/api/client' // ❌ Types shouldn't know about API
+// src/domain/value-objects/Email.ts
+export class Email {
+  private readonly value: string
+
+  constructor(email: string) {
+    if (!this.isValid(email)) {
+      throw new Error(`Email inválido: ${email}`)
+    }
+    this.value = email.toLowerCase().trim()
+  }
+
+  getValue(): string { return this.value }
+  equals(other: Email): boolean { return this.value === other.value }
+}
 ```
 
-### Scope Rule
-- **Global**: Used by 2+ features → `src/shared/`
-- **Local**: Used by 1 feature only → `src/features/[feature]/`
+**3. Domain Exceptions** - Business errors
+```typescript
+// src/domain/exceptions/AuthException.ts
+export class AuthException extends Error {
+  public readonly code: AuthErrorCode
 
-**Decision tree:**
-```
-Is this used by 2+ features?
-├─ YES → src/shared/
-└─ NO  → src/features/[specific-feature]/
+  static invalidCredentials(): AuthException {
+    return new AuthException('INVALID_CREDENTIALS', 'Email o contraseña incorrectos')
+  }
+}
 ```
 
-### Folder Structure per Feature
+### Layer Responsibilities
+
+**Domain Layer (src/domain/):**
+- 📐 Entities with business logic
+- 💎 Value Objects (immutable, validated)
+- 🚫 Domain Exceptions (business errors)
+- 🎯 Business rules (pure functions)
+- ❌ ZERO external dependencies (only TypeScript)
+- ❌ NO framework knowledge (no React, no HTTP, no DB)
+
+**Application Layer (src/application/):**
+- 🎯 Use Cases (orchestrate business operations)
+- 🔄 Validate inputs using Domain objects
+- 🧩 Combine Domain entities and Infrastructure
+- ✅ Uses Domain entities, value objects, exceptions
+- ✅ Calls Infrastructure repositories
+- ❌ NO UI knowledge (independent of React)
+
+**Infrastructure Layer (src/infrastructure/):**
+- 🌐 Repositories (data access)
+- 📡 API clients (HTTP calls)
+- 💾 LocalStorage/IndexedDB
+- 🔌 External services
+- ✅ Translates JSON → Domain entities
+- ✅ Translates Domain entities → JSON
+- ❌ NO UI knowledge
+
+**Presentation Layer (src/features/, src/pages/):**
+- 🎨 React components (UI)
+- 🪝 Custom hooks (adapt Use Cases to React)
+- 📊 Zustand stores (global state)
+- ✅ Uses Use Cases from Application
+- ✅ Uses Domain entities
+- ✅ Uses React Query for async state
+- ❌ NO direct API calls (uses Use Cases)
+
+### Folder Structure
 
 ```
-src/features/albaranes/
-├── components/          # UI Layer - React components
-│   ├── AlbaranForm.tsx
-│   ├── AlbaranTable.tsx
-│   └── __tests__/
-├── hooks/              # Application Layer - Business logic
-│   ├── useAlbaranes.ts
-│   ├── useAlbaranForm.ts
-│   └── __tests__/
-├── stores/             # Application Layer - State
-│   ├── albaranesStore.ts
-│   └── __tests__/
-├── types/              # Domain Layer - Types & Interfaces
-│   ├── Albaran.ts
-│   └── AlbaranFilters.ts
-├── schemas/            # Domain Layer - Validation
-│   └── albaranSchema.ts
-└── api/                # Infrastructure Layer - External calls
-    ├── albaranesApi.ts
-    └── __tests__/
+src/
+├── domain/                         # DOMAIN LAYER
+│   ├── entities/                   # Entities with business logic
+│   │   ├── User.ts
+│   │   ├── Albaran.ts
+│   │   └── Cliente.ts
+│   ├── value-objects/              # Immutable validated objects
+│   │   ├── Email.ts
+│   │   ├── Token.ts
+│   │   └── Tarifa.ts
+│   └── exceptions/                 # Business errors
+│       ├── AuthException.ts
+│       └── AlbaranException.ts
+│
+├── application/                    # APPLICATION LAYER
+│   └── use-cases/                  # Business operations
+│       ├── LoginUseCase.ts
+│       ├── LogoutUseCase.ts
+│       ├── CrearAlbaranUseCase.ts
+│       └── ValidarAlbaranUseCase.ts
+│
+├── infrastructure/                 # INFRASTRUCTURE LAYER
+│   ├── repositories/               # Data access
+│   │   ├── AuthRepository.ts
+│   │   ├── AlbaranRepository.ts
+│   │   └── ClienteRepository.ts
+│   └── api/                        # HTTP clients
+│       └── apiClient.ts
+│
+├── features/                       # PRESENTATION LAYER
+│   ├── auth/
+│   │   ├── components/             # React UI
+│   │   │   ├── LoginForm.tsx
+│   │   │   └── __tests__/
+│   │   ├── hooks/                  # React adapters
+│   │   │   ├── useLogin.ts
+│   │   │   └── __tests__/
+│   │   └── stores/                 # Global state
+│   │       ├── authStore.ts
+│   │       └── __tests__/
+│   ├── albaranes/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── stores/
+│   └── clientes/
+│       ├── components/
+│       ├── hooks/
+│       └── stores/
+│
+└── pages/                          # PRESENTATION LAYER
+    ├── LoginPage.tsx
+    ├── DashboardPage.tsx
+    └── AlbaranesPage.tsx
 ```
 
 ### Import Aliases (tsconfig.json)
@@ -98,8 +194,10 @@ src/features/albaranes/
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@/features/*": ["./src/features/*"],
-      "@/shared/*": ["./src/shared/*"]
+      "@/domain/*": ["./src/domain/*"],
+      "@/application/*": ["./src/application/*"],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/features/*": ["./src/features/*"]
     }
   }
 }
@@ -108,125 +206,387 @@ src/features/albaranes/
 **Usage:**
 ```typescript
 // ✅ Clean imports with aliases
-import { Button } from '@/shared/components/Button'
-import { useAlbaranes } from '@/features/albaranes/hooks/useAlbaranes'
-import type { Albaran } from '@/features/albaranes/types/Albaran'
+import { User } from '@/domain/entities/User'
+import { Email } from '@/domain/value-objects/Email'
+import { LoginUseCase } from '@/application/use-cases/LoginUseCase'
+import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
+import { useLogin } from '@/features/auth/hooks/useLogin'
 
 // ❌ Avoid relative imports
-import { Button } from '../../../shared/components/Button'
+import { User } from '../../../domain/entities/User'
 ```
 
-### Layer Responsibilities
+### Complete Example: Login Flow (Clean Architecture)
 
-**UI Layer (components/):**
-- 🎨 Render UI elements
-- 📝 Handle user interactions
-- ❌ NO business logic
-- ❌ NO API calls
-- ✅ Uses hooks from Application layer
-
-**Application Layer (hooks/, stores/):**
-- 🧠 Business logic
-- 📊 State management
-- 🔄 Orchestration (combine multiple operations)
-- ✅ Uses types from Domain
-- ✅ Uses API from Infrastructure
-
-**Domain Layer (types/, schemas/):**
-- 📐 Data structures (interfaces, types)
-- ✅ Validation rules (Zod schemas)
-- 🎯 Business rules (pure functions)
-- ❌ NO framework dependencies
-- ❌ NO external dependencies (except Zod)
-
-**Infrastructure Layer (api/, utils/):**
-- 🌐 API calls
-- 💾 LocalStorage/IndexedDB
-- 🔧 External services
-- ✅ Uses types from Domain
-- ❌ NO UI knowledge
-
-### Example: Albaran Feature (Clean Architecture)
-
-**1. Domain Layer - Types:**
+**1. Domain Layer - Value Object:**
 ```typescript
-// src/features/albaranes/types/Albaran.ts
-// 📝 Pure TypeScript - No dependencies
-export interface Albaran {
-  id: string
-  clienteId: string
-  fecha: Date
-  estado: 'borrador' | 'pendiente' | 'revisado'
-  piezas: Pieza[]
+// src/domain/value-objects/Email.ts
+/**
+ * VALUE OBJECT: Email
+ * Immutable, validated email address.
+ * Location: Domain Layer
+ * Dependencies: None (pure TypeScript)
+ */
+export class Email {
+  private readonly value: string
+
+  constructor(email: string) {
+    if (!this.isValid(email)) {
+      throw new Error(`Email inválido: ${email}`)
+    }
+    this.value = email.toLowerCase().trim()
+  }
+
+  private isValid(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  getValue(): string {
+    return this.value
+  }
+
+  equals(other: Email): boolean {
+    return this.value === other.value
+  }
 }
 ```
 
-**2. Domain Layer - Schema:**
+**2. Domain Layer - Entity:**
 ```typescript
-// src/features/albaranes/schemas/albaranSchema.ts
-// 📝 Validation rules - Only depends on Zod
-import { z } from 'zod'
+// src/domain/entities/User.ts
+/**
+ * ENTITY: User
+ * User with identity and business logic.
+ * Location: Domain Layer
+ * Dependencies: Email (Value Object)
+ */
+import { Email } from '../value-objects/Email'
 
-export const albaranSchema = z.object({
-  clienteId: z.string().min(1),
-  fecha: z.date(),
-  piezas: z.array(piezaSchema).min(1)
-})
-```
+export type UserRole = 'admin' | 'user' | 'guest'
 
-**3. Infrastructure Layer - API:**
-```typescript
-// src/features/albaranes/api/albaranesApi.ts
-// 📝 External calls - Uses Domain types
-import type { Albaran } from '../types/Albaran'
+export class User {
+  private readonly _id: string
+  private _email: Email
+  private _name: string
+  private _role: UserRole
 
-export async function fetchAlbaranes(): Promise<Albaran[]> {
-  // API call here
+  constructor(props: { id: string; email: Email; name: string; role: UserRole }) {
+    this._id = props.id
+    this._email = props.email
+    this._name = props.name
+    this._role = props.role
+  }
+
+  // Business logic
+  esAdmin(): boolean {
+    return this._role === 'admin'
+  }
+
+  puedeEliminarClientes(): boolean {
+    return this._role === 'admin'
+  }
+
+  // Getters
+  get id(): string { return this._id }
+  get email(): Email { return this._email }
+  get name(): string { return this._name }
+  get role(): UserRole { return this._role }
 }
 ```
 
-**4. Application Layer - Hook:**
+**3. Domain Layer - Exception:**
 ```typescript
-// src/features/albaranes/hooks/useAlbaranes.ts
-// 📝 Business logic - Orchestrates Infrastructure + Domain
-import { useQuery } from '@tanstack/react-query'
-import { fetchAlbaranes } from '../api/albaranesApi'
-import type { Albaran } from '../types/Albaran'
+// src/domain/exceptions/AuthException.ts
+/**
+ * DOMAIN EXCEPTION: AuthException
+ * Business-level authentication errors.
+ * Location: Domain Layer
+ * Dependencies: None
+ */
+export type AuthErrorCode =
+  | 'INVALID_CREDENTIALS'
+  | 'TOKEN_EXPIRED'
+  | 'TOKEN_INVALID'
+  | 'UNAUTHORIZED'
 
-export function useAlbaranes() {
-  return useQuery<Albaran[]>({
-    queryKey: ['albaranes'],
-    queryFn: fetchAlbaranes
+export class AuthException extends Error {
+  public readonly code: AuthErrorCode
+
+  constructor(code: AuthErrorCode, message: string) {
+    super(message)
+    this.code = code
+    this.name = 'AuthException'
+  }
+
+  static invalidCredentials(): AuthException {
+    return new AuthException('INVALID_CREDENTIALS', 'Email o contraseña incorrectos')
+  }
+
+  static tokenExpired(): AuthException {
+    return new AuthException('TOKEN_EXPIRED', 'El token ha expirado')
+  }
+}
+```
+
+**4. Infrastructure Layer - Repository:**
+```typescript
+// src/infrastructure/repositories/AuthRepository.ts
+/**
+ * REPOSITORY: AuthRepository
+ * Handles HTTP calls and translates JSON ↔ Domain entities.
+ * Location: Infrastructure Layer
+ * Dependencies: Domain (User, Email, Token, AuthException)
+ */
+import { User } from '@/domain/entities/User'
+import { Email } from '@/domain/value-objects/Email'
+import { Token } from '@/domain/value-objects/Token'
+import { AuthException } from '@/domain/exceptions/AuthException'
+
+export class AuthRepository {
+  private apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+
+  async login(email: Email, password: string): Promise<{ user: User; token: Token }> {
+    const response = await fetch(`${this.apiUrl}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.getValue(), // Extract value from Value Object
+        password,
+      }),
+    })
+
+    if (!response.ok) {
+      throw AuthException.invalidCredentials()
+    }
+
+    const data = await response.json()
+
+    // Translate JSON → Domain entities
+    const user = new User({
+      id: data.user.id,
+      email: new Email(data.user.email),
+      name: data.user.name,
+      role: data.user.role || 'user',
+    })
+
+    const token = new Token(data.token)
+    this.saveToken(token)
+
+    return { user, token }
+  }
+
+  private saveToken(token: Token): void {
+    localStorage.setItem('authToken', token.getValue())
+  }
+}
+```
+
+**5. Application Layer - Use Case:**
+```typescript
+// src/application/use-cases/LoginUseCase.ts
+/**
+ * USE CASE: LoginUseCase
+ * Orchestrates login flow.
+ * Location: Application Layer
+ * Dependencies: Domain (Email, Token, User, AuthException), Infrastructure (AuthRepository)
+ */
+import { Email } from '@/domain/value-objects/Email'
+import { Token } from '@/domain/value-objects/Token'
+import { User } from '@/domain/entities/User'
+import { AuthException } from '@/domain/exceptions/AuthException'
+import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
+
+export interface LoginInput {
+  email: string
+  password: string
+}
+
+export interface LoginOutput {
+  user: User
+  token: Token
+  success: boolean
+}
+
+export class LoginUseCase {
+  private authRepository: AuthRepository
+
+  constructor(authRepository: AuthRepository) {
+    this.authRepository = authRepository
+  }
+
+  async execute(input: LoginInput): Promise<LoginOutput> {
+    // Validate email using Domain Value Object
+    let email: Email
+    try {
+      email = new Email(input.email)
+    } catch (error) {
+      throw new AuthException('INVALID_CREDENTIALS', 'Email no es válido')
+    }
+
+    // Validate password
+    if (!input.password || input.password.length < 6) {
+      throw new AuthException('INVALID_CREDENTIALS', 'Contraseña debe tener al menos 6 caracteres')
+    }
+
+    // Call Infrastructure
+    const { user, token } = await this.authRepository.login(email, input.password)
+
+    // Validate token
+    if (token.isExpired()) throw AuthException.tokenExpired()
+
+    return { user, token, success: true }
+  }
+}
+```
+
+**6. Presentation Layer - React Hook (Adapter):**
+```typescript
+// src/features/auth/hooks/useLogin.ts
+/**
+ * PRESENTATION HOOK: useLogin
+ * Adapts LoginUseCase to React.
+ * Location: Presentation Layer
+ * Dependencies: Application (LoginUseCase), Infrastructure (AuthRepository), Domain (AuthException)
+ */
+import { useMutation } from '@tanstack/react-query'
+import { useAuthStore } from '../stores/authStore'
+import { LoginUseCase, type LoginInput } from '@/application/use-cases/LoginUseCase'
+import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
+import { AuthException } from '@/domain/exceptions/AuthException'
+
+const authRepository = new AuthRepository()
+const loginUseCase = new LoginUseCase(authRepository)
+
+export function useLogin() {
+  const { setAuth } = useAuthStore()
+
+  const mutation = useMutation({
+    mutationFn: async (input: LoginInput) => {
+      return await loginUseCase.execute(input)
+    },
+
+    onSuccess: (result) => {
+      setAuth(result.user, result.token)
+    },
+
+    onError: (error) => {
+      if (error instanceof AuthException) {
+        console.error(`[Auth Error] ${error.code}: ${error.message}`)
+      } else {
+        console.error('[Technical Error]', error)
+      }
+    },
   })
+
+  return {
+    login: mutation.mutate,
+    isLoading: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error,
+  }
 }
 ```
 
-**5. UI Layer - Component:**
+**7. Presentation Layer - Zustand Store:**
 ```typescript
-// src/features/albaranes/components/AlbaranList.tsx
-// 📝 UI only - Uses Application hook
-import { useAlbaranes } from '../hooks/useAlbaranes'
+// src/features/auth/stores/authStore.ts
+/**
+ * PRESENTATION STORE: authStore
+ * Global authentication state for React.
+ * Location: Presentation Layer
+ * Dependencies: Domain (User, Token)
+ */
+import { create } from 'zustand'
+import { User } from '@/domain/entities/User'
+import { Token } from '@/domain/value-objects/Token'
 
-export function AlbaranList() {
-  const { data: albaranes, isLoading } = useAlbaranes()
-  // Render UI
+interface AuthStore {
+  user: User | null
+  token: Token | null
+  isAuthenticated: boolean
+
+  setAuth: (user: User, token: Token) => void
+  logout: () => void
+  isAdmin: () => boolean
+}
+
+export const useAuthStore = create<AuthStore>((set, get) => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
+
+  setAuth: (user, token) => {
+    set(() => ({ user, token, isAuthenticated: true }))
+  },
+
+  logout: () => {
+    set(() => ({ user: null, token: null, isAuthenticated: false }))
+  },
+
+  isAdmin: () => {
+    const { user } = get()
+    return user?.esAdmin() ?? false
+  },
+}))
+```
+
+**8. Presentation Layer - React Component:**
+```typescript
+// src/features/auth/components/LoginForm.tsx
+/**
+ * PRESENTATION COMPONENT: LoginForm
+ * Login UI form.
+ * Location: Presentation Layer
+ * Dependencies: useLogin hook
+ */
+import { useLogin } from '../hooks/useLogin'
+
+export function LoginForm() {
+  const { login, isLoading, isError, error } = useLogin()
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+
+    login({
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="email" name="email" required />
+      <input type="password" name="password" required />
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+      </button>
+      {isError && <p>{error?.message}</p>}
+    </form>
+  )
 }
 ```
 
 ### Rules for Clean Architecture
 
 **ALWAYS:**
-- ✅ Keep layers separated
-- ✅ Import from inner layers (Domain, Infrastructure)
-- ✅ Use dependency injection when needed
-- ✅ Keep components dumb (UI only)
-- ✅ Keep hooks smart (business logic)
+- ✅ Keep layers strictly separated
+- ✅ Domain has ZERO dependencies (pure TypeScript)
+- ✅ Use Cases orchestrate but don't know about React
+- ✅ Infrastructure translates JSON ↔ Domain entities
+- ✅ Presentation adapts Use Cases to React
+- ✅ Use dependency injection (pass repositories to Use Cases)
+- ✅ Use Domain exceptions for business errors
 
 **NEVER:**
-- ❌ Import from outer layers
-- ❌ Put business logic in components
-- ❌ Put API calls in components
+- ❌ Import from outer layers (no upward dependencies)
+- ❌ Put business logic in components or hooks
+- ❌ Put API calls in components or Use Cases
+- ❌ Use plain objects in Domain (use classes with behavior)
 - ❌ Mix layers in same file
+- ❌ Let Domain know about HTTP, React, or databases
 
 ---
 
@@ -279,13 +639,12 @@ export function AlbaranList() {
 - 🏗️ **Construction analogies**: blueprints, foundations, building materials, structural integrity, permits, inspections
 - 🔧 **Plumbing analogies**: pipes, valves, water flow, connections, leaks, pressure testing, backflow prevention
 - ✅ **Examples**:
+  - Entities = Main structures (house, building)
+  - Value Objects = Materials (cement mix, pipe size - can't change once set)
+  - Use Cases = Construction phases (foundation, framing, plumbing)
+  - Repositories = Material suppliers (deliver materials, take orders)
   - Types = Blueprints (specify exact measurements before building)
-  - Interfaces = Pipe fittings (define how pieces connect)
-  - Type safety = Building inspections (catch problems before going live)
-  - Optional properties = Optional upgrades (air conditioning is optional in a house)
-  - Function types = Plumbing connections (input pipe + output pipe)
-  - Generics = Adjustable wrench (works with different pipe sizes)
-  - Validation (Zod) = Pressure testing (ensure no leaks before use)
+  - Validation = Building inspections (catch problems before going live)
 
 **Teaching Style:**
 - Always relate new concepts to construction/plumbing first
@@ -296,8 +655,8 @@ export function AlbaranList() {
 
 **MANDATORY - Before Writing ANY Code:**
 1. **Explain First, Code Second:**
-   - ALWAYS explain the TypeScript concept before writing code
-   - Break down what each type does and why
+   - ALWAYS explain the TypeScript/DDD concept before writing code
+   - Break down what each concept does and why
    - Show simpler examples before complex ones
    - Use analogies to JavaScript when helpful
 
@@ -309,137 +668,104 @@ export function AlbaranList() {
 
 3. **Interactive Learning:**
    - Ask if the user understands before moving forward
-   - Offer to explain TypeScript concepts in more detail
+   - Offer to explain concepts in more detail
    - Show JavaScript equivalent when applicable
-   - Point out common TypeScript mistakes to avoid
+   - Point out common mistakes to avoid
 
 4. **Build Knowledge Progressively:**
    - Start with basic types (string, number, boolean)
-   - Then interfaces and type aliases
-   - Then generics only when needed
-   - Then advanced patterns (conditional types, utility types)
+   - Then classes and objects
+   - Then Domain concepts (Entity, Value Object)
+   - Then Use Cases and Repositories
+   - Then advanced patterns only when needed
+
+### DDD Concepts Explained
+
+**Entity (Entidad):**
+- Como una **casa con dirección única** - la dirección es el ID
+- Tiene identidad permanente (el ID no cambia)
+- Puede cambiar sus propiedades (pintarla, remodelarla)
+- Contiene lógica de negocio (métodos que hacen cosas)
+
+**Value Object (Objeto de Valor):**
+- Como una **mezcla de cemento** - una vez mezclada, no se puede cambiar
+- Sin identidad (dos mezclas iguales son lo mismo)
+- Inmutable (si quieres diferente, creas uno nuevo)
+- Se valida al crearse (no puedes crear mezcla inválida)
+
+**Use Case (Caso de Uso):**
+- Como una **fase de construcción** - "instalar la plomería"
+- Orquesta varios pasos (abrir zanjas, colocar tubos, probar presión)
+- No sabe de React ni HTTP (solo lógica de negocio)
+- Recibe datos, valida, llama repositorios, retorna resultado
+
+**Repository (Repositorio):**
+- Como un **proveedor de materiales** - trae y lleva materiales
+- Traduce entre JSON (camión) y Domain (materiales en obra)
+- Hace llamadas HTTP, guarda en localStorage
+- El resto del sistema no sabe de HTTP
 
 ### Code Presentation Format
 
-**For EVERY piece of TypeScript code, use this structure:**
+**For EVERY piece of code, explain in construction terms:**
 
 ```typescript
-// 📝 WHAT: Brief description of what this does
-// 🎯 WHY: Why we're using TypeScript here
-// 🔍 TYPES: Explanation of the types used
+// 📝 QUÉ: Value Object Email (mezcla de cemento - inmutable)
+// 🎯 POR QUÉ: No queremos emails inválidos en nuestro sistema
+// 🔍 CÓMO: Se valida al crearse, si es inválido, lanza error
 
-// Example with explanations:
-interface User {           // 📝 Defines the shape of a User object
-  id: string              // 🔍 id must be a string, not a number
-  name: string            // 🔍 name is required and must be text
-  email: string           // 🔍 email must be text
-  age?: number            // 🔍 age is optional (?) and if present, must be a number
+export class Email {
+  private readonly value: string  // readonly = no se puede cambiar (cemento seco)
+
+  constructor(email: string) {
+    if (!this.isValid(email)) {
+      throw new Error(`Email inválido: ${email}`)
+    }
+    this.value = email.toLowerCase().trim()
+  }
+
+  // Método privado - solo Email puede usarlo (inspector interno)
+  private isValid(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  // Método público - cualquiera puede obtener el valor
+  getValue(): string {
+    return this.value
+  }
 }
 
-// 🎯 WHY: This ensures we never accidentally pass wrong data
-// If we try User.age = "25", TypeScript will error before runtime
-```
+// ✅ USO CORRECTO:
+const email = new Email('user@example.com')  // Se valida automáticamente
 
-### Teaching Workflow
-
-**When introducing new TypeScript concepts:**
-
-1. **Show the problem first (JavaScript):**
-   ```javascript
-   // ❌ JavaScript - No safety
-   function greet(user) {
-     return `Hello ${user.name}` // Could crash if user is null!
-   }
-   ```
-
-2. **Then the TypeScript solution:**
-   ```typescript
-   // ✅ TypeScript - Safe
-   function greet(user: User): string {
-     return `Hello ${user.name}` // Compiler ensures user exists and has name
-   }
-   ```
-
-3. **Explain what TypeScript prevents:**
-   - Runtime errors from undefined/null
-   - Typos in property names
-   - Passing wrong data types
-   - Missing required properties
-
-### TypeScript Concepts to Teach Gradually
-
-**Level 1 - Basics (Start Here):**
-- Primitive types: `string`, `number`, `boolean`
-- Arrays: `string[]`, `Array<number>`
-- Objects: inline types vs interfaces
-- Optional properties: `age?: number`
-- Union types: `string | number`
-
-**Level 2 - Intermediate (After Level 1 is clear):**
-- Type aliases: `type ID = string`
-- Interfaces vs Types (when to use each)
-- Function types: `(x: number) => string`
-- Const assertions: `as const`
-- Type inference (let TypeScript figure it out)
-
-**Level 3 - Advanced (Only when needed):**
-- Generics: `Array<T>`, `Promise<User>`
-- Utility types: `Partial<T>`, `Pick<T, K>`
-- Type guards: `typeof`, `instanceof`
-- Discriminated unions
-
-### Explanation Requirements
-
-**NEVER write code without explaining:**
-1. What this TypeScript feature does
-2. Why we're using it here
-3. What error it prevents
-4. How it helps us catch bugs early
-
-**Example - BAD (Just code):**
-```typescript
-const users: User[] = []
-```
-
-**Example - GOOD (Code + Learning):**
-```typescript
-// 📝 WHAT: Create an empty array that will only hold User objects
-// 🎯 WHY: TypeScript prevents us from adding wrong data later
-// 🔍 TYPE: User[] means "array of User objects"
-const users: User[] = []
-
-// ✅ This works:
-users.push({ id: '1', name: 'John', email: 'john@example.com' })
-
-// ❌ This would error (TypeScript catches it):
-// users.push({ id: 1, name: 'John' })
-//   - id is number, should be string
-//   - email is missing
+// ❌ ESTO LANZA ERROR:
+// const email = new Email('invalid')  // Error: Email inválido
 ```
 
 ### Questions to Ask User
 
-**After explaining a TypeScript concept:**
-- "Does this make sense so far?"
-- "Would you like me to explain [concept] in more detail?"
-- "Do you see why TypeScript caught that error?"
-- "Are you comfortable moving forward, or should we practice this more?"
+**After explaining a concept:**
+- "¿Tiene sentido hasta aquí?"
+- "¿Quieres que explique [concepto] con más detalle?"
+- "¿Ves por qué TypeScript atrapó ese error?"
+- "¿Te sientes cómodo para seguir, o practicamos más esto?"
 
 ### Anti-Patterns to AVOID
 
 ❌ **NEVER do this:**
-- Write complex types without explanation
+- Write complex code without explanation
 - Use `any` type (defeats TypeScript purpose)
-- Use advanced features (generics, conditional types) without building up to them
-- Assume user knows TypeScript jargon
-- Move too fast through concepts
+- Use advanced features without building up to them
+- Skip explaining DDD concepts (Entity, Value Object, Use Case)
+- Assume user knows Clean Architecture jargon
 
 ✅ **ALWAYS do this:**
 - Explain before writing
+- Use construction/plumbing analogies
 - Build from simple to complex
-- Use comments liberally
+- Show what errors are prevented
 - Check for understanding
-- Show what errors TypeScript prevents
 
 ---
 
@@ -449,5 +775,6 @@ users.push({ id: '1', name: 'John', email: 'john@example.com' })
 - NEVER mention Claude in commits
 - ALWAYS apply ESLint + Prettier
 - **NEVER write TypeScript code without explaining it first**
+- **ALWAYS use construction/plumbing analogies**
+- **ALWAYS explain DDD concepts (Entity, Value Object, Use Case)**
 - **ALWAYS check if user understands before continuing**
-- **ALWAYS show what errors TypeScript prevents**

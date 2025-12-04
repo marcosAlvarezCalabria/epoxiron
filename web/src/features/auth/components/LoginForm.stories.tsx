@@ -50,7 +50,7 @@ export const LoginSuccess: Story = {
       }
     }
   },
-  play: async ({ canvasElement }) => {
+  play: async () => {
     // Aquí podrías agregar interacciones automáticas con @storybook/test
     // Por ejemplo: llenar el formulario y hacer submit
   }
