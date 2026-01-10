@@ -1,16 +1,78 @@
 {
 	"info": {
-		"_postman_id": "epoxiron-customers-api",
-		"name": "Epoxiron - Customers API",
-		"description": "Complete CRUD operations for Customers with automatic ID handling",
+		"_postman_id": "epoxiron-complete-api",
+		"name": "Epoxiron - Complete API",
+		"description": "Complete API collection with Auth + Customers. Automatic token and ID handling.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Customers - CRUD",
+			"name": "1. Authentication",
 			"item": [
 				{
-					"name": "1. List All Customers",
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// 🎯 Guardar el token automáticamente",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    // Guardar token",
+									"    pm.collectionVariables.set('authToken', response.token);",
+									"    ",
+									"    // Guardar user info",
+									"    pm.collectionVariables.set('userId', response.user.id);",
+									"    pm.collectionVariables.set('userEmail', response.user.email);",
+									"    pm.collectionVariables.set('userName', response.user.name);",
+									"    ",
+									"    console.log('✅ Login exitoso');",
+									"    console.log('👤 Usuario:', response.user.name);",
+									"    console.log('📧 Email:', response.user.email);",
+									"    console.log('🔑 Token guardado automáticamente');",
+									"    console.log('📋 Ahora puedes hacer requests a Customers si lo necesitas');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@epoxiron.com\",\n  \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "**START HERE:** Login to get authentication token.\n\n**Credentials:**\n- Email: `admin@epoxiron.com`\n- Password: `123456`\n\n**Auto-saves:** Token is saved to `{{authToken}}` for authenticated requests."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints - Start here!"
+		},
+		{
+			"name": "2. Customers (No Auth Required)",
+			"item": [
+				{
+					"name": "List All Customers",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -19,12 +81,12 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers"]
 						},
-						"description": "Get all customers from the database.\n\n**Expected response:** Array of customers (empty at start)"
+						"description": "Get all customers.\n\n**No authentication required** (for now)"
 					},
 					"response": []
 				},
 				{
-					"name": "2. Create Customer",
+					"name": "Create Customer",
 					"event": [
 						{
 							"listen": "test",
@@ -64,12 +126,12 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers"]
 						},
-						"description": "Create a new customer.\n\n**Body (required):**\n```json\n{\n  \"name\": \"Customer Name\"\n}\n```\n\n**Auto-saves ID:** The customer ID is automatically saved to `{{customerId}}` variable for use in other requests."
+						"description": "Create a new customer.\n\n**Auto-saves ID:** Customer ID is saved to `{{customerId}}`"
 					},
 					"response": []
 				},
 				{
-					"name": "3. Get Customer by ID",
+					"name": "Get Customer by ID",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -78,12 +140,12 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers", "{{customerId}}"]
 						},
-						"description": "Get one customer by ID.\n\n**Uses automatic ID:** This request uses `{{customerId}}` which was saved when you created a customer."
+						"description": "Get one customer by ID.\n\n**Uses:** `{{customerId}}` from Create Customer"
 					},
 					"response": []
 				},
 				{
-					"name": "4. Update Customer - Name",
+					"name": "Update Customer - Name",
 					"event": [
 						{
 							"listen": "test",
@@ -120,12 +182,12 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers", "{{customerId}}"]
 						},
-						"description": "Update customer name only.\n\n**Body:**\n```json\n{\n  \"name\": \"New Name\"\n}\n```"
+						"description": "Update customer name.\n\n**Uses:** `{{customerId}}`"
 					},
 					"response": []
 				},
 				{
-					"name": "5. Update Customer - Assign Rate",
+					"name": "Update Customer - Assign Rate",
 					"event": [
 						{
 							"listen": "test",
@@ -162,40 +224,12 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers", "{{customerId}}"]
 						},
-						"description": "Assign a rate to the customer.\n\n**Body:**\n```json\n{\n  \"rateId\": \"your-rate-id\"\n}\n```"
+						"description": "Assign rate to customer.\n\n**Uses:** `{{customerId}}`"
 					},
 					"response": []
 				},
 				{
-					"name": "6. Update Customer - Name and Rate",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Juan Pérez Final\",\n  \"rateId\": \"tarifa-456\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/customers/{{customerId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["customers", "{{customerId}}"]
-						},
-						"description": "Update both name and rate at the same time.\n\n**Body:**\n```json\n{\n  \"name\": \"New Name\",\n  \"rateId\": \"rate-id\"\n}\n```"
-					},
-					"response": []
-				},
-				{
-					"name": "7. Delete Customer",
+					"name": "Delete Customer",
 					"event": [
 						{
 							"listen": "test",
@@ -219,18 +253,46 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers", "{{customerId}}"]
 						},
-						"description": "Delete a customer by ID.\n\n**Response:** 204 No Content (success with no body)\n\n**Auto-cleans ID:** After deletion, the `{{customerId}}` variable is cleared."
+						"description": "Delete customer.\n\n**Uses:** `{{customerId}}`\n**Auto-cleans:** Clears `{{customerId}}` after deletion"
 					},
 					"response": []
 				}
 			],
-			"description": "Main CRUD operations for Customers"
+			"description": "Customer CRUD operations (no auth required for now)"
 		},
 		{
-			"name": "Error Cases - Validation",
+			"name": "3. Error Cases",
 			"item": [
 				{
-					"name": "ERROR - Empty Name",
+					"name": "Auth - Invalid Credentials",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpass\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "**Expected:** 401 Unauthorized"
+					},
+					"response": []
+				},
+				{
+					"name": "Customer - Empty Name",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -253,130 +315,52 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["customers"]
 						},
-						"description": "Test validation: Empty name should be rejected.\n\n**Expected:** 400 Bad Request\n**Message:** \"Name is required\""
+						"description": "**Expected:** 400 Bad Request"
 					},
 					"response": []
 				},
 				{
-					"name": "ERROR - Name Too Short",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"A\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/customers",
-							"host": ["{{baseUrl}}"],
-							"path": ["customers"]
-						},
-						"description": "Test validation: Name must be at least 2 characters.\n\n**Expected:** 400 Bad Request\n**Message:** \"Name must be at least 2 characters long\""
-					},
-					"response": []
-				},
-				{
-					"name": "ERROR - Customer Not Found (GET)",
+					"name": "Customer - Not Found",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/customers/non-existent-id-12345",
+							"raw": "{{baseUrl}}/customers/non-existent-id",
 							"host": ["{{baseUrl}}"],
-							"path": ["customers", "non-existent-id-12345"]
+							"path": ["customers", "non-existent-id"]
 						},
-						"description": "Test error handling: Get non-existent customer.\n\n**Expected:** 404 Not Found\n**Message:** \"Customer not found\""
-					},
-					"response": []
-				},
-				{
-					"name": "ERROR - Update Non-Existent",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test Update\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/customers/non-existent-id-12345",
-							"host": ["{{baseUrl}}"],
-							"path": ["customers", "non-existent-id-12345"]
-						},
-						"description": "Test error handling: Update non-existent customer.\n\n**Expected:** 404 Not Found\n**Message:** \"Customer not found\""
-					},
-					"response": []
-				},
-				{
-					"name": "ERROR - Update Without Fields",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/customers/{{customerId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["customers", "{{customerId}}"]
-						},
-						"description": "Test validation: Update must have at least one field.\n\n**Expected:** 400 Bad Request\n**Message:** \"At least one field must be provided to update\""
-					},
-					"response": []
-				},
-				{
-					"name": "ERROR - Delete Non-Existent",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/customers/non-existent-id-12345",
-							"host": ["{{baseUrl}}"],
-							"path": ["customers", "non-existent-id-12345"]
-						},
-						"description": "Test error handling: Delete non-existent customer.\n\n**Expected:** 404 Not Found\n**Message:** \"Customer not found\""
+						"description": "**Expected:** 404 Not Found"
 					},
 					"response": []
 				}
 			],
-			"description": "Test error handling and validation"
+			"description": "Common error cases for testing"
 		}
 	],
 	"variable": [
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:3000/api",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userEmail",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userName",
+			"value": "",
 			"type": "string"
 		},
 		{

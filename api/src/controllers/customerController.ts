@@ -21,6 +21,7 @@ import * as customersStorage from '../storage/customersStorage'
  */
 export async function listCustomers(req: Request, res: Response) {
   try {
+
     // 1. Get all customers from storage
     const customers = customersStorage.findAll()
 
