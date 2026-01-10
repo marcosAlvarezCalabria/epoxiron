@@ -4,13 +4,17 @@
  * Represents an immutable, validated email address.
  *
  * Location: Domain Layer
- * Reason: Defines business rule "what is a valid email"
  * Dependencies: None (pure TypeScript)
  */
 
 export class Email {
   private readonly value: string
 
+  /**
+   * Creates a new Email instance.
+   * @param email - The email address to validate and store
+   * @throws Error if the email format is invalid
+   */
   constructor(email: string) {
     if (!this.isValid(email)) {
       throw new Error(`Email inválido: ${email}`)
@@ -19,19 +23,37 @@ export class Email {
     this.value = email.toLowerCase().trim()
   }
 
+  /**
+   * Validates email format using regex pattern.
+   * @param email - The email string to validate
+   * @returns true if valid, false otherwise
+   */
   private isValid(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
+  /**
+   * Gets the email value.
+   * @returns The validated email string
+   */
   getValue(): string {
     return this.value
   }
 
+  /**
+   * Compares this email with another email.
+   * @param other - Another Email instance to compare
+   * @returns true if emails are equal
+   */
   equals(other: Email): boolean {
     return this.value === other.value
   }
 
+  /**
+   * Converts email to string representation.
+   * @returns The email value as string
+   */
   toString(): string {
     return this.value
   }
