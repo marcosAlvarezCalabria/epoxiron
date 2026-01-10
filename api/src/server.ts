@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import authRoutes from './routes/authRoutes'
+import customerRoutes from './routes/customerRoutes'
 
 // 📝 CONFIGURACIÓN - Cargar variables de entorno
 dotenv.config()
@@ -18,9 +19,12 @@ app.use(cors())
 // express.json() = Lee el cuerpo de las peticiones en formato JSON
 app.use(express.json())
 
-// 📝 RUTAS - 
+// 📝 RUTAS -
 // Todas las rutas de authRoutes estarán bajo /api/auth
 app.use('/api/auth', authRoutes)
+
+// Todas las rutas de customerRoutes estarán bajo /api/customers
+app.use('/api/customers', customerRoutes)
 
 // 📝 RUTA DE PRUEBA - Para verificar que el servidor funciona
 app.get('/health', (req, res) => {
