@@ -1,0 +1,208 @@
+name: GitHub Copilot Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+jobs:
+  copilot-review:
+    name: AI Code Review with GitHub Copilot
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: pr-diff
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const diff = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              mediaType: {
+                format: 'diff'
+              }
+            });
+            return diff.data;
+
+      - name: AI Code Review Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Get changed files
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            // Analyze changes
+            let frontendChanges = 0;
+            let backendChanges = 0;
+            let testChanges = 0;
+            let domainChanges = 0;
+            let configChanges = 0;
+
+            files.data.forEach(file => {
+              if (file.filename.includes('web/src/')) frontendChanges++;
+              if (file.filename.includes('api/src/')) backendChanges++;
+              if (file.filename.includes('.test.') || file.filename.includes('.spec.')) testChanges++;
+              if (file.filename.includes('domain/')) domainChanges++;
+              if (file.filename.includes('package.json') || file.filename.includes('tsconfig')) configChanges++;
+            });
+
+            // Generate review summary
+            let summary = '## 🤖 AI Code Review Summary\n\n';
+            summary += '### 📊 Change Analysis\n\n';
+            summary += `- Frontend files: ${frontendChanges}\n`;
+            summary += `- Backend files: ${backendChanges}\n`;
+            summary += `- Test files: ${testChanges}\n`;
+            summary += `- Domain layer: ${domainChanges}\n`;
+            summary += `- Config files: ${configChanges}\n\n`;
+
+            // Architecture checks
+            summary += '### 🏗️ Architecture Review\n\n';
+
+            if (domainChanges > 0) {
+              summary += '⚠️ **Domain Layer Modified**: Changes detected in Domain layer. Please verify:\n';
+              summary += '- ✅ No external dependencies (pure TypeScript)\n';
+              summary += '- ✅ Business logic encapsulated in Entities/Value Objects\n';
+              summary += '- ✅ Domain Exceptions used for business errors\n\n';
+            }
+
+            if (frontendChanges > 0 && testChanges === 0) {
+              summary += '⚠️ **Missing Tests**: Frontend changes detected without test updates.\n';
+              summary += '- Consider adding tests for new components/hooks\n\n';
+            }
+
+            if (backendChanges > 0 && testChanges === 0) {
+              summary += '⚠️ **Missing Tests**: Backend changes detected without test updates.\n';
+              summary += '- Consider adding tests for new endpoints/use cases\n\n';
+            }
+
+            // Security checks
+            summary += '### 🔒 Security Checklist\n\n';
+            summary += '- [ ] No hardcoded secrets or API keys\n';
+            summary += '- [ ] Input validation implemented\n';
+            summary += '- [ ] Authentication/Authorization checked\n';
+            summary += '- [ ] SQL injection prevention (if DB queries)\n';
+            summary += '- [ ] XSS prevention (if user input displayed)\n\n';
+
+            // UX checks
+            if (frontendChanges > 0) {
+              summary += '### 🎨 UX/UI Checklist\n\n';
+              summary += '- [ ] Touch targets minimum 44x44px (tablet-first)\n';
+              summary += '- [ ] Loading states implemented\n';
+              summary += '- [ ] Error states handled\n';
+              summary += '- [ ] Empty states implemented\n';
+              summary += '- [ ] Accessibility: ARIA labels, keyboard navigation\n';
+              summary += '- [ ] Color contrast WCAG 2.1 AA compliant\n\n';
+            }
+
+            // Clean Architecture checks
+            summary += '### 🎯 Clean Architecture Checklist\n\n';
+            summary += '- [ ] Dependencies flow inward (outer → inner layers)\n';
+            summary += '- [ ] Domain Layer: Zero external dependencies\n';
+            summary += '- [ ] Application Layer: Only depends on Domain\n';
+            summary += '- [ ] Infrastructure Layer: Only depends on Domain\n';
+            summary += '- [ ] Presentation Layer: Depends on all layers\n\n';
+
+            // Performance
+            summary += '### ⚡ Performance Considerations\n\n';
+            summary += '- [ ] No unnecessary re-renders (React)\n';
+            summary += '- [ ] Debouncing on search/filter inputs\n';
+            summary += '- [ ] Lazy loading where applicable\n';
+            summary += '- [ ] Optimized database queries (if backend)\n\n';
+
+            // Best practices
+            summary += '### ✨ Best Practices\n\n';
+            summary += '- [ ] Code follows TypeScript/ESLint rules\n';
+            summary += '- [ ] No console.log statements (use proper logging)\n';
+            summary += '- [ ] Comments explain "why", not "what"\n';
+            summary += '- [ ] Error handling implemented\n';
+            summary += '- [ ] Commits follow Conventional Commits\n\n';
+
+            summary += '---\n\n';
+            summary += '*This is an automated review by GitHub Copilot. Please ensure all items are checked before merging.*\n';
+            summary += '*A human reviewer will provide additional feedback.*';
+
+            // Post comment
+            await github.rest.issues.createComment({
+              issue_number: pr.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+      - name: Check for sensitive data
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const sensitivePatterns = [
+              /api[_-]?key/i,
+              /secret/i,
+              /password/i,
+              /token/i,
+              /private[_-]?key/i,
+              /aws[_-]?access/i,
+              /db[_-]?connection/i
+            ];
+
+            let foundSensitive = false;
+            const warnings = [];
+
+            for (const file of files.data) {
+              // Skip .env.example (it's safe)
+              if (file.filename.includes('.env.example')) continue;
+
+              // Check if .env or sensitive config files
+              if (file.filename.includes('.env') && file.status !== 'removed') {
+                warnings.push(`⚠️ **${file.filename}**: Environment file detected. Ensure no real secrets are committed.`);
+                foundSensitive = true;
+              }
+
+              // Check patch content for sensitive patterns
+              if (file.patch) {
+                sensitivePatterns.forEach(pattern => {
+                  if (pattern.test(file.patch)) {
+                    warnings.push(`⚠️ **${file.filename}**: Possible sensitive data pattern detected: ${pattern}`);
+                    foundSensitive = true;
+                  }
+                });
+              }
+            }
+
+            if (foundSensitive) {
+              let comment = '## 🔐 Security Alert: Possible Sensitive Data\n\n';
+              warnings.forEach(w => comment += w + '\n');
+              comment += '\n**Action Required**: Please review and ensure no secrets are exposed.\n';
+
+              await github.rest.issues.createComment({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+
+              // Don't fail the check, just warn
+              core.warning('Possible sensitive data detected in PR');
+            }

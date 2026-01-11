@@ -1,0 +1,84 @@
+# Auto-label PRs based on changed files
+# Docs: https://github.com/actions/labeler
+
+# Frontend labels
+'frontend':
+  - changed-files:
+    - any-glob-to-any-file: 'web/src/**/*'
+
+'ui/ux':
+  - changed-files:
+    - any-glob-to-any-file: 'web/src/**/*.tsx'
+    - any-glob-to-any-file: 'web/src/**/*.css'
+
+'components':
+  - changed-files:
+    - any-glob-to-any-file: 'web/src/**/components/**/*'
+
+# Backend labels
+'backend':
+  - changed-files:
+    - any-glob-to-any-file: 'api/src/**/*'
+
+'api':
+  - changed-files:
+    - any-glob-to-any-file: 'api/src/routes/**/*'
+    - any-glob-to-any-file: 'api/src/controllers/**/*'
+
+# Architecture labels
+'domain':
+  - changed-files:
+    - any-glob-to-any-file: 'web/src/domain/**/*'
+    - any-glob-to-any-file: 'api/src/domain/**/*'
+
+'application':
+  - changed-files:
+    - any-glob-to-any-file: 'web/src/application/**/*'
+    - any-glob-to-any-file: 'api/src/application/**/*'
+
+'infrastructure':
+  - changed-files:
+    - any-glob-to-any-file: 'web/src/infrastructure/**/*'
+    - any-glob-to-any-file: 'api/src/infrastructure/**/*'
+
+# Test labels
+'tests':
+  - changed-files:
+    - any-glob-to-any-file: '**/*.test.ts'
+    - any-glob-to-any-file: '**/*.test.tsx'
+    - any-glob-to-any-file: '**/*.spec.ts'
+
+# Documentation labels
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
+    - any-glob-to-any-file: 'docs/**/*'
+
+# Configuration labels
+'configuration':
+  - changed-files:
+    - any-glob-to-any-file: '**/package.json'
+    - any-glob-to-any-file: '**/tsconfig.json'
+    - any-glob-to-any-file: '**/.eslintrc.*'
+    - any-glob-to-any-file: '**/vite.config.*'
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file: '**/package-lock.json'
+
+# GitHub labels
+'github-actions':
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**/*'
+
+# Accessibility
+'accessibility':
+  - changed-files:
+    - any-glob-to-any-file: '**/*a11y*'
+    - any-glob-to-any-file: '**/accessibility/**/*'
+
+# Security
+'security':
+  - changed-files:
+    - any-glob-to-any-file: '**/*auth*'
+    - any-glob-to-any-file: '**/*security*'

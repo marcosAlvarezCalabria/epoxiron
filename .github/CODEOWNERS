@@ -1,0 +1,78 @@
+# CODEOWNERS - Auto-assign reviewers
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ⚠️ MODO SOLO: Equipo simulado - Solo @marcos revisa
+# Cuando tengas equipo real, descomenta las líneas correspondientes
+
+# Default owner for everything (Tech Lead)
+*       @marcos
+
+# Frontend (React, TypeScript, UI)
+# Cuando tengas frontend-dev, descomenta:
+# /web/src/**/*.tsx                    @frontend-dev @marcos
+# /web/src/**/*.ts                     @frontend-dev @marcos
+# /web/src/**/*.css                    @frontend-dev @marcos
+# /web/src/features/                   @frontend-dev @marcos
+# /web/src/pages/                      @frontend-dev @marcos
+# /web/src/shared/components/          @frontend-dev @marcos
+
+# Domain Layer (DDD - Critical, requires careful review)
+# Cuando tengas backend-dev, descomenta:
+# /web/src/domain/                     @marcos @backend-dev
+# /web/src/domain/entities/            @marcos @backend-dev
+# /web/src/domain/value-objects/       @marcos @backend-dev
+# /web/src/domain/exceptions/          @marcos @backend-dev
+
+# Application Layer (Use Cases)
+# Cuando tengas backend-dev, descomenta:
+# /web/src/application/                @backend-dev @marcos
+# /web/src/application/use-cases/      @backend-dev @marcos
+
+# Infrastructure Layer (APIs, Repositories)
+# Cuando tengas backend-dev, descomenta:
+# /web/src/infrastructure/             @backend-dev @marcos
+# /web/src/infrastructure/repositories/ @backend-dev @marcos
+# /web/src/infrastructure/api/         @backend-dev @marcos
+
+# Backend (Node.js, Express)
+# Cuando tengas backend-dev, descomenta:
+# /api/**/*.ts                         @backend-dev @marcos
+# /api/**/*.js                         @backend-dev @marcos
+# /api/src/routes/                     @backend-dev @marcos
+# /api/src/controllers/                @backend-dev @marcos
+# /api/src/models/                     @backend-dev @marcos
+
+# Tests (QA Engineer + original developer)
+# Cuando tengas qa-engineer, descomenta:
+# **/*.test.ts                         @qa-engineer @marcos
+# **/*.test.tsx                        @qa-engineer @marcos
+# **/*.spec.ts                         @qa-engineer @marcos
+# /web/src/test/                       @qa-engineer @marcos
+# /api/src/__tests__/                  @qa-engineer @marcos
+
+# Configuration files (Tech Lead only)
+package.json                         @marcos
+package-lock.json                    @marcos
+tsconfig.json                        @marcos
+vite.config.ts                       @marcos
+.eslintrc.*                          @marcos
+.prettierrc.*                        @marcos
+
+# GitHub workflows (Tech Lead only)
+/.github/workflows/                  @marcos
+
+# Documentation (Tech Lead solo por ahora)
+/docs/                               @marcos
+*.md                                 @marcos
+CLAUDE.md                            @marcos
+
+# Environment files (Tech Lead only, security critical)
+.env*                                @marcos
+.env.example                         @marcos
+
+# Database migrations (Tech Lead solo por ahora)
+/api/src/migrations/                 @marcos
+
+# Accessibility changes (Tech Lead solo por ahora)
+**/*a11y*                            @marcos
+**/accessibility/                    @marcos

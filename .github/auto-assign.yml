@@ -1,0 +1,36 @@
+# Auto-assign reviewers configuration
+# When a PR is opened, automatically assign reviewers
+
+# ⚠️ MODO SOLO: Solo asigna a @marcos
+# Cuando tengas equipo, cambia numberOfReviewers a 2
+
+# Number of reviewers to assign
+numberOfReviewers: 0
+
+# Assign based on file patterns (uses CODEOWNERS)
+useReviewGroups: false
+
+# Review groups (comentados - sin equipo todavía)
+# reviewGroups:
+#   frontend:
+#     - frontend-dev
+#     - marcos
+#   backend:
+#     - backend-dev
+#     - marcos
+#   qa:
+#     - qa-engineer
+#     - marcos
+
+# Always assign the tech lead
+alwaysAssign:
+  - marcos
+
+# Skip draft PRs
+skipDraftPR: true
+
+# Add assignees (not just reviewers)
+addAssignees: true
+
+# Assignee strategy
+assigneeStrategy: round-robin
