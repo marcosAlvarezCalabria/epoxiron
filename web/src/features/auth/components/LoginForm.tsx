@@ -4,7 +4,6 @@ import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
 import { useLogin } from '../hooks/useLogin'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthException } from '@/domain/exceptions/AuthException'
 
 
 
