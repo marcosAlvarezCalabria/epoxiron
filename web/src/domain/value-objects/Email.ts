@@ -16,11 +16,14 @@ export class Email {
    * @throws Error if the email format is invalid
    */
   constructor(email: string) {
-    if (!this.isValid(email)) {
+    // Normalize first (trim and lowercase), then validate
+    const normalized = email.toLowerCase().trim()
+
+    if (!this.isValid(normalized)) {
       throw new Error(`Email inválido: ${email}`)
     }
 
-    this.value = email.toLowerCase().trim()
+    this.value = normalized
   }
 
   /**

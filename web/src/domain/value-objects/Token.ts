@@ -33,7 +33,7 @@ export class Token {
       const [, payloadBase64] = this.value.split('.')
       const payloadJson = atob(payloadBase64)
       return JSON.parse(payloadJson)
-    } catch (error) {
+    } catch {
       throw new Error('No se pudo decodificar el payload del token')
     }
   }

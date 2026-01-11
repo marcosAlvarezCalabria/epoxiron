@@ -38,7 +38,7 @@ export class LoginUseCase {
       let email: Email
       try {
         email = new Email(input.email)
-      } catch (error) {
+      } catch {
         throw new AuthException(
           'INVALID_CREDENTIALS',
           'Email no es válido'
