@@ -1,15 +1,23 @@
+/**
+ * Tests for authApi
+ *
+ * These tests verify the API layer functions for authentication.
+ * Note: authApi is a thin wrapper over fetch. The real business logic
+ * is in AuthRepository (infrastructure layer).
+ */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { login, logout } from '../authApi'
 import type { LoginData } from '../../types/auth'
-/******************AUTH API******************/
+
 describe('authApi', () => {
   beforeEach(() => {
-    localStorage.clear()
     vi.clearAllMocks()
   })
-/********************************LOGIN******************************/
+
   describe('login', () => {
-    it('debe retornar token y usuario cuando las credenciales son correctas', async () => {
+    it('should return token and user when credentials are correct', async () => {
+      // Given: Mock successful API response
       globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -27,15 +35,19 @@ describe('authApi', () => {
         password: '123456'
       }
 
+      // When: Login is called
       const response = await login(loginData)
 
-      expect(response.token).toBeDefined()
+      // Then: Should return token and user
+      expect(response.token).toBe('fake-token-123')
       expect(response.user).toBeDefined()
       expect(response.user.email).toBe(loginData.email)
+      expect(response.user.name).toBe('Test User')
     })
 
-    it('debe guardar el token en localStorage', async () => {
-      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+    it('should call fetch with correct parameters', async () => {
+      // Given: Mock fetch
+      const mockFetch = vi.fn().mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           token: 'fake-token-123',
@@ -46,19 +58,26 @@ describe('authApi', () => {
           }
         })
       })
+      globalThis.fetch = mockFetch
 
       const loginData: LoginData = {
         email: 'test@test.com',
         password: '123456'
       }
 
-      const response = await login(loginData)
+      // When: Login is called
+      await login(loginData)
 
-      const savedToken = localStorage.getItem('auth_token')
-      expect(savedToken).toBe(response.token)
+      // Then: Fetch should be called with correct parameters
+      expect(mockFetch).toHaveBeenCalledWith('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginData)
+      })
     })
 
-    it('debe lanzar error cuando las credenciales son incorrectas', async () => {
+    it('should throw error when credentials are incorrect', async () => {
+      // Given: Mock failed API response
       globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
         status: 401
@@ -69,48 +88,69 @@ describe('authApi', () => {
         password: 'wrongpass'
       }
 
-      await expect(login(loginData)).rejects.toThrow()
+      // When/Then: Should throw error
+      await expect(login(loginData)).rejects.toThrow('Login failed')
     })
 
-    it('debe lanzar error cuando falta el email', async () => {
+    it('should throw error when server returns 400', async () => {
+      // Given: Mock bad request response
       globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
         status: 400
       })
 
-      const loginData = {
+      const loginData: LoginData = {
+        email: 'test@test.com',
         password: '123456'
-      } as LoginData
+      }
 
-      await expect(login(loginData)).rejects.toThrow()
+      // When/Then: Should throw error
+      await expect(login(loginData)).rejects.toThrow('Login failed')
     })
 
-    it('debe lanzar error cuando falta el password', async () => {
+    it('should throw error when server returns 500', async () => {
+      // Given: Mock server error response
       globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
-        status: 400
+        status: 500
       })
 
-      const loginData = {
-        email: 'test@test.com'
-      } as LoginData
+      const loginData: LoginData = {
+        email: 'test@test.com',
+        password: '123456'
+      }
 
-      await expect(login(loginData)).rejects.toThrow()
+      // When/Then: Should throw error
+      await expect(login(loginData)).rejects.toThrow('Login failed')
     })
   })
-//***************LOGOUT******************************/
+
   describe('logout', () => {
-    it('debe eliminar el token de localStorage', () => {
-      localStorage.setItem('auth_token', 'fake-token')
+    it('should call logout endpoint', async () => {
+      // Given: Mock fetch
+      const mockFetch = vi.fn().mockResolvedValueOnce({
+        ok: true
+      })
+      globalThis.fetch = mockFetch
 
-      logout()
+      // When: Logout is called
+      await logout()
 
-      const token = localStorage.getItem('auth_token')
-      expect(token).toBeNull()
+      // Then: Should call logout endpoint with POST
+      expect(mockFetch).toHaveBeenCalledWith('/api/auth/logout', {
+        method: 'POST'
+      })
     })
 
-    it('debe funcionar incluso si no hay token', () => {
-      expect(() => logout()).not.toThrow()
+    it('should not throw error even if request fails', async () => {
+      // Given: Mock failed logout response
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 500
+      })
+
+      // When/Then: Should not throw (logout is fire-and-forget)
+      await expect(logout()).resolves.toBeUndefined()
     })
   })
 })

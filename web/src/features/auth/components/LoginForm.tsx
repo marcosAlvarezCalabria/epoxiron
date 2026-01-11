@@ -1,109 +1,122 @@
+/**
+ * PRESENTATION COMPONENT: LoginForm
+ *
+ * Form component for user authentication.
+ *
+ * Location: Presentation Layer
+ * Reason: UI component that connects form validation with login use case
+ * Dependencies: React Hook Form, Zod schema, useLogin hook
+ */
+
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
-import { useLogin } from '../hooks/useLogin'
-import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-
+import { useLogin } from '../hooks/useLogin'
+import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
+import { AuthException } from '@/domain/exceptions/AuthException'
 
 export function LoginForm() {
-  const { login, isLoading, error, isSuccess } = useLogin()
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const { login, isLoading, isError, error } = useLogin()
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
   })
 
   const onSubmit = (data: LoginFormData) => {
-    login(data)
+    login(
+      { email: data.email, password: data.password },
+      {
+        onSuccess: () => {
+          navigate('/dashboard')
+        },
+      }
+    )
   }
-  useEffect(() => {
-    if (isSuccess) {
-      navigate('/dashboard')
+
+  const getErrorMessage = (): string | null => {
+    if (!isError || !error) return null
+
+    if (error instanceof AuthException) {
+      if (error.isCredentialsError()) {
+        return 'Email o contraseña incorrectos'
+      }
+      if (error.isTokenError()) {
+        return 'Error en la autenticación. Por favor, intenta de nuevo.'
+      }
+      return error.message
     }
-  }, [isSuccess, navigate])
+
+    return 'Ocurrió un error inesperado. Por favor, intenta de nuevo.'
+  }
+
+  const errorMessage = getErrorMessage()
 
   return (
-    <div className="w-full max-w-md">
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
-        {/* Campo Email */}
-        <div>
-          <label 
-            htmlFor="email" 
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...register('email')}
-            disabled={isLoading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            placeholder="admin@epoxiron.com"
-            required
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-          />
-          {errors.email && (
-            <p id="email-error" role="alert" className="mt-1 text-sm text-red-600">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
-
-        {/* Campo Password */}
-        <div>
-          <label 
-            htmlFor="password" 
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Contraseña
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register('password')}
-            disabled={isLoading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            placeholder="••••••"
-            required
-            aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'password-error' : undefined}
-          />
-          {errors.password && (
-            <p id="password-error" role="alert" className="mt-1 text-sm text-red-600">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        {/* Error del servidor */}
-        {error && (
-          <div 
-            role="alert" 
-            className="p-4 bg-red-50 border border-red-200 rounded-lg"
-          >
-            <p className="text-sm text-red-800">
-              ❌ {error.message}
-            </p>
-          </div>
-        )}
-
-        {/* Botón Submit */}
-        <button
-          type="submit"
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Email Field */}
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          {...register('email')}
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            errors.email ? 'border-red-500' : 'border-gray-300'
+          }`}
+          placeholder="tu@email.com"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          {isLoading ? '⏳ Cargando...' : '🚀 Iniciar sesión'}
-        </button>
-      </form>
-    </div>
+        />
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+        )}
+      </div>
+
+      {/* Password Field */}
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          Contraseña
+        </label>
+        <input
+          id="password"
+          type="password"
+          {...register('password')}
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            errors.password ? 'border-red-500' : 'border-gray-300'
+          }`}
+          placeholder="••••••••"
+          disabled={isLoading}
+        />
+        {errors.password && (
+          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+        )}
+      </div>
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-800">{errorMessage}</p>
+        </div>
+      )}
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={`w-full py-2 px-4 rounded-md font-medium text-white transition-colors ${
+          isLoading
+            ? 'bg-blue-400 cursor-not-allowed'
+            : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+        }`}
+      >
+        {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+      </button>
+    </form>
   )
 }
