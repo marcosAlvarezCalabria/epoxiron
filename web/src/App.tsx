@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { useAuthStore } from './features/auth/stores/authStore';
 import { DashboardPage } from './pages/DashboardPage';
+import { CustomersPage } from './pages/CustomersPage';
 import type React from 'react';
 
 function ProtectedRoute ({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <CustomersPage />
             </ProtectedRoute>
           }
         />
