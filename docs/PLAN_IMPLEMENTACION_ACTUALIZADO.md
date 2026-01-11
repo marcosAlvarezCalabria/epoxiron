@@ -1,6 +1,6 @@
 # Plan de Implementación Actualizado - Epoxiron MVP
 
-> 📅 **Actualizado:** 2025-12-01
+> 📅 **Actualizado:** 2026-01-11
 > 🎯 **Objetivo:** Sistema completo de gestión de albaranes para taller de pintura
 
 ---
@@ -8,6 +8,8 @@
 ## ✅ Estado Actual - Fase 1 COMPLETADA
 
 ### Lo que ya funciona:
+
+#### Backend
 - ✅ **Backend completo con Express + TypeScript**
   - Servidor corriendo en `http://localhost:3000`
   - JWT + bcryptjs para autenticación
@@ -20,6 +22,7 @@
   - Validación con bcrypt
   - Usuario hardcodeado: `admin@epoxiron.com` / `123456`
 
+#### Frontend
 - ✅ **Frontend React 19 + TypeScript**
   - Vite como bundler
   - React Router con rutas protegidas
@@ -29,13 +32,47 @@
   - Tailwind CSS
 
 - ✅ **Páginas implementadas:**
-  - `LoginPage` → Formulario de login
+  - `LoginPage` → ✅ Formulario de login completo (PR #3)
   - `DashboardPage` → Vista después de login
   - `ProtectedRoute` → HOC para proteger rutas
 
 - ✅ **Features completadas:**
   - `web/src/features/auth/` → Sistema de autenticación completo
   - Clean Architecture aplicada correctamente
+
+#### Domain Layer (TDD) - 🎯 RECIÉN COMPLETADO
+- ✅ **Entidades con tests comprehensivos:**
+  - `User` → 34 tests, 100% cobertura
+  - `Customer` → 13 tests, 100% cobertura
+  - `Item` → 43 tests, 100% cobertura
+  - `DeliveryNote` → 43 tests, 100% cobertura (aggregate root)
+
+- ✅ **Value Objects:**
+  - `Email` → 19 tests, validación completa
+  - `Price` → Validación de euros, 2 decimales
+  - `RACColor` → Colores RAC y especiales
+  - `Measurements` → Metros lineales/cuadrados, grosor
+  - `Token` → JWT validation
+
+- ✅ **Domain Exceptions:**
+  - `AuthException` → Errores de autenticación tipados
+  - `DeliveryNoteException` → Errores de negocio de albaranes
+
+#### Bugs Críticos Arreglados (PR #3)
+- ✅ **LoginForm.tsx implementado** (122 líneas)
+  - React Hook Form + Zod validation
+  - Manejo de errores con AuthException
+  - Estados de loading y error
+  - Navegación al dashboard
+
+- ✅ **Tests de authApi** (7 tests)
+  - Login/logout functionality
+  - Error handling
+
+- ✅ **Archivo renombrado**
+  - CreteAlbaranUseCase.ts → CreateDeliveryNoteUseCase.ts
+
+**Total tests pasando:** 159 ✅
 
 ---
 
