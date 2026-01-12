@@ -3,6 +3,7 @@ import { LoginPage } from './pages/LoginPage';
 import { useAuthStore } from './features/auth/stores/authStore';
 import { DashboardPage } from './pages/DashboardPage';
 import { CustomersPage } from './pages/CustomersPage';
+import { RatesPage } from './pages/RatesPage';
 import type React from 'react';
 
 function ProtectedRoute ({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CustomersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rates"
+          element={
+            <ProtectedRoute>
+              <RatesPage />
             </ProtectedRoute>
           }
         />
