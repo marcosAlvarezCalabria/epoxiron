@@ -6,13 +6,10 @@
  */
 
 import { useState } from 'react'
-import type { SpecialPiece } from '../types/Rate'
 
-interface RateFormProps {
-  customerId: string
-  onSubmit: (data: RateFormData) => void
-  onCancel: () => void
-  isLoading: boolean
+export interface SpecialPiece {
+  name: string
+  price: number
 }
 
 export interface RateFormData {
@@ -22,81 +19,112 @@ export interface RateFormData {
   specialPieces: SpecialPiece[]
 }
 
+interface RateFormProps {
+  customerId: string
+  onSubmit: (data: RateFormData) => void
+  onCancel: () => void
+  isLoading: boolean
+}
+
 export function RateForm({ customerId, onSubmit, onCancel, isLoading }: RateFormProps) {
-  const [linearMeter, setLinearMeter] = useState('15.00')
-  const [squareMeter, setSquareMeter] = useState('25.00')
-  const [minimum, setMinimum] = useState('50.00')
+  const [formData, setFormData] = useState<RateFormData>({
+    ratePerLinearMeter: 0,
+    ratePerSquareMeter: 0,
+    minimumRate: 0,
+    specialPieces: []
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (formData.ratePerLinearMeter <= 0 || formData.ratePerSquareMeter <= 0 || formData.minimumRate <= 0) {
+      alert('Please fill all required fields with valid values')
+      return
+    }
+    onSubmit(formData)
+  }
 
-    onSubmit({
-      ratePerLinearMeter: parseFloat(linearMeter),
-      ratePerSquareMeter: parseFloat(squareMeter),
-      minimumRate: parseFloat(minimum),
-      specialPieces: [] // For now, no special pieces in the form
-    })
+  const handleInputChange = (field: keyof RateFormData, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="customerId">Customer ID:</label>
-        <input
-          id="customerId"
-          type="text"
-          value={customerId}
-          disabled
-        />
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label htmlFor="ratePerLinearMeter" className="block text-sm font-medium text-gray-700">
+            Rate per Linear Meter (€/ml) *
+          </label>
+          <input
+            type="number"
+            id="ratePerLinearMeter"
+            value={formData.ratePerLinearMeter}
+            onChange={(e) => handleInputChange('ratePerLinearMeter', parseFloat(e.target.value) || 0)}
+            required
+            min="0"
+            step="0.01"
+            disabled={isLoading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="ratePerSquareMeter" className="block text-sm font-medium text-gray-700">
+            Rate per Square Meter (€/m²) *
+          </label>
+          <input
+            type="number"
+            id="ratePerSquareMeter"
+            value={formData.ratePerSquareMeter}
+            onChange={(e) => handleInputChange('ratePerSquareMeter', parseFloat(e.target.value) || 0)}
+            required
+            min="0"
+            step="0.01"
+            disabled={isLoading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="minimumRate" className="block text-sm font-medium text-gray-700">
+            Minimum Rate (€) *
+          </label>
+          <input
+            type="number"
+            id="minimumRate"
+            value={formData.minimumRate}
+            onChange={(e) => handleInputChange('minimumRate', parseFloat(e.target.value) || 0)}
+            required
+            min="0"
+            step="0.01"
+            disabled={isLoading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
       <div>
-        <label htmlFor="linearMeter">Rate per Linear Meter (€):</label>
-        <input
-          id="linearMeter"
-          type="number"
-          step="0.01"
-          min="0"
-          value={linearMeter}
-          onChange={(e) => setLinearMeter(e.target.value)}
+        <p className="text-sm text-gray-600">
+          <strong>Note:</strong> Special pieces functionality will be added in the next version.
+        </p>
+      </div>
+
+      <div className="flex space-x-4">
+        <button
+          type="submit"
           disabled={isLoading}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="squareMeter">Rate per Square Meter (€):</label>
-        <input
-          id="squareMeter"
-          type="number"
-          step="0.01"
-          min="0"
-          value={squareMeter}
-          onChange={(e) => setSquareMeter(e.target.value)}
-          disabled={isLoading}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="minimum">Minimum Rate (€):</label>
-        <input
-          id="minimum"
-          type="number"
-          step="0.01"
-          min="0"
-          value={minimum}
-          onChange={(e) => setMinimum(e.target.value)}
-          disabled={isLoading}
-          required
-        />
-      </div>
-
-      <div>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save Rate'}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Creating...' : 'Create Rate'}
         </button>
-        <button type="button" onClick={onCancel} disabled={isLoading}>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isLoading}
+          className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
           Cancel
         </button>
       </div>
