@@ -1,14 +1,27 @@
 /**
- * PAGE: Delivery Notes - Con lista
+ * PAGE: Delivery Notes - CRUD completo
  */
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DeliveryNotesList } from '../features/delivery-notes/components/DeliveryNotesList'
+import { DeliveryNoteForm } from '../features/delivery-notes/components/DeliveryNoteForm'
+import { useCreateDeliveryNote } from '../features/delivery-notes/hooks/useDeliveryNotes'
+import type { CreateDeliveryNoteData } from '../features/delivery-notes/hooks/useDeliveryNotes'
 
 export function DeliveryNotesPage() {
   const [showForm, setShowForm] = useState(false)
   const navigate = useNavigate()
+
+  const { mutate: createDeliveryNote, isPending } = useCreateDeliveryNote()
+
+  const handleSubmit = (data: CreateDeliveryNoteData) => {
+    createDeliveryNote(data, {
+      onSuccess: () => {
+        setShowForm(false)
+      }
+    })
+  }
 
   return (
     <div className="p-8 space-y-8">
@@ -34,13 +47,11 @@ export function DeliveryNotesPage() {
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-4">Create New Delivery Note</h3>
-          <p>Formulario de albaranes aparecerá aquí (próximo paso)</p>
-          <button
-            onClick={() => setShowForm(false)}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 mt-4"
-          >
-            Close
-          </button>
+          <DeliveryNoteForm
+            onSubmit={handleSubmit}
+            onCancel={() => setShowForm(false)}
+            isLoading={isPending}
+          />
         </div>
       )}
 
