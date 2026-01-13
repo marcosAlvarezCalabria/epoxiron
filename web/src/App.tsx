@@ -4,6 +4,7 @@ import { useAuthStore } from './features/auth/stores/authStore';
 import { DashboardPage } from './pages/DashboardPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { RatesPage } from './pages/RatesPage';
+import { DeliveryNotesPage } from './pages/DeliveryNotesPage';
 import type React from 'react';
 
 function ProtectedRoute ({ children }: { children: React.ReactNode }) {
@@ -44,10 +45,18 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/delivery-notes"
+          element={
+            <ProtectedRoute>
+              <DeliveryNotesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

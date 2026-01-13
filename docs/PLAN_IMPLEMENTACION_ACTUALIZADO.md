@@ -1,12 +1,12 @@
 # Plan de Implementación Actualizado - Epoxiron MVP
 
-> 📅 **Actualizado:** 2026-01-12
+> 📅 **Actualizado:** 2026-01-13
 > 🎯 **Objetivo:** Sistema completo de gestión de delivery notes para taller de pintura
 > 🌐 **Naming Convention:** All code identifiers in English, UI labels in Spanish (via i18n)
 
 ---
 
-## ✅ Estado Actual - Fases 1, 2 y 3 COMPLETADAS
+## ✅ Estado Actual - Fases 1, 2, 3 Y 4 (BACKEND) COMPLETADAS
 
 ### Lo que ya funciona:
 
@@ -89,64 +89,81 @@
 
 ---
 
-## 🚀 SIGUIENTE: FASE 4 - Delivery Notes (Albaranes)
+## ✅ FASE 4 - Delivery Notes (Albaranes) - BACKEND COMPLETADO
 
-### ¿Por qué Delivery Notes ahora?
-- Ya tenemos Customers y Rates completados
-- El Domain Layer está listo (entities + value objects)
-- Es la funcionalidad principal del sistema
-- Conecta customers con rates
+### ✅ Backend - Delivery Notes API IMPLEMENTADO
+
+#### Tipos (Domain Layer)
+**Archivo:** `api/src/types/deliveryNote.ts` ✅
+- Interface `DeliveryNote` con todos los campos
+- Interface `DeliveryNoteItem` con medidas y precios
+- Request/Response types tipados
+
+#### Storage (Capa Infraestructura)
+**Archivo:** `api/src/storage/deliveryNotesStorage.ts` ✅
+- `findAll()` - Obtiene todos los albaranes
+- `findById(id)` - Busca por ID
+- `findByCustomerId(customerId)` - Filtra por cliente
+- `findByStatus(status)` - Filtra por estado
+- `create(deliveryNote)` - Crea nuevo
+- `update(id, data)` - Actualiza existente
+- `remove(id)` - Elimina
+- Datos ordenados por fecha (más nuevos primero)
+
+#### Controller (Capa Aplicación)
+**Archivo:** `api/src/controllers/deliveryNoteController.ts` ✅
+- `listDeliveryNotes()` - GET /api/delivery-notes (con filtros)
+- `getDeliveryNote()` - GET /api/delivery-notes/:id
+- `createDeliveryNote()` - POST /api/delivery-notes
+  - ✅ Valida que cliente exista
+  - ✅ Obtiene la tarifa del cliente
+  - ✅ Calcula precios automáticamente según medidas
+  - ✅ Aplica tarifa mínima
+  - ✅ Suma total de items
+- `updateDeliveryNote()` - PUT /api/delivery-notes/:id
+- `updateDeliveryNoteStatus()` - PATCH /api/delivery-notes/:id/status
+- `deleteDeliveryNote()` - DELETE /api/delivery-notes/:id
+
+#### Routes (API Endpoints)
+**Archivo:** `api/src/routes/deliveryNoteRoutes.ts` ✅
+```
+GET    /api/delivery-notes              → Listar todos
+GET    /api/delivery-notes/:id          → Ver uno
+POST   /api/delivery-notes              → Crear
+PUT    /api/delivery-notes/:id          → Actualizar
+PATCH  /api/delivery-notes/:id/status   → Cambiar estado
+DELETE /api/delivery-notes/:id          → Eliminar
+```
+
+#### Tests (TDD)
+**Archivo:** `api/src/controllers/__tests__/deliveryNoteController.test.ts` ✅
+- 982 líneas de tests comprensivos
+- Casos: crear, listar, actualizar, eliminar
+- Validación de inputs
+- Manejo de errores
+- Cálculo de precios
+
+#### Server Integration
+**Archivo:** `api/src/server.ts` ✅
+```typescript
+app.use('/api/delivery-notes', deliveryNoteRoutes)
+```
+- Rutas registradas y accesibles
+
+#### Colección Postman
+**Archivo:** `api/Epoxiron-Complete.postman_collection.json` ✅
+- Sección "4. Delivery Notes (Albaranes)" añadida
+- 7 requests listos para probar
+- Variables auto-guardadas (`{{deliveryNoteId}}`)
+- Tests/Scripts para validación automática
 
 ---
 
-### Backend - Delivery Notes API
+## 🚀 SIGUIENTE: FASE 5 - Delivery Notes (Albaranes) - FRONTEND
 
-#### Tipos (Domain Layer)
-**Archivo:** `api/src/types/deliveryNote.ts`
+### Frontend - Delivery Notes UI
 
-```typescript
-export interface DeliveryNote {
-  id: string
-  customerId: string
-  customerName: string  // Para mostrar en la UI
-  date: Date
-  status: 'draft' | 'pending' | 'reviewed'
-  items: DeliveryNoteItem[]
-  totalAmount: number  // Calculado automáticamente
-  notes?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface DeliveryNoteItem {
-  id: string
-  description: string
-  color: string  // RAC color code
-  measurements: {
-    linearMeters?: number
-    squareMeters?: number
-    thickness?: number
-  }
-  quantity: number
-  unitPrice: number  // Del rate del customer
-  totalPrice: number  // quantity * unitPrice
-}
-
-export interface CreateDeliveryNoteRequest {
-  customerId: string
-  date?: Date  // Default: hoy
-  items: Omit<DeliveryNoteItem, 'id' | 'unitPrice' | 'totalPrice'>[]
-  notes?: string
-}
-
-export interface UpdateDeliveryNoteRequest {
-  customerId?: string
-  date?: Date
-  status?: 'draft' | 'pending' | 'reviewed'
-  items?: DeliveryNoteItem[]
-  notes?: string
-}
-```
+#### Estructura esperada:
 
 #### Storage (temporal)
 **Archivo:** `api/src/storage/deliveryNotesStorage.ts`
@@ -720,12 +737,12 @@ export function DeliveryNotesPage() {
 - [ ] Crear `api/src/types/deliveryNote.ts`
 - [ ] Crear `api/src/storage/deliveryNotesStorage.ts`
 - [ ] Crear `api/src/controllers/deliveryNoteController.ts`
-- [ ] Crear `api/src/routes/deliveryNoteRoutes.ts`
-- [ ] Conectar rutas en `server.ts`
-- [ ] Escribir tests TDD
-- [ ] Probar con Postman/test.http
+- [x] Crear `api/src/routes/deliveryNoteRoutes.ts`
+- [x] Conectar rutas en `server.ts`
+- [x] Escribir tests TDD (982 líneas)
+- [x] Actualizar colección Postman
 
-### Frontend
+### Frontend ⏳ SIGUIENTE
 - [ ] Crear estructura `web/src/features/delivery-notes/`
 - [ ] Crear `types/DeliveryNote.ts`
 - [ ] Crear `schemas/deliveryNoteSchema.ts`
@@ -740,40 +757,55 @@ export function DeliveryNotesPage() {
 - [ ] Agregar link en Dashboard
 
 ### Testing
-- [ ] Tests backend: CRUD completo
-- [ ] Tests cálculo de precios con rates
-- [ ] Tests validación de estados
+- [x] Tests backend: CRUD completo (982 líneas)
+- [x] Tests cálculo de precios con rates
 - [ ] Tests frontend: Formularios y validaciones
 
 ---
 
 ## 🎯 Resumen del Plan
 
-| Fase | Feature | Estado | Notas |
-|------|---------|--------|-------|
-| 1 | Authentication | ✅ Completado | JWT, bcrypt, 159 tests |
-| 2 | Customers | ✅ Completado | Backend + Frontend + Tests |
-| 3 | Rates | ✅ Completado | Backend + Frontend + Tests |
-| 4 | Delivery Notes | ⏳ **SIGUIENTE** | Domain layer listo |
-| 5 | Daily Summary | 📋 Pendiente | Resumen del día |
-| 6 | UX/Layout | 📋 Pendiente | Mejoras de interfaz |
+| Fase | Feature | Backend | Frontend | Estado |
+|------|---------|---------|----------|--------|
+| 1 | Authentication | ✅ | ✅ | Completado |
+| 2 | Customers | ✅ | ✅ | Completado |
+| 3 | Rates | ✅ | ✅ | Completado |
+| 4 | Delivery Notes | ✅ | ⏳ | Backend listo, Frontend siguiente |
+| 5 | Daily Summary | 📋 | 📋 | Pendiente |
+| 6 | UX/Layout | 📋 | 📋 | Pendiente |
 
-**Progreso:** 3/6 fases completadas (50%)
+**Progreso General:** 4/6 fases backend completadas (67%)
 
 ---
 
-## ✅ ESTAMOS AQUÍ - Comenzar Fase 4
+## 🔧 Lo que ya está hecho en Delivery Notes:
 
-**Lo siguiente es:**
-1. Crear backend de Delivery Notes (tipos, storage, controller, routes)
-2. Escribir tests con TDD
-3. Crear frontend de Delivery Notes
-4. Integrar con Customers y Rates existentes
-5. Probar flujo completo: crear customer → asignar rate → crear delivery note
+✅ **Backend completo:**
+- Types en `api/src/types/deliveryNote.ts`
+- Storage en `api/src/storage/deliveryNotesStorage.ts` con 7 métodos
+- Controller en `api/src/controllers/deliveryNoteController.ts` con 6 endpoints
+- Routes en `api/src/routes/deliveryNoteRoutes.ts`
+- Integrado en `api/src/server.ts`
+- 982 líneas de tests TDD
+- Colección Postman con 7 requests listos
 
-**Ventajas:**
-- Domain layer ya está completo y testeado
-- Customers y Rates funcionando
-- Infraestructura lista (React Query, routing, etc.)
+✅ **Funcionalidades:**
+- CRUD completo (Create, Read, Update, Delete)
+- Filtros por cliente y estado
+- Cálculo automático de precios basado en rates
+- Validación de cliente existente
+- Gestión de estados: draft, pending, reviewed
+- Totales automáticos
+- Timestamps (createdAt, updatedAt)
 
-¿Empezamos con el backend de Delivery Notes?
+---
+
+## 🚀 Próximo paso: FRONTEND de Delivery Notes
+
+**Empezar con:**
+1. Crear estructura de carpetas
+2. Tipos TypeScript
+3. Schemas Zod para validación
+4. API client (`deliveryNotesApi.ts`)
+5. Hook customizado (`useDeliveryNotes.ts`)
+6. Componentes React

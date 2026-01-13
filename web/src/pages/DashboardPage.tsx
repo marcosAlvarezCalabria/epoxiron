@@ -10,6 +10,12 @@ export function DashboardPage() {
     navigate('/login')
   }
 
+  const menuItems = [
+    { label: '📋 Albaranes', path: '/delivery-notes' },
+    { label: '👥 Clientes', path: '/customers' },
+    { label: '💰 Tarifas', path: '/rates' }
+  ]
+
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-lg">
@@ -32,12 +38,22 @@ export function DashboardPage() {
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             ✅ ¡Bienvenido al Dashboard!
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-8">
             Has iniciado sesión correctamente como <strong>{user?.email.getValue()}</strong>
           </p>
-          <p className="text-gray-500">
-            Aquí irá el contenido del sistema de gestión de albaranes...
-          </p>
+
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Menú Principal</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {menuItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="p-6 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-left"
+              >
+                <p className="text-lg font-semibold text-blue-700">{item.label}</p>
+              </button>
+            ))}
+          </div>  
         </div>
       </main>
     </div>
