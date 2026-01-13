@@ -1,41 +1,34 @@
 /**
- * PRESENTATION STORE: authStore
- *
- * Global authentication state for React with persistence.
- *
- * Location: Presentation Layer
- * Reason: React-specific state management (Zustand)
- * Dependencies: Domain entities (User, Token)
+ * PRESENTATION STORE: authStore - Versión simplificada para desarrollo rápido
+ * Se conectará con MongoDB después
  */
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { User } from '@/domain/entities/User'
-import { Token } from '@/domain/value-objects/Token'
+
+interface User {
+  email: string
+  name?: string
+  role?: string
+}
 
 interface AuthStore {
   user: User | null
-  token: Token | null
   isAuthenticated: boolean
-
-  setAuth: (user: User, token: Token) => void
+  
+  login: (userData: User) => void
   logout: () => void
-
-  isAdmin: () => boolean
-  canDeleteClients: () => boolean
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
 
-      setAuth: (user, token) => {
+      login: (userData) => {
         set(() => ({
-          user,
-          token,
+          user: userData,
           isAuthenticated: true,
         }))
       },
@@ -43,23 +36,12 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         set(() => ({
           user: null,
-          token: null,
           isAuthenticated: false,
         }))
       },
-
-      isAdmin: () => {
-        const { user } = get()
-        return user?.esAdmin() ?? false
-      },
-
-      canDeleteClients: () => {
-        const { user } = get()
-        return user?.puedeEliminarClientes() ?? false
-      },
     }),
     {
-      name: 'auth-storage', // localStorage key
+      name: 'auth-storage',
     }
   )
 )

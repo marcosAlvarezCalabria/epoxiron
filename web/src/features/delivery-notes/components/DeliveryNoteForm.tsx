@@ -1,12 +1,10 @@
 /**
  * COMPONENT: DeliveryNoteForm
- *
- * Simple form to create/edit delivery notes
+ * Actualizado para usar la nueva estructura DeliveryNote
  */
 
 import { useState } from 'react'
 import { useCustomers } from '@/features/customers/hooks/useCustomers'
-import { useRates } from '@/features/rates/hooks/useRates'
 import type { CreateDeliveryNoteData } from '../hooks/useDeliveryNotes'
 
 interface DeliveryNoteFormProps {
@@ -16,40 +14,57 @@ interface DeliveryNoteFormProps {
 }
 
 interface FormItem {
-  rateId: string
-  quantity: number
   description: string
+  color: string
+  quantity: number
+  linearMeters?: number
+  squareMeters?: number
+  thickness?: number
 }
 
 export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNoteFormProps) {
   const [customerId, setCustomerId] = useState('')
-  const [deliveryDate, setDeliveryDate] = useState('')
+  const [date, setDate] = useState('')
   const [notes, setNotes] = useState('')
-  const [items, setItems] = useState<FormItem[]>([{ rateId: '', quantity: 1, description: '' }])
+  const [items, setItems] = useState<FormItem[]>([{ 
+    description: '', 
+    color: '', 
+    quantity: 1 
+  }])
 
   const { data: customers } = useCustomers()
-  const { data: rates } = useRates()
-
-  // Filter rates by selected customer
-  const customerRates = rates?.filter(rate => rate.customerId === customerId) || []
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!customerId || !deliveryDate || items.some(item => !item.rateId || item.quantity <= 0)) {
-      alert('Please fill all required fields')
+    if (!customerId || !date || items.some(item => !item.description || item.quantity <= 0)) {
+      alert('Por favor completa todos los campos obligatorios')
       return
     }
 
+    // Convertir FormItem a estructura esperada por CreateDeliveryNoteData
+    const processedItems = items
+      .filter(item => item.description)
+      .map(item => ({
+        description: item.description,
+        color: item.color,
+        quantity: item.quantity,
+        measurements: {
+          linearMeters: item.linearMeters,
+          squareMeters: item.squareMeters,
+          thickness: item.thickness
+        }
+      }))
+
     onSubmit({
       customerId,
-      deliveryDate,
-      items: items.filter(item => item.rateId),
+      date,
+      items: processedItems,
       notes: notes.trim() || undefined
     })
   }
 
   const addItem = () => {
-    setItems([...items, { rateId: '', quantity: 1, description: '' }])
+    setItems([...items, { description: '', color: '', quantity: 1 }])
   }
 
   const removeItem = (index: number) => {
@@ -58,156 +73,228 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
     }
   }
 
-  const updateItem = (index: number, field: keyof FormItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof FormItem, value: string | number | undefined) => {
     const updatedItems = [...items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
     setItems(updatedItems)
   }
 
+  // Helper para parseFloat seguro
+  const safeParseFloat = (value: string): number | undefined => {
+    const parsed = parseFloat(value)
+    return isNaN(parsed) ? undefined : parsed
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Customer and Date */}
-      <div className="grid grid-cols-2 gap-4">
+    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Customer and Date */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="customer" className="block text-sm font-medium text-gray-300 mb-2">
+              Cliente *
+            </label>
+            <select
+              id="customer"
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
+              required
+              disabled={isLoading}
+              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50"
+            >
+              <option value="">Seleccionar cliente</option>
+              {customers?.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-2">
+              Fecha de Entrega *
+            </label>
+            <input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              disabled={isLoading}
+              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50"
+            />
+          </div>
+        </div>
+
+        {/* Items */}
         <div>
-          <label htmlFor="customer" className="block text-sm font-medium text-gray-700">
-            Customer *
-          </label>
-          <select
-            id="customer"
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            required
-            disabled={isLoading}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            <option value="">Select a customer</option>
-            {customers?.map((customer) => (
-              <option key={customer.id} value={customer.id}>
-                {customer.name}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className="flex justify-between items-center mb-4">
+            <label className="block text-sm font-medium text-gray-300">Productos/Servicios *</label>
+            <button
+              type="button"
+              onClick={addItem}
+              disabled={isLoading}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              + Añadir Item
+            </button>
+          </div>
 
-        <div>
-          <label htmlFor="deliveryDate" className="block text-sm font-medium text-gray-700">
-            Delivery Date *
-          </label>
-          <input
-            type="date"
-            id="deliveryDate"
-            value={deliveryDate}
-            onChange={(e) => setDeliveryDate(e.target.value)}
-            required
-            disabled={isLoading}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-      </div>
+          {items.map((item, index) => (
+            <div key={index} className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Descripción *
+                  </label>
+                  <input
+                    type="text"
+                    value={item.description}
+                    onChange={(e) => updateItem(index, 'description', e.target.value)}
+                    required
+                    disabled={isLoading}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="Ej: Recubrimiento epoxi"
+                  />
+                </div>
 
-      {/* Items */}
-      <div>
-        <div className="flex justify-between items-center mb-3">
-          <label className="block text-sm font-medium text-gray-700">Items *</label>
-          <button
-            type="button"
-            onClick={addItem}
-            disabled={!customerId || isLoading}
-            className="bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            + Add Item
-          </button>
-        </div>
+                {/* Color */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Color
+                  </label>
+                  <input
+                    type="text"
+                    value={item.color}
+                    onChange={(e) => updateItem(index, 'color', e.target.value)}
+                    disabled={isLoading}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="Ej: Azul, Verde"
+                  />
+                </div>
 
-        {items.map((item, index) => (
-          <div key={index} className="grid grid-cols-12 gap-2 mb-3 p-3 bg-gray-50 rounded">
-            <div className="col-span-5">
-              <select
-                value={item.rateId}
-                onChange={(e) => updateItem(index, 'rateId', e.target.value)}
-                required
-                disabled={isLoading}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-              >
-                <option value="">Select service/rate</option>
-                {customerRates.map((rate) => (
-                  <option key={rate.id} value={rate.id}>
-                    Linear: €{rate.ratePerLinearMeter}/ml | Square: €{rate.ratePerSquareMeter}/m²
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-span-2">
-              <input
-                type="number"
-                value={item.quantity}
-                onChange={(e) => updateItem(index, 'quantity', Math.max(1, parseInt(e.target.value)))}
-                required
-                disabled={isLoading}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                min="1"
-              />
-            </div>
-            <div className="col-span-5">
-              <input
-                type="text"
-                value={item.description}
-                onChange={(e) => updateItem(index, 'description', e.target.value)}
-                disabled={isLoading}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                placeholder="Description (optional)"
-              />
-            </div>
-            <div className="col-span-12">
+                {/* Quantity */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Cantidad *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                    required
+                    disabled={isLoading}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
+              {/* Measurements */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Metros Lineales
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={item.linearMeters || ''}
+                    onChange={(e) => updateItem(index, 'linearMeters', safeParseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="0.0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Metros Cuadrados
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={item.squareMeters || ''}
+                    onChange={(e) => updateItem(index, 'squareMeters', safeParseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="0.0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Grosor (mm)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={item.thickness || ''}
+                    onChange={(e) => updateItem(index, 'thickness', safeParseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="0.0"
+                  />
+                </div>
+              </div>
+
+              {/* Remove Item */}
               {items.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeItem(index)}
-                  className="text-red-600 text-sm"
-                  disabled={isLoading}
-                >
-                  Remove item
-                </button>
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    disabled={isLoading}
+                    className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors disabled:opacity-50"
+                  >
+                    ✕ Eliminar Item
+                  </button>
+                </div>
               )}
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Notes */}
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-          Notes (optional)
-        </label>
-        <textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          rows={3}
-          placeholder="Any additional notes..."
-          disabled={isLoading}
-        />
-      </div>
+        {/* Notes */}
+        <div>
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-300 mb-2">
+            Notas (opcional)
+          </label>
+          <textarea
+            id="notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            disabled={isLoading}
+            rows={3}
+            className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 p-4 transition-all disabled:opacity-50 resize-none"
+            placeholder="Información adicional sobre el albarán..."
+          />
+        </div>
 
-      {/* Actions */}
-      <div className="flex justify-end gap-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-          disabled={isLoading}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          {isLoading ? 'Creating...' : 'Create Delivery Note'}
-        </button>
-      </div>
-    </form>
+        {/* Actions */}
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="bg-gray-700 text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {isLoading ? 'Creando...' : 'Crear Albarán'}
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }

@@ -5,46 +5,76 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { DeliveryNote } from '../types/DeliveryNote'
 
-interface DeliveryNoteItem {
-  id: string
-  rateId: string
-  quantity: number
-  description?: string
-}
-
-interface DeliveryNote {
-  id: string
+// Definir CreateDeliveryNoteData aquí directamente
+export interface CreateDeliveryNoteData {
   customerId: string
-  deliveryDate: string
-  items: DeliveryNoteItem[]
-  notes?: string
-  createdAt: Date
-}
-
-interface CreateDeliveryNoteData {
-  customerId: string
-  deliveryDate: string
-  items: Omit<DeliveryNoteItem, 'id'>[]
+  date?: string
+  items: {
+    description: string
+    color: string
+    quantity: number
+    measurements: {
+      linearMeters?: number
+      squareMeters?: number
+      thickness?: number
+    }
+  }[]
   notes?: string
 }
 
-// Mock data
+// Mock data usando la interfaz correcta
 const mockDeliveryNotes: DeliveryNote[] = [
   {
     id: '1',
     customerId: '1',
-    deliveryDate: '2024-01-15',
+    customerName: 'Empresa SA',
+    date: '2024-01-15',
+    status: 'reviewed',
+    totalAmount: 450.00,
     items: [
       {
         id: '1',
-        rateId: '1',
+        description: 'Trabajo de recubrimiento epoxi',
+        color: 'Azul',
+        measurements: {
+          linearMeters: 10,
+          thickness: 2
+        },
         quantity: 10,
-        description: 'Trabajo de recubrimiento epoxi'
+        unitPrice: 45.00,
+        totalPrice: 450.00
       }
     ],
     notes: 'Trabajo completado satisfactoriamente',
-    createdAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: '2',
+    customerId: '2',
+    customerName: 'Talleres Metal',
+    date: '2024-01-16',
+    status: 'pending',
+    totalAmount: 825.50,
+    items: [
+      {
+        id: '2',
+        description: 'Recubrimiento estructural',
+        color: 'Verde',
+        measurements: {
+          squareMeters: 25,
+          thickness: 3
+        },
+        quantity: 42,
+        unitPrice: 19.65,
+        totalPrice: 825.50
+      }
+    ],
+    notes: 'Pendiente de revisión',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ]
 
@@ -59,15 +89,28 @@ const fetchDeliveryNotes = async (): Promise<DeliveryNote[]> => {
 
 const createDeliveryNote = async (data: CreateDeliveryNoteData): Promise<DeliveryNote> => {
   await delay(300)
+  
+  // Simular cálculo de precios (esto se haría en el backend)
+  const processedItems = data.items.map((item, index) => ({
+    id: String(Date.now() + index),
+    ...item,
+    unitPrice: 45.00, // Precio por defecto
+    totalPrice: item.quantity * 45.00
+  }))
+
   const newDeliveryNote: DeliveryNote = {
     id: String(Date.now()),
-    ...data,
-    items: data.items.map((item, index) => ({
-      ...item,
-      id: String(Date.now() + index)
-    })),
-    createdAt: new Date()
+    customerId: data.customerId,
+    customerName: 'Cliente Test', // En el futuro se obtendrá del customerId
+    date: data.date || new Date().toISOString().split('T')[0],
+    status: 'draft',
+    items: processedItems,
+    totalAmount: processedItems.reduce((sum, item) => sum + item.totalPrice, 0),
+    notes: data.notes,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
+  
   mockDeliveryNotes.push(newDeliveryNote)
   return newDeliveryNote
 }
@@ -91,4 +134,5 @@ export function useCreateDeliveryNote() {
   })
 }
 
-export type { DeliveryNote, DeliveryNoteItem, CreateDeliveryNoteData }
+// Re-export types
+export type { DeliveryNote }

@@ -21,10 +21,9 @@ export function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800))
     
-    login({ email })
+    login({ email, name: email.split('@')[0] })
     navigate('/dashboard')
     setIsLoading(false)
   }
