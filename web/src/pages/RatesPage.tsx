@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/stores/authStore'
 import { useRates, useCreateRate, useUpdateRate } from '@/features/rates/hooks/useRates'
 import { RateForm } from '../features/rates/components/RateForm'
+import { useCustomers } from '@/features/customers/hooks/useCustomers'
 
 export function RatesPage() {
   const { user, logout } = useAuthStore()
@@ -15,6 +16,7 @@ export function RatesPage() {
   const { data: rates, isLoading } = useRates()
   const { mutate: createRate, isPending: isCreating } = useCreateRate()
   const { mutate: updateRate, isPending: isUpdating } = useUpdateRate()
+  const { data: customers } = useCustomers() // Añadir esto
   
   const [showForm, setShowForm] = useState(false)
   const [editingRate, setEditingRate] = useState<any>(null)
@@ -66,10 +68,17 @@ export function RatesPage() {
     }
   }
 
-  const filteredRates = rates?.filter(rate =>
-    rate.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    rate.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || []
+  const getCustomerName = (customerId: string) => {
+    if (!customers || !customerId) return 'Cliente desconocido'
+    const customer = customers.find(c => c.id === customerId)
+    return customer?.name || 'Cliente desconocido'
+  }
+
+  const filteredRates = rates?.filter(rate => {
+    const customerName = getCustomerName(rate.customerId)
+    return customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           rate.id.toLowerCase().includes(searchTerm.toLowerCase())
+  }) || []
 
   const isFormLoading = isCreating || isUpdating
 
@@ -240,8 +249,10 @@ export function RatesPage() {
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-black/10">
                     <tr>
-                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nombre</th>
-                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Descripción</th>
+                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
+                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">€/ml</th>
+                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">€/m²</th>
+                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Mínimo</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acciones</th>
                     </tr>
@@ -251,15 +262,18 @@ export function RatesPage() {
                       <tr key={rate.id} className="hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4">
                           <div>
-                            <p className="font-bold text-white">{rate.name}</p>
+                            <p className="font-bold text-white">{getCustomerName(rate.customerId)}</p>
+                            <p className="text-gray-400 text-xs">Tarifa ID: {rate.id}</p>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-gray-200">
-                          {rate.description ? (
-                            <span className="text-white">{rate.description}</span>
-                          ) : (
-                            <span className="text-gray-500 text-sm">Sin descripción</span>
-                          )}
+                          <span className="font-mono text-green-400">€{rate.ratePerLinearMeter.toFixed(2)}</span>
+                        </td>
+                        <td className="px-4 py-4 text-gray-200">
+                          <span className="font-mono text-blue-400">€{rate.ratePerSquareMeter.toFixed(2)}</span>
+                        </td>
+                        <td className="px-4 py-4 text-gray-200">
+                          <span className="font-mono text-purple-400">€{rate.minimumRate.toFixed(2)}</span>
                         </td>
                         <td className="px-4 py-4">
                           <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-green-900/30 text-green-400 border border-green-800/30">

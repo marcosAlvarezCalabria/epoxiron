@@ -1,30 +1,47 @@
 /**
  * HOOKS: React Query hooks for rates
- * Con mutaciones para crear, actualizar y eliminar
+ * Con tipos correctos para evitar errores
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-// Mock data con name editable
-let mockRates = [
+// Tipo Rate bien definido
+export interface Rate {
+  id: string
+  customerId: string
+  ratePerLinearMeter: number
+  ratePerSquareMeter: number
+  minimumRate: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+// Mock data con tipos correctos
+let mockRates: Rate[] = [
   {
     id: '1',
-    name: 'Tarifa Estándar',
-    description: 'Precios estándar para clientes regulares',
+    customerId: '1',
+    ratePerLinearMeter: 25.50,
+    ratePerSquareMeter: 45.00,
+    minimumRate: 100.00,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
   {
-    id: '2', 
-    name: 'Tarifa Premium',
-    description: 'Precios especiales para clientes VIP',
+    id: '2',
+    customerId: '2',
+    ratePerLinearMeter: 22.00,
+    ratePerSquareMeter: 40.50,
+    minimumRate: 85.00,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
   {
     id: '3',
-    name: 'Tarifa Descuento',
-    description: null, // Sin descripción para probar
+    customerId: '3',
+    ratePerLinearMeter: 30.00,
+    ratePerSquareMeter: 50.00,
+    minimumRate: 120.00,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }
@@ -43,8 +60,10 @@ const createRate = async (rateData: any) => {
   
   const newRate = {
     id: String(Date.now()),
-    name: rateData.name,
-    description: rateData.description || null,
+    customerId: rateData.customerId,
+    ratePerLinearMeter: rateData.ratePerLinearMeter,
+    ratePerSquareMeter: rateData.ratePerSquareMeter,
+    minimumRate: rateData.minimumRate,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }

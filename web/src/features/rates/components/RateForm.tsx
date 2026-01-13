@@ -1,35 +1,47 @@
 /**
  * COMPONENT: RateForm - Formulario para crear/editar tarifas
- * Dark theme consistente con CustomerForm
+ * Actualizado con campos de precios por metro
  */
 
 import { useState, useEffect } from 'react'
+import { useCustomers } from '@/features/customers/hooks/useCustomers'
+
+interface Rate {
+  id?: string
+  customerId: string
+  ratePerLinearMeter: number
+  ratePerSquareMeter: number
+  minimumRate: number
+}
 
 interface RateFormProps {
-  rate?: any // Rate editando o null para nuevo
+  rate?: Rate | null
   onSubmit: (rateData: any) => void
   onCancel: () => void
   isLoading?: boolean
 }
 
 export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFormProps) {
+  const { data: customers } = useCustomers()
+  
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    notes: ''
+    customerId: '',
+    ratePerLinearMeter: '',
+    ratePerSquareMeter: '',
+    minimumRate: ''
   })
 
-  // Error state
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Pre-populate form when editing
   useEffect(() => {
     if (rate) {
       setFormData({
-        name: rate.name || '',
-        description: rate.description || '',
-        notes: rate.notes || ''
+        customerId: rate.customerId,
+        ratePerLinearMeter: rate.ratePerLinearMeter.toString(),
+        ratePerSquareMeter: rate.ratePerSquareMeter.toString(),
+        minimumRate: rate.minimumRate.toString()
       })
     }
   }, [rate])
@@ -37,8 +49,20 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es obligatorio'
+    if (!formData.customerId) {
+      newErrors.customerId = 'El cliente es obligatorio'
+    }
+    
+    if (!formData.ratePerLinearMeter || isNaN(Number(formData.ratePerLinearMeter))) {
+      newErrors.ratePerLinearMeter = 'El precio por metro lineal debe ser un número válido'
+    }
+    
+    if (!formData.ratePerSquareMeter || isNaN(Number(formData.ratePerSquareMeter))) {
+      newErrors.ratePerSquareMeter = 'El precio por metro cuadrado debe ser un número válido'
+    }
+    
+    if (!formData.minimumRate || isNaN(Number(formData.minimumRate))) {
+      newErrors.minimumRate = 'La tarifa mínima debe ser un número válido'
     }
 
     setErrors(newErrors)
@@ -50,12 +74,14 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
     
     if (!validateForm()) return
 
-    // Limpiar campos vacíos
-    const cleanData = Object.fromEntries(
-      Object.entries(formData).filter(([_, value]) => value.trim() !== '')
-    )
+    const submitData = {
+      customerId: formData.customerId,
+      ratePerLinearMeter: Number(formData.ratePerLinearMeter),
+      ratePerSquareMeter: Number(formData.ratePerSquareMeter),
+      minimumRate: Number(formData.minimumRate)
+    }
 
-    onSubmit(cleanData)
+    onSubmit(submitData)
   }
 
   const handleChange = (field: string, value: string) => {
@@ -76,7 +102,7 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               {rate ? 'Editar Tarifa' : 'Nueva Tarifa'}
             </h3>
             <p className="text-gray-400 text-sm mt-1">
-              {rate ? 'Modifica los datos de la tarifa' : 'Crea una nueva tarifa de precios'}
+              {rate ? 'Modifica los precios de la tarifa' : 'Configura una nueva tarifa de precios'}
             </p>
           </div>
           <button
@@ -92,68 +118,107 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Name */}
+          {/* Customer Selection */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-              Nombre de la Tarifa *
+            <label htmlFor="customerId" className="block text-sm font-medium text-gray-300 mb-2">
+              Cliente *
             </label>
-            <input
-              id="name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+            <select
+              id="customerId"
+              value={formData.customerId}
+              onChange={(e) => handleChange('customerId', e.target.value)}
               disabled={isLoading}
               className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                errors.name 
+                errors.customerId 
                   ? 'border-red-600 focus:border-red-600' 
                   : 'border-gray-700 focus:border-blue-600'
               }`}
-              placeholder="Ej: Tarifa Estándar, Tarifa Premium..."
-            />
-            {errors.name && (
-              <p className="text-red-400 text-sm mt-1">{errors.name}</p>
+            >
+              <option value="">Selecciona un cliente</option>
+              {customers?.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name}
+                </option>
+              ))}
+            </select>
+            {errors.customerId && (
+              <p className="text-red-400 text-sm mt-1">{errors.customerId}</p>
             )}
-            <p className="text-gray-500 text-xs mt-1">
-              Nombre principal de la tarifa
-            </p>
           </div>
 
-          {/* Description */}
+          {/* Rate Per Linear Meter */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
-              Descripción (opcional)
+            <label htmlFor="ratePerLinearMeter" className="block text-sm font-medium text-gray-300 mb-2">
+              Precio por Metro Lineal (€/ml) *
             </label>
             <input
-              id="description"
-              type="text"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
+              id="ratePerLinearMeter"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.ratePerLinearMeter}
+              onChange={(e) => handleChange('ratePerLinearMeter', e.target.value)}
               disabled={isLoading}
-              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50 focus:outline-none"
-              placeholder="Descripción adicional sobre la tarifa..."
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
+                errors.ratePerLinearMeter 
+                  ? 'border-red-600 focus:border-red-600' 
+                  : 'border-gray-700 focus:border-blue-600'
+              }`}
+              placeholder="25.50"
             />
-            <p className="text-gray-500 text-xs mt-1">
-              Información adicional sobre esta tarifa
-            </p>
+            {errors.ratePerLinearMeter && (
+              <p className="text-red-400 text-sm mt-1">{errors.ratePerLinearMeter}</p>
+            )}
           </div>
 
-          {/* Notes - igual que antes */}
+          {/* Rate Per Square Meter */}
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-300 mb-2">
-              Notas Internas (opcional)
+            <label htmlFor="ratePerSquareMeter" className="block text-sm font-medium text-gray-300 mb-2">
+              Precio por Metro Cuadrado (€/m²) *
             </label>
-            <textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
+            <input
+              id="ratePerSquareMeter"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.ratePerSquareMeter}
+              onChange={(e) => handleChange('ratePerSquareMeter', e.target.value)}
               disabled={isLoading}
-              rows={4}
-              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 p-4 transition-all disabled:opacity-50 resize-none focus:outline-none"
-              placeholder="Información adicional sobre esta tarifa, condiciones especiales, etc..."
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
+                errors.ratePerSquareMeter 
+                  ? 'border-red-600 focus:border-red-600' 
+                  : 'border-gray-700 focus:border-blue-600'
+              }`}
+              placeholder="45.00"
             />
-            <p className="text-gray-500 text-xs mt-1">
-              Notas internas que solo verá el equipo
-            </p>
+            {errors.ratePerSquareMeter && (
+              <p className="text-red-400 text-sm mt-1">{errors.ratePerSquareMeter}</p>
+            )}
+          </div>
+
+          {/* Minimum Rate */}
+          <div>
+            <label htmlFor="minimumRate" className="block text-sm font-medium text-gray-300 mb-2">
+              Tarifa Mínima (€) *
+            </label>
+            <input
+              id="minimumRate"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.minimumRate}
+              onChange={(e) => handleChange('minimumRate', e.target.value)}
+              disabled={isLoading}
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
+                errors.minimumRate 
+                  ? 'border-red-600 focus:border-red-600' 
+                  : 'border-gray-700 focus:border-blue-600'
+              }`}
+              placeholder="100.00"
+            />
+            {errors.minimumRate && (
+              <p className="text-red-400 text-sm mt-1">{errors.minimumRate}</p>
+            )}
           </div>
 
           {/* Info Box */}
@@ -167,8 +232,7 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               <div className="text-sm">
                 <p className="text-blue-300 font-medium mb-1">Sobre las Tarifas</p>
                 <p className="text-blue-200/80">
-                  Las tarifas se asignan a clientes para determinar precios específicos. 
-                  Después de crear la tarifa, podrás configurar precios por producto.
+                  Configura precios específicos por cliente. La tarifa mínima se aplica cuando el cálculo por metros es inferior.
                 </p>
               </div>
             </div>
@@ -186,7 +250,7 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
             </button>
             <button
               type="submit"
-              disabled={isLoading || !formData.name.trim()}
+              disabled={isLoading || !formData.customerId || !formData.ratePerLinearMeter || !formData.ratePerSquareMeter || !formData.minimumRate}
               className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium flex items-center justify-center gap-2"
             >
               {isLoading ? (

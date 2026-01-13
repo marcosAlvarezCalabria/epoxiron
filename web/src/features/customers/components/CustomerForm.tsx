@@ -194,29 +194,8 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
             />
           </div>
 
-          {/* Rate */}
-          <div>
-            <label htmlFor="rateId" className="block text-sm font-medium text-gray-300 mb-2">
-              Tarifa Asociada
-            </label>
-            <select
-              id="rateId"
-              value={formData.rateId}
-              onChange={(e) => handleChange('rateId', e.target.value)}
-              disabled={isLoading}
-              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50 focus:outline-none"
-            >
-              <option value="">Sin tarifa asignada</option>
-              {rates?.map((rate) => (
-                <option key={rate.id} value={rate.id}>
-                  {rate.name || `Tarifa ${rate.id}`}
-                </option>
-              ))}
-            </select>
-            <p className="text-gray-500 text-xs mt-1">
-              Puedes asignar una tarifa después desde la gestión de tarifas
-            </p>
-          </div>
+          {/* Remover completamente el selector de tarifas */}
+          {/* Las tarifas se asignan desde la página de tarifas */}
 
           {/* Notes */}
           <div>

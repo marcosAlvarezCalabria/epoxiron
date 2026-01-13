@@ -75,8 +75,8 @@ export function CustomersPage() {
     const rate = rates.find(r => r.id === rateId)
     if (!rate) return 'Sin tarifa'
     
-    // Usar el nombre de la tarifa si existe, sino usar el ID
-    return rate.name || `Tarifa ${rate.id}`
+    // Simplemente mostrar "Tarifa asignada" ya que las tarifas son específicas por cliente
+    return 'Tarifa asignada'
   }
 
   const filteredCustomers = customers?.filter(customer =>
