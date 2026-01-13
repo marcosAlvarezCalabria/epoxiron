@@ -5,178 +5,178 @@
  */
 
 import { useState } from 'react'
-import { useCustomers } from '../../customers/hooks/useCustomers'
-import { useCreateDeliveryNote } from '../hooks/useDeliveryNotes'
-import type { DeliveryNoteItem } from '../types/DeliveryNote'
+import { useCustomers } from '@/features/customers/hooks/useCustomers'
+import { useRates } from '@/features/rates/hooks/useRates'
+import type { CreateDeliveryNoteData } from '../hooks/useDeliveryNotes'
 
 interface DeliveryNoteFormProps {
-  onSuccess?: () => void
+  onSubmit: (data: CreateDeliveryNoteData) => void
+  onCancel: () => void
+  isLoading: boolean
 }
 
-export function DeliveryNoteForm({ onSuccess }: DeliveryNoteFormProps) {
-  const { data: customers } = useCustomers()
-  const { mutate: createNote, isPending } = useCreateDeliveryNote()
+interface FormItem {
+  rateId: string
+  quantity: number
+  description: string
+}
 
+export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNoteFormProps) {
   const [customerId, setCustomerId] = useState('')
-  const [items, setItems] = useState<Omit<DeliveryNoteItem, 'id' | 'unitPrice' | 'totalPrice'>[]>([
-    {
-      description: '',
-      color: 'RAL9016',
-      measurements: { linearMeters: undefined },
-      quantity: 1
-    }
-  ])
+  const [deliveryDate, setDeliveryDate] = useState('')
   const [notes, setNotes] = useState('')
+  const [items, setItems] = useState<FormItem[]>([{ rateId: '', quantity: 1, description: '' }])
 
-  const handleAddItem = () => {
-    setItems([
-      ...items,
-      {
-        description: '',
-        color: 'RAL9016',
-        measurements: { linearMeters: undefined },
-        quantity: 1
-      }
-    ])
-  }
+  const { data: customers } = useCustomers()
+  const { data: rates } = useRates()
 
-  const handleRemoveItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index))
-  }
-
-  const handleItemChange = (
-    index: number,
-    field: string,
-    value: string | number | undefined
-  ) => {
-    const updated = [...items]
-    if (field === 'linearMeters' || field === 'squareMeters' || field === 'thickness') {
-      updated[index] = {
-        ...updated[index],
-        measurements: {
-          ...updated[index].measurements,
-          [field]: value as number
-        }
-      }
-    } else {
-      updated[index] = { ...updated[index], [field]: value }
-    }
-    setItems(updated)
-  }
+  // Filter rates by selected customer
+  const customerRates = rates?.filter(rate => rate.customerId === customerId) || []
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!customerId || items.length === 0) {
-      alert('Please select customer and add at least one item')
+    if (!customerId || !deliveryDate || items.some(item => !item.rateId || item.quantity <= 0)) {
+      alert('Please fill all required fields')
       return
     }
 
-    createNote(
-      {
-        customerId,
-        date: new Date().toISOString().split('T')[0],
-        items: items.map(item => ({
-          ...item,
-          measurements: {
-            linearMeters: item.measurements.linearMeters,
-            squareMeters: item.measurements.squareMeters,
-            thickness: item.measurements.thickness
-          }
-        })),
-        notes
-      },
-      {
-        onSuccess: () => {
-          setCustomerId('')
-          setItems([
-            {
-              description: '',
-              color: 'RAL9016',
-              measurements: { linearMeters: undefined },
-              quantity: 1
-            }
-          ])
-          setNotes('')
-          onSuccess?.()
-        }
-      }
-    )
+    onSubmit({
+      customerId,
+      deliveryDate,
+      items: items.filter(item => item.rateId),
+      notes: notes.trim() || undefined
+    })
+  }
+
+  const addItem = () => {
+    setItems([...items, { rateId: '', quantity: 1, description: '' }])
+  }
+
+  const removeItem = (index: number) => {
+    if (items.length > 1) {
+      setItems(items.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateItem = (index: number, field: keyof FormItem, value: string | number) => {
+    const updatedItems = [...items]
+    updatedItems[index] = { ...updatedItems[index], [field]: value }
+    setItems(updatedItems)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 border p-6 rounded-lg">
-      <h2>Create Delivery Note</h2>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Customer and Date */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="customer" className="block text-sm font-medium text-gray-700">
+            Customer *
+          </label>
+          <select
+            id="customer"
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            required
+            disabled={isLoading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">Select a customer</option>
+            {customers?.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Customer Selection */}
-      <div>
-        <label>Customer *</label>
-        <select
-          value={customerId}
-          onChange={(e) => setCustomerId(e.target.value)}
-          className="w-full border p-2 rounded"
-          disabled={isPending}
-        >
-          <option value="">Select a customer</option>
-          {customers?.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label htmlFor="deliveryDate" className="block text-sm font-medium text-gray-700">
+            Delivery Date *
+          </label>
+          <input
+            type="date"
+            id="deliveryDate"
+            value={deliveryDate}
+            onChange={(e) => setDeliveryDate(e.target.value)}
+            required
+            disabled={isLoading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
       {/* Items */}
       <div>
-        <h3>Items</h3>
-        {items.map((item, idx) => (
-          <div key={idx} className="space-y-2 border p-3 rounded mb-3">
-            <input
-              type="text"
-              placeholder="Description"
-              value={item.description}
-              onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
-              className="w-full border p-2 rounded text-sm"
-              disabled={isPending}
-            />
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-sm font-medium text-gray-700">Items *</label>
+          <button
+            type="button"
+            onClick={addItem}
+            disabled={!customerId || isLoading}
+            className="bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            + Add Item
+          </button>
+        </div>
 
-            <select
-              value={item.color}
-              onChange={(e) => handleItemChange(idx, 'color', e.target.value)}
-              className="w-full border p-2 rounded text-sm"
-              disabled={isPending}
-            >
-              <option>RAL9016</option>
-              <option>RAL7016</option>
-              <option>RAL3000</option>
-              <option>Special</option>
-            </select>
-
-            <div className="grid grid-cols-2 gap-2">
+        {items.map((item, index) => (
+          <div key={index} className="grid grid-cols-12 gap-2 mb-3 p-3 bg-gray-50 rounded">
+            <div className="col-span-5">
+              <select
+                value={item.rateId}
+                onChange={(e) => updateItem(index, 'rateId', e.target.value)}
+                required
+                disabled={isLoading}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Select service/rate</option>
+                {customerRates.map((rate) => (
+                  <option key={rate.id} value={rate.id}>
+                    Linear: €{rate.ratePerLinearMeter}/ml | Square: €{rate.ratePerSquareMeter}/m²
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-span-2">
               <input
                 type="number"
-                placeholder="Linear meters (ml)"
-                value={item.measurements.linearMeters || ''}
-                onChange={(e) =>
-                  handleItemChange(idx, 'linearMeters', e.target.value ? parseFloat(e.target.value) : undefined)
-                }
-                className="border p-2 rounded text-sm"
-                step="0.1"
-                disabled={isPending}
-              />
-              <input
-                type="number"
-                placeholder="Square meters (m²)"
-                value={item.measurements.squareMeters || ''}
-                onChange={(e) =>
-                  handleItemChange(idx, 'squareMeters', e.target.value ? parseFloat(e.target.value) : undefined)
-                }
-                className="border p-2 rounded text-sm"
-                step="0.1"
-                disabled={isPending}
+                value={item.quantity}
+                onChange={(e) => updateItem(index, 'quantity', Math.max(1, parseInt(e.target.value)))}
+                required
+                disabled={isLoading}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                min="1"
               />
             </div>
+            <div className="col-span-5">
+              <input
+                type="text"
+                value={item.description}
+                onChange={(e) => updateItem(index, 'description', e.target.value)}
+                disabled={isLoading}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                placeholder="Description (optional)"
+              />
+            </div>
+            <div className="col-span-12">
+              {items.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeItem(index)}
+                  className="text-red-600 text-sm"
+                  disabled={isLoading}
+                >
+                  Remove item
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
 
+      {/* Notes */}
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="number"

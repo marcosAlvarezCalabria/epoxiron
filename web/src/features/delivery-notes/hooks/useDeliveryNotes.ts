@@ -6,66 +6,70 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+interface DeliveryNoteItem {
+  id: string
+  rateId: string
+  quantity: number
+  description?: string
+}
+
 interface DeliveryNote {
   id: string
-  customerName: string
-  date: string
+  customerId: string
+  deliveryDate: string
   items: DeliveryNoteItem[]
   notes?: string
-  status: 'draft' | 'pending' | 'reviewed'
-  totalAmount: number
   createdAt: Date
 }
 
-interface DeliveryNoteItem {
-  id: string
-  description: string
-  color: string
-  quantity: number
+interface CreateDeliveryNoteData {
+  customerId: string
+  deliveryDate: string
+  items: Omit<DeliveryNoteItem, 'id'>[]
+  notes?: string
 }
 
-// Mock data compatible con el componente existente
+// Mock data
 const mockDeliveryNotes: DeliveryNote[] = [
   {
     id: '1',
-    customerName: 'Cliente Ejemplo 1',
-    date: '2024-01-15',
+    customerId: '1',
+    deliveryDate: '2024-01-15',
     items: [
       {
         id: '1',
-        description: 'Pieza soldada',
-        color: 'Azul',
-        quantity: 5
+        rateId: '1',
+        quantity: 10,
+        description: 'Trabajo de recubrimiento epoxi'
       }
     ],
-    notes: 'Trabajo completado correctamente',
-    status: 'draft',
-    totalAmount: 450.00,
+    notes: 'Trabajo completado satisfactoriamente',
     createdAt: new Date()
   }
 ]
 
+// Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+// Mock API functions
 const fetchDeliveryNotes = async (): Promise<DeliveryNote[]> => {
   await delay(500)
   return mockDeliveryNotes
 }
 
-const deleteDeliveryNote = async (id: string): Promise<void> => {
+const createDeliveryNote = async (data: CreateDeliveryNoteData): Promise<DeliveryNote> => {
   await delay(300)
-  const index = mockDeliveryNotes.findIndex(note => note.id === id)
-  if (index > -1) {
-    mockDeliveryNotes.splice(index, 1)
+  const newDeliveryNote: DeliveryNote = {
+    id: String(Date.now()),
+    ...data,
+    items: data.items.map((item, index) => ({
+      ...item,
+      id: String(Date.now() + index)
+    })),
+    createdAt: new Date()
   }
-}
-
-const updateDeliveryNoteStatus = async ({ id, status }: { id: string; status: 'draft' | 'pending' | 'reviewed' }): Promise<void> => {
-  await delay(300)
-  const note = mockDeliveryNotes.find(note => note.id === id)
-  if (note) {
-    note.status = status
-  }
+  mockDeliveryNotes.push(newDeliveryNote)
+  return newDeliveryNote
 }
 
 // Hooks
@@ -76,26 +80,15 @@ export function useDeliveryNotes() {
   })
 }
 
-export function useDeleteDeliveryNote() {
+export function useCreateDeliveryNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: deleteDeliveryNote,
+    mutationFn: createDeliveryNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['delivery-notes'] })
     },
   })
 }
 
-export function useUpdateDeliveryNoteStatus() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: updateDeliveryNoteStatus,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['delivery-notes'] })
-    },
-  })
-}
-
-export type { DeliveryNote, DeliveryNoteItem }
+export type { DeliveryNote, DeliveryNoteItem, CreateDeliveryNoteData }

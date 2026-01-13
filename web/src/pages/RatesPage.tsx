@@ -1,10 +1,11 @@
 /**
- * PAGE: Rates - Con formulario real
+ * PAGE: Rates - CRUD completo
  */
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RateForm, type RateFormData } from '@/features/rates/components/RateForm'
+import { RateList } from '@/features/rates/components/RateList'
 import { useCreateRate } from '@/features/rates/hooks/useRates'
 import { useCustomers } from '@/features/customers/hooks/useCustomers'
 
@@ -107,9 +108,7 @@ export function RatesPage() {
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <p>Lista de tarifas aparecerá aquí (próximo paso)</p>
-      </div>
+      <RateList />
     </div>
   )
 }
