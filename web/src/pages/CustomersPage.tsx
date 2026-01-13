@@ -6,14 +6,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/stores/authStore'
-import { useCustomers } from '@/features/customers/hooks/useCustomers'
+import { useCustomers, useCreateCustomer, useUpdateCustomer } from '@/features/customers/hooks/useCustomers'
 import { useRates } from '@/features/rates/hooks/useRates'
+import { CustomerForm } from '../features/customers/components/CustomerForm'
 
 export function CustomersPage() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const { data: customers, isLoading } = useCustomers()
   const { data: rates } = useRates()
+  const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer()
+  const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer()
   
   const [showForm, setShowForm] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<any>(null)
@@ -40,25 +43,47 @@ export function CustomersPage() {
   }
 
   const handleSubmitCustomer = (customerData: any) => {
-    console.log('Guardando cliente:', customerData)
-    // TODO: Implementar guardado
-    handleCloseForm()
+    if (editingCustomer) {
+      // Actualizar cliente existente
+      updateCustomer(
+        { id: editingCustomer.id, ...customerData },
+        {
+          onSuccess: () => {
+            handleCloseForm()
+          }
+        }
+      )
+    } else {
+      // Crear nuevo cliente
+      createCustomer(customerData, {
+        onSuccess: () => {
+          handleCloseForm()
+        }
+      })
+    }
   }
 
   const handleDeleteCustomer = (customerId: string) => {
     if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
       console.log('Eliminando cliente:', customerId)
-      // TODO: Implementar eliminación
+      // TODO: Implementar eliminación con useDeleteCustomer
     }
   }
 
   const getRateName = (rateId: string) => {
-    return rateId ? 'Tarifa Asignada' : 'Sin tarifa'
+    if (!rates || !rateId) return 'Sin tarifa'
+    const rate = rates.find(r => r.id === rateId)
+    if (!rate) return 'Sin tarifa'
+    
+    // Usar el nombre de la tarifa si existe, sino usar el ID
+    return rate.name || `Tarifa ${rate.id}`
   }
 
   const filteredCustomers = customers?.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
+
+  const isFormLoading = isCreating || isUpdating
 
   return (
     <div className="bg-gray-900 font-sans text-gray-200 min-h-screen">
@@ -237,7 +262,7 @@ export function CustomersPage() {
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Email</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Teléfono</th>
-                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Tarifa Asociada</th>
+                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Tarifa</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acciones</th>
                     </tr>
                   </thead>
@@ -247,14 +272,35 @@ export function CustomersPage() {
                         <td className="px-4 py-4">
                           <div>
                             <p className="font-bold text-white">{customer.name}</p>
-                            <p className="text-gray-400 text-sm">ID: {customer.id}</p>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-gray-200">
-                          <span className="text-gray-400">Sin implementar</span>
+                          {customer.email ? (
+                            <div className="flex items-center gap-1">
+                              <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                              </svg>
+                              <span className="text-white text-sm truncate max-w-[150px]" title={customer.email}>
+                                {customer.email}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-500 text-sm">Sin email</span>
+                          )}
                         </td>
                         <td className="px-4 py-4 text-gray-200">
-                          <span className="text-gray-400">Sin implementar</span>
+                          {customer.phone ? (
+                            <div className="flex items-center gap-1">
+                              <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                              </svg>
+                              <span className="text-white text-sm">
+                                {customer.phone}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-500 text-sm">Sin teléfono</span>
+                          )}
                         </td>
                         <td className="px-4 py-4 text-gray-200">
                           {customer.rateId ? (
@@ -277,7 +323,8 @@ export function CustomersPage() {
                           <div className="flex items-center justify-center gap-2">
                             <button 
                               onClick={() => handleEditCustomer(customer)}
-                              className="p-2 text-blue-600 hover:bg-blue-600/20 rounded-lg transition-colors"
+                              disabled={isFormLoading}
+                              className="p-2 text-blue-600 hover:bg-blue-600/20 rounded-lg transition-colors disabled:opacity-50"
                               title="Editar cliente"
                             >
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -286,7 +333,8 @@ export function CustomersPage() {
                             </button>
                             <button 
                               onClick={() => handleDeleteCustomer(customer.id)}
-                              className="p-2 text-red-600 hover:bg-red-600/20 rounded-lg transition-colors"
+                              disabled={isFormLoading}
+                              className="p-2 text-red-600 hover:bg-red-600/20 rounded-lg transition-colors disabled:opacity-50"
                               title="Eliminar cliente"
                             >
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -329,37 +377,14 @@ export function CustomersPage() {
         </div>
       </main>
 
-      {/* Formulario Modal Placeholder */}
+      {/* Reemplazar el modal placeholder con el nuevo CustomerForm */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
-            <h3 className="text-xl font-bold text-white mb-4">
-              {editingCustomer ? 'Editar Cliente' : 'Nuevo Cliente'}
-            </h3>
-            <p className="text-gray-400 mb-4">
-              Formulario placeholder - será implementado después
-            </p>
-            {editingCustomer && (
-              <p className="text-gray-300 text-sm mb-4">
-                Editando: {editingCustomer.name}
-              </p>
-            )}
-            <div className="flex gap-3">
-              <button 
-                onClick={() => handleSubmitCustomer({ name: 'Cliente Test' })}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Guardar
-              </button>
-              <button 
-                onClick={handleCloseForm}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
+        <CustomerForm
+          customer={editingCustomer}
+          onSubmit={handleSubmitCustomer}
+          onCancel={handleCloseForm}
+          isLoading={isFormLoading}
+        />
       )}
 
       {/* Floating Action Button */}
