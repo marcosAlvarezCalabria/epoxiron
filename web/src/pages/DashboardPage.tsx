@@ -225,7 +225,11 @@ export function DashboardPage() {
               <tbody className="divide-y divide-gray-700">
                 {deliveryNotes && deliveryNotes.length > 0 ? (
                   deliveryNotes.map((note) => (
-                    <tr key={note.id} className="hover:bg-white/5 transition-colors">
+                    <tr 
+                      key={note.id} 
+                      className="hover:bg-white/5 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/delivery-notes/${note.id}`)}
+                    >
                       <td className="px-4 py-4 font-bold text-white">#{note.id}</td>
                       <td className="px-4 py-4 text-gray-200">{note.customerName}</td>
                       <td className="px-4 py-4">{getStatusBadge(note.status)}</td>
@@ -233,11 +237,14 @@ export function DashboardPage() {
                         {note.items.reduce((sum, item) => sum + item.quantity, 0)}
                       </td>
                       <td className="px-4 py-4 text-right font-bold text-white">
-                        {note.totalAmount.toFixed(2)}€
+                        {(note.totalAmount || 0).toFixed(2)}€
                       </td>
                       <td className="px-4 py-4 text-center">
                         <button 
-                          onClick={() => navigate('/delivery-notes')}
+                          onClick={(e) => {
+                            e.stopPropagation() // Evitar que se active el click de la fila
+                            navigate(`/delivery-notes/${note.id}`)
+                          }}
                           className="p-2 text-blue-600 hover:bg-blue-600/20 rounded-lg transition-colors"
                         >
                           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

@@ -4,6 +4,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { RatesPage } from './pages/RatesPage';
 import { DeliveryNotesPage } from './pages/DeliveryNotesPage';
+import { DeliveryNoteDetailsPage } from './pages/DeliveryNoteDetailsPage';
 import { useAuthStore } from './features/auth/stores/authStore';
 import type React from 'react';
 
@@ -50,6 +51,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DeliveryNotesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/delivery-notes/:id"
+          element={
+            <ProtectedRoute>
+              <DeliveryNoteDetailsPage />
             </ProtectedRoute>
           }
         />
