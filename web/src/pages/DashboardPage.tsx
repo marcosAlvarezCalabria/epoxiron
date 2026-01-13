@@ -22,7 +22,7 @@ export function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">Epoxiron</h1>
           <div className="flex items-center gap-4">
-            <span className="text-gray-700">👤 {user?.name}</span>
+            <span className="text-gray-700">👤 {String(user?.email)}</span>
             <button
               onClick={handleLogout}
               className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
@@ -39,7 +39,7 @@ export function DashboardPage() {
             ✅ ¡Bienvenido al Dashboard!
           </h2>
           <p className="text-gray-600 mb-8">
-            Has iniciado sesión correctamente como <strong>{user?.email.getValue()}</strong>
+            Has iniciado sesión correctamente como <strong>{String(user?.email)}</strong>
           </p>
 
           <h3 className="text-xl font-bold text-gray-800 mb-4">Menú Principal</h3>

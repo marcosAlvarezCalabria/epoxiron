@@ -1,91 +1,36 @@
 /**
- * PAGE: Rates
- *
- * Simple page to manage pricing rates
- * (Styles will be updated with Figma design later)
+ * PAGE: Rates - VERSIÓN SIMPLE
  */
 
-import { useState } from 'react'
-import { RateForm } from '@/features/rates/components/RateForm'
-import { RateList } from '@/features/rates/components/RateList'
-import { useCreateRate } from '@/features/rates/hooks/useRates'
-import { useCustomers } from '@/features/customers/hooks/useCustomers'
-import type { RateFormData } from '@/features/rates/components/RateForm'
+import { useNavigate } from 'react-router-dom'
 
 export function RatesPage() {
-  const [showForm, setShowForm] = useState(false)
-  const [selectedCustomerId, setSelectedCustomerId] = useState('')
-
-  const { mutate: createRate, isPending } = useCreateRate()
-  const { data: customers } = useCustomers()
-
-  const handleSubmit = (data: RateFormData) => {
-    createRate(
-      {
-        customerId: selectedCustomerId,
-        ...data
-      },
-      {
-        onSuccess: () => {
-          setShowForm(false)
-          setSelectedCustomerId('')
-        }
-      }
-    )
-  }
-
-  const handleNewRate = () => {
-    if (!customers || customers.length === 0) {
-      alert('Please create a customer first')
-      return
-    }
-    setShowForm(true)
-  }
+  const navigate = useNavigate()
 
   return (
-    <div>
-      <h1>Rates Management</h1>
-
-      <button onClick={handleNewRate}>
-        + New Rate
-      </button>
-
-      {showForm && (
-        <div>
-          <h3>Create New Rate</h3>
-
-          {!selectedCustomerId ? (
-            <div>
-              <label htmlFor="customer-select">Select Customer:</label>
-              <select
-                id="customer-select"
-                value={selectedCustomerId}
-                onChange={(e) => setSelectedCustomerId(e.target.value)}
-              >
-                <option value="">-- Select a customer --</option>
-                {customers?.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name}
-                  </option>
-                ))}
-              </select>
-              <button onClick={() => setShowForm(false)}>Cancel</button>
-            </div>
-          ) : (
-            <RateForm
-              customerId={selectedCustomerId}
-              onSubmit={handleSubmit}
-              onCancel={() => {
-                setShowForm(false)
-                setSelectedCustomerId('')
-              }}
-              isLoading={isPending}
-            />
-          )}
+    <div className="p-8 space-y-8">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+          >
+            ← Back to Dashboard
+          </button>
+          <h1 className="text-3xl font-bold">Rates Management</h1>
         </div>
-      )}
 
-      <RateList />
+        <button 
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          + New Rate
+        </button>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <p>Rates page is working! 🎉</p>
+        <p>Navigation button should take you back to dashboard.</p>
+      </div>
     </div>
   )
 }
