@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import authRoutes from './routes/authRoutes'
 import customerRoutes from './routes/customerRoutes'
 import rateRoutes from './routes/rateRoutes'
+import deliveryNoteRoutes from './routes/deliveryNoteRoutes'
 
 // 📝 CONFIGURACIÓN - Cargar variables de entorno
 dotenv.config()
@@ -29,6 +30,9 @@ app.use('/api/customers', customerRoutes)
 
 // Todas las rutas de rateRoutes estarán bajo /api/rates
 app.use('/api/rates', rateRoutes)
+
+// Todas las rutas de deliveryNoteRoutes estarán bajo /api/delivery-notes
+app.use('/api/delivery-notes', deliveryNoteRoutes)
 
 // 📝 RUTA DE PRUEBA - Para verificar que el servidor funciona
 app.get('/health', (req, res) => {
