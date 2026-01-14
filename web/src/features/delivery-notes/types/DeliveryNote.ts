@@ -2,15 +2,21 @@
  * TYPES: DeliveryNote - Tipos para albaranes y sus items
  */
 
-export interface DeliveryNoteItem {
-  id: string
-  name: string
-  quantity: number
+export interface MeasurementData {
   linearMeters?: number
   squareMeters?: number
   thickness?: number
+}
+
+export interface DeliveryNoteItem {
+  id: string
+  name: string // In some places used as description?
+  description: string // UI uses description
+  quantity: number
+  color: string // UI uses color
   racColor?: string
   specialColor?: string
+  measurements: MeasurementData
   unitPrice?: number
   totalPrice: number
   notes?: string
@@ -19,6 +25,8 @@ export interface DeliveryNoteItem {
 export interface DeliveryNote {
   id: string
   customerId: string
+  customerName: string // Used in Lists
+  date: string // Business date
   status: 'draft' | 'pending' | 'reviewed'
   items: DeliveryNoteItem[]
   totalAmount: number
@@ -29,13 +37,28 @@ export interface DeliveryNote {
 
 export interface CreateDeliveryNoteRequest {
   customerId: string
+  date: string
   items: Omit<DeliveryNoteItem, 'id'>[]
   notes?: string
 }
 
 export interface UpdateDeliveryNoteRequest {
   customerId?: string
+  date?: string
   status?: 'draft' | 'pending' | 'reviewed'
   items?: DeliveryNoteItem[]
+  notes?: string
+}
+
+// Form Data for the Frontend Form (might differ slightly from API request)
+export interface DeliveryNoteFormData {
+  customerId: string
+  date: string
+  items: Array<{
+    description: string
+    color: string
+    quantity: number
+    measurements: MeasurementData
+  }>
   notes?: string
 }

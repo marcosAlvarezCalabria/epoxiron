@@ -27,9 +27,9 @@ export async function apiClient<T>(
   const { requiresAuth = true, headers = {}, ...restOptions } = options
 
   // Build headers
-  const requestHeaders: HeadersInit = {
+  const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...headers,
+    ...(headers as Record<string, string>),
   }
 
   // Add JWT token if authentication is required

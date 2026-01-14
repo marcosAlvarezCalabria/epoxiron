@@ -15,7 +15,7 @@ export function DeliveryNotesPage() {
   const { data: deliveryNotes = [], isLoading } = useDeliveryNotes()
   const { data: customers = [] } = useCustomers()
   const deleteDeliveryNote = useDeleteDeliveryNote()
-  
+
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -34,13 +34,13 @@ export function DeliveryNotesPage() {
   const filteredNotes = deliveryNotes.filter(note => {
     const customer = customers.find(c => c.id === note.customerId)
     const customerName = customer?.name || ''
-    
-    const matchesSearch = searchTerm === '' || 
+
+    const matchesSearch = searchTerm === '' ||
       note.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customerName.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesStatus = statusFilter === '' || note.status === statusFilter
-    
+
     return matchesSearch && matchesStatus
   })
 
@@ -113,7 +113,7 @@ export function DeliveryNotesPage() {
           <div className="flex items-center gap-2">
             <div className="bg-blue-600 text-white p-1.5 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22 6l-8 4-8-4V4l8 4 8-4v2zM2 8l8 4v8l-8-4V8zm12 12V12l8-4v8l-8 4z"/>
+                <path d="M22 6l-8 4-8-4V4l8 4 8-4v2zM2 8l8 4v8l-8-4V8zm12 12V12l8-4v8l-8 4z" />
               </svg>
             </div>
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Epoxiron</h2>
@@ -121,25 +121,25 @@ export function DeliveryNotesPage() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 px-4 flex-1 justify-center">
-            <button 
+            <button
               onClick={() => navigate('/')}
               className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
             >
               Resumen del Día
             </button>
-            <button 
+            <button
               onClick={() => navigate('/customers')}
               className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
             >
               Clientes
             </button>
-            <button 
+            <button
               onClick={() => navigate('/rates')}
               className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
             >
               Tarifas
             </button>
-            <button 
+            <button
               className="flex items-center gap-1 text-blue-600 font-bold text-sm"
             >
               Albaranes
@@ -149,15 +149,15 @@ export function DeliveryNotesPage() {
           {/* User Actions */}
           <div className="flex items-center gap-2">
             <div className="text-sm text-gray-300">
-              Hola, {user?.email?.split('@')[0]}
+              Hola, {user?.email?.getValue().split('@')[0]}
             </div>
-            <button 
+            <button
               onClick={handleLogout}
               className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
               title="Cerrar sesión"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/>
+                <path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z" />
               </svg>
             </button>
           </div>
@@ -165,25 +165,25 @@ export function DeliveryNotesPage() {
 
         {/* Mobile Navigation */}
         <div className="md:hidden flex border-t border-gray-700 px-4 gap-6 bg-gray-800 overflow-x-auto">
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Resumen</p>
           </button>
-          <button 
+          <button
             onClick={() => navigate('/customers')}
             className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Clientes</p>
           </button>
-          <button 
+          <button
             onClick={() => navigate('/rates')}
             className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Tarifas</p>
           </button>
-          <button 
+          <button
             className="flex flex-col items-center justify-center border-b-[3px] border-blue-600 text-blue-600 pb-[10px] pt-3 whitespace-nowrap"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Albaranes</p>
@@ -201,12 +201,12 @@ export function DeliveryNotesPage() {
             <p className="text-gray-400 text-sm">Gestión completa de albaranes de entrega</p>
           </div>
           <div className="mt-4 sm:mt-0">
-            <button 
+            <button
               onClick={() => navigate('/delivery-notes/new')}
               className="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
               </svg>
               <span className="truncate">Nuevo Albarán</span>
             </button>
@@ -251,7 +251,7 @@ export function DeliveryNotesPage() {
                     className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 pl-10 pr-4 transition-all focus:outline-none"
                   />
                   <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                   </svg>
                 </div>
               </div>
@@ -331,7 +331,7 @@ export function DeliveryNotesPage() {
                               title="Ver detalles"
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                               </svg>
                             </button>
                             <button
@@ -340,7 +340,7 @@ export function DeliveryNotesPage() {
                               title="Eliminar"
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                               </svg>
                             </button>
                           </div>
@@ -353,22 +353,22 @@ export function DeliveryNotesPage() {
             ) : (
               <div className="px-4 py-8 text-center">
                 <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                 </svg>
                 <h3 className="text-gray-400 text-lg font-medium mb-2">No hay albaranes</h3>
                 <p className="text-gray-500 text-sm mb-4">
-                  {searchTerm || statusFilter 
+                  {searchTerm || statusFilter
                     ? 'No se encontraron albaranes que coincidan con los filtros aplicados.'
                     : 'Aún no has creado ningún albarán. ¡Crea tu primer albarán ahora!'
                   }
                 </p>
                 {!searchTerm && !statusFilter && (
-                  <button 
+                  <button
                     onClick={() => navigate('/delivery-notes/new')}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
                     </svg>
                     Crear primer albarán
                   </button>

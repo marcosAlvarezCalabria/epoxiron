@@ -10,7 +10,8 @@ export function CreateDeliveryNotePage() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
 
-  const handleSuccess = (newDeliveryNoteId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSuccess = (_newDeliveryNoteId: string) => {
     // Redirigir al listado o al albarán creado
     navigate('/delivery-notes')
   }
@@ -33,7 +34,7 @@ export function CreateDeliveryNotePage() {
           <div className="flex items-center gap-2">
             <div className="bg-blue-600 text-white p-1.5 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22 6l-8 4-8-4V4l8 4 8-4v2zM2 8l8 4v8l-8-4V8zm12 12V12l8-4v8l-8 4z"/>
+                <path d="M22 6l-8 4-8-4V4l8 4 8-4v2zM2 8l8 4v8l-8-4V8zm12 12V12l8-4v8l-8 4z" />
               </svg>
             </div>
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Epoxiron</h2>
@@ -51,15 +52,15 @@ export function CreateDeliveryNotePage() {
           {/* User Actions */}
           <div className="flex items-center gap-2">
             <div className="text-sm text-gray-300">
-              Hola, {user?.email?.split('@')[0]}
+              Hola, {user?.email?.getValue().split('@')[0]}
             </div>
-            <button 
+            <button
               onClick={handleLogout}
               className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
               title="Cerrar sesión"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/>
+                <path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z" />
               </svg>
             </button>
           </div>
@@ -76,7 +77,7 @@ export function CreateDeliveryNotePage() {
             <p className="text-gray-400 text-sm">Añade items y configura el albarán de entrega</p>
           </div>
           <div className="mt-4 sm:mt-0 flex gap-3">
-            <button 
+            <button
               onClick={handleCancel}
               className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-700 text-white text-base font-medium leading-normal tracking-[0.015em] hover:bg-gray-600 transition-colors"
             >

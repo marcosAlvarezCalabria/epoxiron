@@ -788,16 +788,16 @@ export function DeliveryNotesPage() {
 - [x] Escribir tests TDD (982 líneas)
 - [x] Actualizar colección Postman
 
-### Frontend ⏳ SIGUIENTE
-- [ ] Crear estructura `web/src/features/delivery-notes/`
-- [ ] Crear `types/DeliveryNote.ts`
-- [ ] Crear `schemas/deliveryNoteSchema.ts`
-- [ ] Crear `api/deliveryNotesApi.ts`
-- [ ] Crear `hooks/useDeliveryNotes.ts`
-- [ ] Crear `components/DeliveryNoteForm.tsx`
-- [ ] Crear `components/DeliveryNoteList.tsx`
-- [ ] Crear `components/DeliveryNoteCard.tsx`
-- [ ] Crear `components/StatusBadge.tsx`
+### Frontend ⏳ SIGUIENTE (En Progreso)
+- [x] Crear estructura `web/src/features/delivery-notes/`
+- [x] Crear `types/DeliveryNote.ts`
+- [ ] Crear `schemas/deliveryNoteSchema.ts` (Pendiente)
+- [x] Crear `api/deliveryNotesApi.ts`
+- [x] Crear `hooks/useDeliveryNotes.ts`
+- [x] Crear `components/DeliveryNoteForm.tsx`
+- [x] Crear `components/DeliveryNoteList.tsx`
+- [ ] Crear `components/DeliveryNoteCard.tsx` (Pendiente)
+- [ ] Crear `components/StatusBadge.tsx` (Pendiente)
 - [ ] Crear `pages/DeliveryNotesPage.tsx`
 - [ ] Agregar ruta en `App.tsx`
 - [ ] Agregar link en Dashboard

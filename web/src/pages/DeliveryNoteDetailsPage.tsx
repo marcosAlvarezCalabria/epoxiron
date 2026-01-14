@@ -43,26 +43,26 @@ export function DeliveryNoteDetailsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      reviewed: { 
-        bg: 'bg-green-900/30', 
-        text: 'text-green-400', 
-        border: 'border-green-800/30', 
-        icon: 'check_circle', 
-        label: 'Revisado' 
+      reviewed: {
+        bg: 'bg-green-900/30',
+        text: 'text-green-400',
+        border: 'border-green-800/30',
+        icon: 'check_circle',
+        label: 'Revisado'
       },
-      pending: { 
-        bg: 'bg-amber-900/30', 
-        text: 'text-amber-400', 
-        border: 'border-amber-800/30', 
-        icon: 'schedule', 
-        label: 'Pendiente' 
+      pending: {
+        bg: 'bg-amber-900/30',
+        text: 'text-amber-400',
+        border: 'border-amber-800/30',
+        icon: 'schedule',
+        label: 'Pendiente'
       },
-      draft: { 
-        bg: 'bg-blue-900/30', 
-        text: 'text-blue-400', 
-        border: 'border-blue-800/30', 
-        icon: 'edit', 
-        label: 'Borrador' 
+      draft: {
+        bg: 'bg-blue-900/30',
+        text: 'text-blue-400',
+        border: 'border-blue-800/30',
+        icon: 'edit',
+        label: 'Borrador'
       }
     }
 
@@ -71,9 +71,9 @@ export function DeliveryNoteDetailsPage() {
     return (
       <span className={`inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold ${config.bg} ${config.text} border ${config.border}`}>
         <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-          {config.icon === 'check_circle' && <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>}
-          {config.icon === 'schedule' && <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z"/>}
-          {config.icon === 'edit' && <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>}
+          {config.icon === 'check_circle' && <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />}
+          {config.icon === 'schedule' && <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z" />}
+          {config.icon === 'edit' && <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />}
         </svg>
         {config.label}
       </span>
@@ -92,7 +92,7 @@ export function DeliveryNoteDetailsPage() {
                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                 </svg>
               </button>
               <div>
@@ -110,7 +110,7 @@ export function DeliveryNoteDetailsPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Delivery Info */}
@@ -151,10 +151,10 @@ export function DeliveryNoteDetailsPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-white">€{item.totalPrice.toFixed(2)}</p>
-                        <p className="text-gray-400 text-sm">€{item.unitPrice.toFixed(2)} x {item.quantity}</p>
+                        <p className="text-gray-400 text-sm">€{(item.unitPrice || 0).toFixed(2)} x {item.quantity}</p>
                       </div>
                     </div>
-                    
+
                     {/* Measurements */}
                     <div className="mt-3 flex flex-wrap gap-4 text-sm">
                       {item.measurements.linearMeters && (

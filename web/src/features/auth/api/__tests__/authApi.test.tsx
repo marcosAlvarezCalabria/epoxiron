@@ -69,7 +69,7 @@ describe('authApi', () => {
       await login(loginData)
 
       // Then: Fetch should be called with correct parameters
-      expect(mockFetch).toHaveBeenCalledWith('/api/auth/login', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData)

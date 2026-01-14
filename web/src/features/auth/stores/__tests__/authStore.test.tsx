@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useAuthStore } from '../authStore'
-import { User } from '@/domain/entities/User'
-import { Email } from '@/domain/value-objects/Email'
-import { Token } from '@/domain/value-objects/Token'
+import { User } from '../../../../domain/entities/User'
+import { Email } from '../../../../domain/value-objects/Email'
+import { Token } from '../../../../domain/value-objects/Token'
 
 describe('authStore', () => {
   beforeEach(() => {

@@ -12,7 +12,6 @@ export {
   useDeliveryNote,
   useCreateDeliveryNote,
   useUpdateDeliveryNote,
-  useUpdateDeliveryNoteStatus,
   useDeleteDeliveryNote
 } from './hooks/useDeliveryNotes'
 

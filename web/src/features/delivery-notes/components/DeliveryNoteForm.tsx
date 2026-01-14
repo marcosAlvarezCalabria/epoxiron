@@ -33,8 +33,8 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   const [customerId, setCustomerId] = useState(deliveryNote?.customerId || '')
   const [notes, setNotes] = useState(deliveryNote?.notes || '')
   const [items, setItems] = useState<FormItem[]>(
-    deliveryNote?.items || [{ 
-      name: '', 
+    deliveryNote?.items || [{
+      name: '',
       quantity: 1,
       totalPrice: 0
     }]
@@ -48,7 +48,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!customerId || items.some(item => !item.name || item.quantity <= 0)) {
       alert('Por favor completa todos los campos obligatorios')
       return
@@ -60,10 +60,14 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         .filter(item => item.name.trim())
         .map(item => ({
           name: item.name,
+          description: item.name, // Usamos nombre como descripción por ahora
           quantity: item.quantity,
-          linearMeters: item.linearMeters,
-          squareMeters: item.squareMeters,
-          thickness: item.thickness,
+          color: item.racColor || item.specialColor || 'Sin color',
+          measurements: {
+            linearMeters: item.linearMeters,
+            squareMeters: item.squareMeters,
+            thickness: item.thickness
+          },
           racColor: item.racColor,
           specialColor: item.specialColor,
           unitPrice: item.unitPrice,
@@ -77,9 +81,10 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           id: deliveryNote.id,
           data: {
             customerId,
+            date: new Date().toISOString(),
             items: processedItems.map((item, index) => ({
               ...item,
-              id: deliveryNote.items[index]?.id || `new-${index}`
+              id: deliveryNote.items[index]?.id || `new-${index}`,
             })),
             notes: notes.trim() || undefined
           }
@@ -89,10 +94,11 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         // Modo creación
         const createData: CreateDeliveryNoteRequest = {
           customerId,
+          date: new Date().toISOString(),
           items: processedItems,
           notes: notes.trim() || undefined
         }
-        
+
         const result = await createDeliveryNote.mutateAsync(createData)
         onSuccess(result.id)
       }
@@ -103,8 +109,8 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   }
 
   const addItem = () => {
-    setItems([...items, { 
-      name: '', 
+    setItems([...items, {
+      name: '',
       quantity: 1,
       totalPrice: 0
     }])
@@ -119,13 +125,13 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   const updateItem = (index: number, field: keyof FormItem, value: string | number | undefined) => {
     const updatedItems = [...items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
-    
+
     // Calcular totalPrice automáticamente
     if (field === 'unitPrice' || field === 'quantity') {
       const item = updatedItems[index]
       updatedItems[index].totalPrice = (item.unitPrice || 0) * item.quantity
     }
-    
+
     setItems(updatedItems)
   }
 
@@ -212,6 +218,43 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                     disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
                     className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
                   />
+                </div>
+              </div>
+
+              {/* Unit Price & Total */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Precio Unitario
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">€</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.unitPrice || ''}
+                      onChange={(e) => updateItem(index, 'unitPrice', safeParseFloat(e.target.value))}
+                      disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
+                      className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 pl-8 pr-3 transition-all disabled:opacity-50"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Total
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">€</span>
+                    <input
+                      type="number"
+                      value={item.totalPrice?.toFixed(2) || '0.00'}
+                      readOnly
+                      className="w-full rounded-lg text-gray-400 bg-gray-900 border border-gray-700 h-10 pl-8 pr-3"
+                    />
+                  </div>
                 </div>
               </div>
 
