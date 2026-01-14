@@ -14,21 +14,25 @@ interface User {
 
 interface AuthStore {
   user: User | null
+  token: string | null
   isAuthenticated: boolean
-  
-  login: (userData: User) => void
+
+  login: (userData: User, token: string) => void
   logout: () => void
+  getToken: () => string | null
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
 
-      login: (userData) => {
+      login: (userData, token) => {
         set(() => ({
           user: userData,
+          token: token,
           isAuthenticated: true,
         }))
       },
@@ -36,8 +40,13 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         set(() => ({
           user: null,
+          token: null,
           isAuthenticated: false,
         }))
+      },
+
+      getToken: () => {
+        return get().token
       },
     }),
     {

@@ -17,8 +17,12 @@ import {
   updateRate,
   deleteRate
 } from '../controllers/rateController'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 const router = Router()
+
+// 🔒 PROTECT ALL ROUTES: Apply auth middleware to all rate routes
+router.use(authMiddleware)
 
 // GET /api/rates - List all rates
 router.get('/', listRates)

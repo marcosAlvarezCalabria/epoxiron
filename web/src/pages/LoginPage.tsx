@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/stores/authStore'
+import { login as loginApi } from '../features/auth/api/authApi'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,19 +14,37 @@ export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  
+  const [error, setError] = useState('')
+
   const navigate = useNavigate()
   const { login } = useAuthStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    login({ email, name: email.split('@')[0] })
-    navigate('/dashboard')
-    setIsLoading(false)
+    setError('')
+
+    try {
+      // Call the real backend API
+      const response = await loginApi({ email, password })
+
+      // Save user and token in authStore
+      login(
+        {
+          email: response.user.email,
+          name: response.user.name,
+          role: 'admin' // You can add role to backend response later
+        },
+        response.token
+      )
+
+      navigate('/dashboard')
+    } catch (err) {
+      setError('Email o contraseña incorrectos')
+      console.error('Login error:', err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -54,6 +73,13 @@ export function LoginPage() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-900/20 border border-red-800/30 text-red-400 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Email */}
             <div className="flex flex-col gap-2">
               <label className="flex flex-col flex-1">

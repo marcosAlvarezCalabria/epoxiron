@@ -17,8 +17,12 @@ import {
   deleteDeliveryNote,
   updateDeliveryNoteStatus
 } from '../controllers/deliveryNoteController'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 const router = Router()
+
+// 🔒 PROTECT ALL ROUTES: Apply auth middleware to all delivery note routes
+router.use(authMiddleware)
 
 // GET /api/delivery-notes - List all delivery notes (with optional filters)
 router.get('/', listDeliveryNotes)
