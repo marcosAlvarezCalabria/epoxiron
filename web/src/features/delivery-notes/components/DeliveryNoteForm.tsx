@@ -1,70 +1,113 @@
 /**
  * COMPONENT: DeliveryNoteForm
- * Actualizado para usar la nueva estructura DeliveryNote
+ * Usando tipos existentes - sin duplicación
  */
 
 import { useState } from 'react'
-import { useCustomers } from '@/features/customers/hooks/useCustomers'
-import type { CreateDeliveryNoteData } from '../hooks/useDeliveryNotes'
+import { useCustomers } from '../../customers/hooks/useCustomers'
+import { useCreateDeliveryNote, useUpdateDeliveryNote } from '../hooks/useDeliveryNotes'
+import type { DeliveryNote, CreateDeliveryNoteRequest, DeliveryNoteItem } from '../types/DeliveryNote'
 
 interface DeliveryNoteFormProps {
-  onSubmit: (data: CreateDeliveryNoteData) => void
+  deliveryNote?: DeliveryNote  // Para modo edición
+  isEditing?: boolean
+  onSuccess: (noteId: string) => void
   onCancel: () => void
-  isLoading: boolean
 }
 
 interface FormItem {
-  description: string
-  color: string
+  id?: string
+  name: string
+  racColor?: string
+  specialColor?: string
   quantity: number
   linearMeters?: number
   squareMeters?: number
   thickness?: number
+  unitPrice?: number
+  totalPrice: number
+  notes?: string
 }
 
-export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNoteFormProps) {
-  const [customerId, setCustomerId] = useState('')
-  const [date, setDate] = useState('')
-  const [notes, setNotes] = useState('')
-  const [items, setItems] = useState<FormItem[]>([{ 
-    description: '', 
-    color: '', 
-    quantity: 1 
-  }])
+export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, onCancel }: DeliveryNoteFormProps) {
+  const [customerId, setCustomerId] = useState(deliveryNote?.customerId || '')
+  const [notes, setNotes] = useState(deliveryNote?.notes || '')
+  const [items, setItems] = useState<FormItem[]>(
+    deliveryNote?.items || [{ 
+      name: '', 
+      quantity: 1,
+      totalPrice: 0
+    }]
+  )
 
   const { data: customers } = useCustomers()
+  const createDeliveryNote = useCreateDeliveryNote()
+  const updateDeliveryNote = useUpdateDeliveryNote()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isLoading = createDeliveryNote.isPending || updateDeliveryNote.isPending
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!customerId || !date || items.some(item => !item.description || item.quantity <= 0)) {
+    
+    if (!customerId || items.some(item => !item.name || item.quantity <= 0)) {
       alert('Por favor completa todos los campos obligatorios')
       return
     }
 
-    // Convertir FormItem a estructura esperada por CreateDeliveryNoteData
-    const processedItems = items
-      .filter(item => item.description)
-      .map(item => ({
-        description: item.description,
-        color: item.color,
-        quantity: item.quantity,
-        measurements: {
+    try {
+      // Convertir FormItem a DeliveryNoteItem
+      const processedItems: Omit<DeliveryNoteItem, 'id'>[] = items
+        .filter(item => item.name.trim())
+        .map(item => ({
+          name: item.name,
+          quantity: item.quantity,
           linearMeters: item.linearMeters,
           squareMeters: item.squareMeters,
-          thickness: item.thickness
-        }
-      }))
+          thickness: item.thickness,
+          racColor: item.racColor,
+          specialColor: item.specialColor,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          notes: item.notes
+        }))
 
-    onSubmit({
-      customerId,
-      date,
-      items: processedItems,
-      notes: notes.trim() || undefined
-    })
+      if (isEditing && deliveryNote) {
+        // Modo edición
+        const result = await updateDeliveryNote.mutateAsync({
+          id: deliveryNote.id,
+          data: {
+            customerId,
+            items: processedItems.map((item, index) => ({
+              ...item,
+              id: deliveryNote.items[index]?.id || `new-${index}`
+            })),
+            notes: notes.trim() || undefined
+          }
+        })
+        onSuccess(result.id)
+      } else {
+        // Modo creación
+        const createData: CreateDeliveryNoteRequest = {
+          customerId,
+          items: processedItems,
+          notes: notes.trim() || undefined
+        }
+        
+        const result = await createDeliveryNote.mutateAsync(createData)
+        onSuccess(result.id)
+      }
+    } catch (error) {
+      console.error('Error saving delivery note:', error)
+      alert('Error guardando el albarán. Por favor inténtalo de nuevo.')
+    }
   }
 
   const addItem = () => {
-    setItems([...items, { description: '', color: '', quantity: 1 }])
+    setItems([...items, { 
+      name: '', 
+      quantity: 1,
+      totalPrice: 0
+    }])
   }
 
   const removeItem = (index: number) => {
@@ -76,6 +119,13 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
   const updateItem = (index: number, field: keyof FormItem, value: string | number | undefined) => {
     const updatedItems = [...items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
+    
+    // Calcular totalPrice automáticamente
+    if (field === 'unitPrice' || field === 'quantity') {
+      const item = updatedItems[index]
+      updatedItems[index].totalPrice = (item.unitPrice || 0) * item.quantity
+    }
+    
     setItems(updatedItems)
   }
 
@@ -85,56 +135,44 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
     return isNaN(parsed) ? undefined : parsed
   }
 
+  // Calcular total del albarán
+  const totalAmount = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0)
+
   return (
     <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Customer and Date */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="customer" className="block text-sm font-medium text-gray-300 mb-2">
-              Cliente *
-            </label>
-            <select
-              id="customer"
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value)}
-              required
-              disabled={isLoading}
-              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50"
-            >
-              <option value="">Seleccionar cliente</option>
-              {customers?.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-2">
-              Fecha de Entrega *
-            </label>
-            <input
-              type="date"
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-              disabled={isLoading}
-              className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50"
-            />
-          </div>
+        {/* Customer */}
+        <div>
+          <label htmlFor="customer" className="block text-sm font-medium text-gray-300 mb-2">
+            Cliente *
+          </label>
+          <select
+            id="customer"
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            required
+            disabled={isLoading || (isEditing && deliveryNote?.status !== 'draft')}
+            className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 px-4 transition-all disabled:opacity-50"
+          >
+            <option value="">Seleccionar cliente</option>
+            {customers?.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Items */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <label className="block text-sm font-medium text-gray-300">Productos/Servicios *</label>
+            <label className="block text-sm font-medium text-gray-300">
+              Items del Albarán *
+            </label>
             <button
               type="button"
               onClick={addItem}
-              disabled={isLoading}
+              disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               + Añadir Item
@@ -143,35 +181,20 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
 
           {items.map((item, index) => (
             <div key={index} className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-700">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Description */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Descripción *
+                    Nombre del Item *
                   </label>
                   <input
                     type="text"
-                    value={item.description}
-                    onChange={(e) => updateItem(index, 'description', e.target.value)}
+                    value={item.name}
+                    onChange={(e) => updateItem(index, 'name', e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
                     className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                    placeholder="Ej: Recubrimiento epoxi"
-                  />
-                </div>
-
-                {/* Color */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Color
-                  </label>
-                  <input
-                    type="text"
-                    value={item.color}
-                    onChange={(e) => updateItem(index, 'color', e.target.value)}
-                    disabled={isLoading}
-                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                    placeholder="Ej: Azul, Verde"
+                    placeholder="Ej: Puerta principal, Ventana lateral"
                   />
                 </div>
 
@@ -186,14 +209,45 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
                     value={item.quantity}
                     onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
                     className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
 
+              {/* Colors */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Color RAL
+                  </label>
+                  <input
+                    type="text"
+                    value={item.racColor || ''}
+                    onChange={(e) => updateItem(index, 'racColor', e.target.value)}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="Ej: RAL 7016, RAL 9010"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Color Especial
+                  </label>
+                  <input
+                    type="text"
+                    value={item.specialColor || ''}
+                    onChange={(e) => updateItem(index, 'specialColor', e.target.value)}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
+                    className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                    placeholder="Ej: Azul metalizado, Verde marino"
+                  />
+                </div>
+              </div>
+
               {/* Measurements */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Metros Lineales
@@ -204,7 +258,7 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
                     step="0.1"
                     value={item.linearMeters || ''}
                     onChange={(e) => updateItem(index, 'linearMeters', safeParseFloat(e.target.value))}
-                    disabled={isLoading}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
                     className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
                     placeholder="0.0"
                   />
@@ -220,7 +274,7 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
                     step="0.1"
                     value={item.squareMeters || ''}
                     onChange={(e) => updateItem(index, 'squareMeters', safeParseFloat(e.target.value))}
-                    disabled={isLoading}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
                     className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
                     placeholder="0.0"
                   />
@@ -236,7 +290,7 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
                     step="0.1"
                     value={item.thickness || ''}
                     onChange={(e) => updateItem(index, 'thickness', safeParseFloat(e.target.value))}
-                    disabled={isLoading}
+                    disabled={isLoading || (isEditing && deliveryNote?.status === 'reviewed')}
                     className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
                     placeholder="0.0"
                   />
@@ -275,6 +329,18 @@ export function DeliveryNoteForm({ onSubmit, onCancel, isLoading }: DeliveryNote
             placeholder="Información adicional sobre el albarán..."
           />
         </div>
+
+        {/* Total Amount - Solo en modo edición */}
+        {isEditing && (
+          <div className="text-right">
+            <span className="text-sm font-medium text-gray-300 mr-2">
+              Total:
+            </span>
+            <span className="text-xl font-bold text-white">
+              ${totalAmount.toFixed(2)}
+            </span>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-4">

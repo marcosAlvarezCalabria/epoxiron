@@ -5,6 +5,8 @@ import { CustomersPage } from './pages/CustomersPage';
 import { RatesPage } from './pages/RatesPage';
 import { DeliveryNotesPage } from './pages/DeliveryNotesPage';
 import { DeliveryNoteDetailsPage } from './pages/DeliveryNoteDetailsPage';
+import { CreateDeliveryNotePage } from './pages/CreateDeliveryNotePage';
+import { EditDeliveryNotePage } from './pages/EditDeliveryNotePage';
 import { useAuthStore } from './features/auth/stores/authStore';
 import type React from 'react';
 
@@ -55,10 +57,18 @@ function App() {
           }
         />
         <Route
-          path="/delivery-notes/:id"
+          path="/delivery-notes/new"
           element={
             <ProtectedRoute>
-              <DeliveryNoteDetailsPage />
+              <CreateDeliveryNotePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/delivery-notes/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditDeliveryNotePage />
             </ProtectedRoute>
           }
         />
