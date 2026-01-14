@@ -10,8 +10,8 @@ import { EditDeliveryNotePage } from './pages/EditDeliveryNotePage';
 import { useAuthStore } from './features/auth/stores/authStore';
 import type React from 'react';
 
-function ProtectedRoute ({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated }= useAuthStore();
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? (
     <>{children}</>
   ) : (
@@ -65,6 +65,14 @@ function App() {
           }
         />
         <Route
+          path="/delivery-notes/:id"
+          element={
+            <ProtectedRoute>
+              <DeliveryNoteDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/delivery-notes/:id/edit"
           element={
             <ProtectedRoute>
@@ -72,10 +80,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<div style={{padding: '20px'}}>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<div style={{ padding: '20px' }}>
           <h1>Página no encontrada</h1>
-          <a href="/dashboard">Volver al Dashboard</a>
+          <a href="/login">Volver al Login</a>
         </div>} />
       </Routes>
     </BrowserRouter>

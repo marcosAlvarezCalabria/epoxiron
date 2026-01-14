@@ -300,7 +300,7 @@ export function DeliveryNotesPage() {
                     {filteredNotes.map((note) => (
                       <tr key={note.id} className="hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4">
-                          <p className="font-bold text-white">{note.id}</p>
+                          <p className="font-bold text-white">{note.number || note.id}</p>
                         </td>
                         <td className="px-4 py-4">
                           <p className="text-white font-medium">{getCustomerName(note.customerId)}</p>

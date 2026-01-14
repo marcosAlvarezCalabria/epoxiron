@@ -104,3 +104,18 @@ export function remove(id: string): boolean {
 export function clearAll(): void {
   deliveryNotes = []
 }
+
+/**
+ * 🔢 GENERATE NEXT DELIVERY NOTE NUMBER
+ * Generates a sequential number like ALB-1, ALB-2, etc.
+ */
+export function getNextNumber(): string {
+  const currentYear = new Date().getFullYear()
+  const notesThisYear = deliveryNotes.filter(note => {
+    const noteYear = note.date.getFullYear()
+    return noteYear === currentYear
+  })
+
+  const nextNumber = notesThisYear.length + 1
+  return `ALB-${currentYear}-${nextNumber.toString().padStart(3, '0')}`
+}

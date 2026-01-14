@@ -129,9 +129,10 @@ export async function createDeliveryNote(req: Request, res: Response) {
     // 5. Create delivery note
     const newNote: DeliveryNote = {
       id: nanoid(),
+      number: deliveryNotesStorage.getNextNumber(), // Sequential number like ALB-2026-001
       customerId: data.customerId,
       customerName: customer.name,
-      date: data.date || new Date(),
+      date: data.date ? new Date(data.date) : new Date(), // Convert string to Date
       status: 'draft',
       items: itemsWithPrices,
       totalAmount,

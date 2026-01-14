@@ -27,7 +27,8 @@ export interface DeliveryNoteItem {
 // 📋 COMPLETE DELIVERY NOTE
 // The full delivery note with all information
 export interface DeliveryNote {
-  id: string                    // Unique delivery note ID
+  id: string                    // Unique delivery note ID (internal use)
+  number: string                // Human-readable number (e.g., ALB-2026-001)
   customerId: string            // Reference to the customer
   customerName: string          // Customer name (for display, cached from Customer)
   date: Date                    // Delivery note date
@@ -44,7 +45,7 @@ export interface DeliveryNote {
 // Note: unitPrice and totalPrice are calculated automatically
 export interface CreateDeliveryNoteRequest {
   customerId: string            // REQUIRED - which customer
-  date?: Date                   // OPTIONAL - defaults to today
+  date?: Date | string          // OPTIONAL - defaults to today, accepts Date or ISO string
   items: Omit<DeliveryNoteItem, 'id' | 'unitPrice' | 'totalPrice'>[]  // Items without calculated fields
   notes?: string                // OPTIONAL - additional notes
 }
@@ -64,6 +65,7 @@ export type DeliveryNotesListResponse = DeliveryNote[]
 
 export interface DeliveryNoteResponse {
   id: string
+  number: string  // Human-readable number
   customerId: string
   customerName: string
   date: string  // ISO string format for JSON

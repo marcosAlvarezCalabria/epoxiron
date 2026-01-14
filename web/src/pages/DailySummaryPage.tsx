@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/stores/authStore'
 import { useDeliveryNotes, useDeleteDeliveryNote } from '../features/delivery-notes/hooks/useDeliveryNotes'
 import { useCustomers } from '../features/customers/hooks/useCustomers'
-import { ConfirmDialog } from '../components/ConfirmDialog'
+import { ConfirmDialog } from '../shared/components/ConfirmDialog'
 
 export function DailySummaryPage() {
   const { user, logout } = useAuthStore()
@@ -291,8 +291,8 @@ export function DailySummaryPage() {
                   <button
                     onClick={() => setSelectedDate(getDatePreset('today'))}
                     className={`px-3 py-1 rounded-lg text-xs transition-colors ${selectedDate === getDatePreset('today')
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                   >
                     Hoy
@@ -300,8 +300,8 @@ export function DailySummaryPage() {
                   <button
                     onClick={() => setSelectedDate(getDatePreset('yesterday'))}
                     className={`px-3 py-1 rounded-lg text-xs transition-colors ${selectedDate === getDatePreset('yesterday')
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                   >
                     Ayer
@@ -309,8 +309,8 @@ export function DailySummaryPage() {
                   <button
                     onClick={() => setSelectedDate(getDatePreset('week'))}
                     className={`px-3 py-1 rounded-lg text-xs transition-colors ${selectedDate === getDatePreset('week')
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                   >
                     Semana

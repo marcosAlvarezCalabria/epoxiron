@@ -24,9 +24,10 @@ export interface DeliveryNoteItem {
 
 export interface DeliveryNote {
   id: string
+  number?: string // Human-readable number like ALB-2026-001
   customerId: string
-  customerName: string // Used in Lists
-  date: string // Business date
+  customerName: string
+  date: string
   status: 'draft' | 'pending' | 'reviewed'
   items: DeliveryNoteItem[]
   totalAmount: number
