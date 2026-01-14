@@ -69,15 +69,19 @@ export const useUpdateDeliveryNote = () => {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateDeliveryNoteRequest }): Promise<DeliveryNote> => {
-      if (!data.customerId) throw new Error('Customer ID is required for update')
-      if (!data.items) throw new Error('Items are required for update')
+      // Explicit checks to ensure data presence for the Use Case
+      const customerId = data.customerId
+      const items = data.items
+
+      if (!customerId) throw new Error('Customer ID is required for update')
+      if (!items) throw new Error('Items are required for update')
 
       // EXECUTE USE CASE
       const output = await updateUseCase.execute({
         id: id,
-        customerId: data.customerId,
+        customerId: customerId,
         date: data.date || new Date().toISOString(), // Fallback if missing
-        items: data.items.map(i => ({
+        items: items.map(i => ({
           id: i.id, // Pass ID for existing items
           name: i.name,
           quantity: i.quantity,

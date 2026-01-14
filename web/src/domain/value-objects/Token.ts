@@ -61,6 +61,12 @@ export class Token {
     return this.value
   }
 
+  toJSON(): Record<string, unknown> {
+    return {
+      value: this.value
+    }
+  }
+
   equals(other: Token): boolean {
     return this.value === other.value
   }
