@@ -42,12 +42,17 @@ export function useCreateCustomer() {
   })
 }
 
+import { UpdateCustomerUseCase } from '../../../application/use-cases/UpdateCustomerUseCase'
+import { DeleteCustomerUseCase } from '../../../application/use-cases/DeleteCustomerUseCase'
+
 export function useUpdateCustomer() {
   const queryClient = useQueryClient()
+  const repository = new ApiCustomerRepository()
+  const updateUseCase = new UpdateCustomerUseCase(repository)
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCustomerRequest }) =>
-      customersApi.updateCustomer(id, data),
+      updateUseCase.execute({ id, ...data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
@@ -56,9 +61,11 @@ export function useUpdateCustomer() {
 
 export function useDeleteCustomer() {
   const queryClient = useQueryClient()
+  const repository = new ApiCustomerRepository()
+  const deleteUseCase = new DeleteCustomerUseCase(repository)
 
   return useMutation({
-    mutationFn: (customerId: string) => customersApi.deleteCustomer(customerId),
+    mutationFn: (customerId: string) => deleteUseCase.execute(customerId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
     },

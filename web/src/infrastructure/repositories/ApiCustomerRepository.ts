@@ -22,20 +22,23 @@ export class ApiCustomerRepository implements CustomerRepository {
 
     async save(customer: Customer): Promise<void> {
         const apiModel = CustomerMapper.toApi(customer)
-
-        // Determine if it's create (POST) or update (PUT)
-        // Since this repository is simple, we might assume save = create or update based on existence?
-        // But typically 'save' in this context is often used for Creation in this simple CRUD app.
-        // Let's check how CreateDeliveryNote works. It does POST.
-        // We will assume POST for now or check if ID exists (but clean arch usually separates add/update or handles it smart).
-        // For 'CreateCustomerUseCase', we know we are creating. 
-        // Ideally we should have `create` and `update` methods or smart logic.
-        // Given current usage pattern in project:
-        // ApiDeliveryNoteRepository has 'save' doing POST.
-
         await apiClient<ApiCustomer>('/customers', {
             method: 'POST',
             body: JSON.stringify(apiModel)
+        })
+    }
+
+    async update(customer: Customer): Promise<void> {
+        const apiModel = CustomerMapper.toApi(customer)
+        await apiClient<ApiCustomer>(`/customers/${customer.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(apiModel)
+        })
+    }
+
+    async delete(id: string): Promise<void> {
+        await apiClient<void>(`/customers/${id}`, {
+            method: 'DELETE'
         })
     }
 
