@@ -34,14 +34,20 @@ export function useRateByCustomer(customerId: string) {
   })
 }
 
+// DI Injection (Manual)
+import { ApiRateRepository } from '../../../infrastructure/repositories/ApiRateRepository'
+import { CreateRateUseCase, type CreateRateDTO } from '../../../application/use-cases/CreateRateUseCase'
+
 export function useCreateRate() {
   const queryClient = useQueryClient()
+  const repository = new ApiRateRepository()
+  const createUseCase = new CreateRateUseCase(repository)
 
   return useMutation({
-    mutationFn: (data: CreateRateRequest) => ratesApi.createRate(data),
+    mutationFn: (data: CreateRateDTO) => createUseCase.execute(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rates'] })
-    }
+    },
   })
 }
 

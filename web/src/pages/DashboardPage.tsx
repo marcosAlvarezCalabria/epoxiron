@@ -195,7 +195,7 @@ export function DashboardPage() {
               <p className="text-2xl font-bold text-red-400">{pendingNotes}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Total Piezas</p>
+              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Cantidad Total</p>
               <p className="text-2xl font-bold text-white">{totalPieces}</p>
             </div>
             <div className="flex flex-col gap-1">
@@ -217,7 +217,7 @@ export function DashboardPage() {
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nº</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Piezas</th>
+                  <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Cant. Total</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold text-right">Importe</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acción</th>
                 </tr>
@@ -230,7 +230,7 @@ export function DashboardPage() {
                       className="hover:bg-white/5 transition-colors cursor-pointer"
                       onClick={() => navigate(`/delivery-notes/${note.id}`)}
                     >
-                      <td className="px-4 py-4 font-bold text-white">#{note.id}</td>
+                      <td className="px-4 py-4 font-bold text-white">{note.number || note.id}</td>
                       <td className="px-4 py-4 text-gray-200">{note.customerName}</td>
                       <td className="px-4 py-4">{getStatusBadge(note.status)}</td>
                       <td className="px-4 py-4 text-center text-gray-200">

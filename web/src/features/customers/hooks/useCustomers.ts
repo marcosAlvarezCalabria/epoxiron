@@ -23,11 +23,19 @@ export function useCustomer(id: string) {
   })
 }
 
+// DI Injection (Manual for now)
+import { ApiCustomerRepository } from '../../../infrastructure/repositories/ApiCustomerRepository'
+import { CreateCustomerUseCase } from '../../../application/use-cases/CreateCustomerUseCase'
+
 export function useCreateCustomer() {
   const queryClient = useQueryClient()
 
+  // In a real app, this would come from a Context/Container
+  const repository = new ApiCustomerRepository()
+  const createUseCase = new CreateCustomerUseCase(repository)
+
   return useMutation({
-    mutationFn: (data: CreateCustomerRequest) => customersApi.createCustomer(data),
+    mutationFn: (data: CreateCustomerRequest) => createUseCase.execute(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
     },

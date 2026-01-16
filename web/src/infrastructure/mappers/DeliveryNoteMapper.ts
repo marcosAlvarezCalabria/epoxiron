@@ -13,7 +13,7 @@ export class DeliveryNoteMapper {
 
         return new DeliveryNote({
             id: apiModel.id,
-            number: 'UNKNOWN',
+            number: apiModel.number || 'UNKNOWN',
             customerId: apiModel.customerId,
             date: date,
             status: apiModel.status as DeliveryNoteStatus,
@@ -54,6 +54,7 @@ export class DeliveryNoteMapper {
     static toApi(domainEntity: DeliveryNote): ApiDeliveryNote {
         return {
             id: domainEntity.id,
+            number: domainEntity.number,
             customerId: domainEntity.customerId,
             customerName: 'Unknown',
             date: domainEntity.date.toISOString(),

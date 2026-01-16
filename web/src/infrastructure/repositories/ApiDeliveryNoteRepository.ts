@@ -62,7 +62,29 @@ export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
     }
 
     async nextNumber(): Promise<string> {
-        const timestamp = Date.now().toString().slice(-4)
-        return `DN-${new Date().getFullYear()}-${timestamp}`
+        try {
+            // Get all existing notes to calculate next number
+            // Ideally this should be done by the backend to avoid race conditions
+            const allNotes = await this.findAll()
+
+            // Filter notes for current year to reset sequence annually (optional business rule)
+            const currentYear = new Date().getFullYear()
+            const currentYearNotes = allNotes.filter(n =>
+                new Date(n.date).getFullYear() === currentYear
+            )
+
+            // Simple sequence: count + 1
+            const nextSequence = currentYearNotes.length + 1
+
+            // Format: ALB-2024-001
+            // Pad sequence with leading zeros (e.g., 1 -> 001, 12 -> 012)
+            const paddedSequence = nextSequence.toString().padStart(3, '0')
+
+            return `ALB-${currentYear}-${paddedSequence}`
+        } catch (error) {
+            console.warn('Could not calculate sequential ID, falling back to timestamp', error)
+            const timestamp = Date.now().toString().slice(-4)
+            return `ALB-${new Date().getFullYear()}-${timestamp}`
+        }
     }
 }
