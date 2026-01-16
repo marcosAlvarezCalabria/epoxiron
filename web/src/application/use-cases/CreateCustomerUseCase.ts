@@ -14,10 +14,15 @@ export class CreateCustomerUseCase {
     }
 
     async execute(data: CreateCustomerDTO): Promise<Customer> {
-        // 1. Generate identity
+        // 1. Check for duplicates
+        if (await this.customerRepository.existsByName(data.name)) {
+            throw new Error('A customer with this name already exists')
+        }
+
+        // 2. Generate identity
         const id = await this.customerRepository.nextIdentity()
 
-        // 2. Create Domain Entity
+        // 3. Create Domain Entity
         const customer = new Customer({
             id: id,
             name: data.name,

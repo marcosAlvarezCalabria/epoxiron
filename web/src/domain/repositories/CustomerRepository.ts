@@ -7,4 +7,5 @@ export interface CustomerRepository {
     update(customer: Customer): Promise<void>
     delete(id: string): Promise<void>
     nextIdentity(): Promise<string>
+    existsByName(name: string): Promise<boolean>
 }

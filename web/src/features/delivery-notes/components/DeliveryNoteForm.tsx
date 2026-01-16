@@ -8,6 +8,8 @@ import { useCustomers } from '../../customers/hooks/useCustomers'
 import { useRateByCustomer } from '../../rates/hooks/useRates'
 import { useCreateDeliveryNote, useUpdateDeliveryNote } from '../hooks/useDeliveryNotes'
 import type { DeliveryNote, CreateDeliveryNoteRequest, DeliveryNoteItem } from '../types/DeliveryNote'
+import { Measurements } from '../../../domain/value-objects/Measurements'
+import { RAL_COLORS } from '@/constants/ralColors'
 
 interface DeliveryNoteFormProps {
   deliveryNote?: DeliveryNote
@@ -45,21 +47,31 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
   const isLoading = createDeliveryNote.isPending || updateDeliveryNote.isPending
 
+  // ...
+
   // Función para calcular precio de un item basado en tarifa
   const calculateItemPrice = (item: FormItem): number => {
     if (!customerRate) return 0
 
-    let basePrice = 0
+    try {
+      // Construct Domain Value Object
+      // Treat <= 0 as undefined to avoid Domain Validation errors while typing (e.g. "0.5")
+      const linearMeters = item.linearMeters && item.linearMeters > 0 ? item.linearMeters : undefined
+      const squareMeters = item.squareMeters && item.squareMeters > 0 ? item.squareMeters : undefined
+      const thickness = item.thickness && item.thickness > 0 ? item.thickness : undefined
 
-    // Calcular según medidas
-    if (item.linearMeters && item.linearMeters > 0) {
-      basePrice = item.linearMeters * customerRate.ratePerLinearMeter
-    } else if (item.squareMeters && item.squareMeters > 0) {
-      basePrice = item.squareMeters * customerRate.ratePerSquareMeter
+      const measurements = new Measurements({
+        linearMeters,
+        squareMeters,
+        thickness
+      })
+
+      // Delegate calculation to Domain Entity
+      return customerRate.calculatePrice(measurements, item.name)
+    } catch (error) {
+      // Silently fail for invalid inputs during typing
+      return 0
     }
-
-    // Aplicar tarifa mínima
-    return Math.max(basePrice, customerRate.minimumRate)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -194,15 +206,15 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                   <div>
                     <p className="text-gray-400">Metros lineales</p>
-                    <p className="text-white font-bold">€{customerRate.ratePerLinearMeter.toFixed(2)}/ml</p>
+                    <p className="text-white font-bold">€{customerRate.pricePerLinearMeter.toFixed(2)}/ml</p>
                   </div>
                   <div>
                     <p className="text-gray-400">Metros cuadrados</p>
-                    <p className="text-white font-bold">€{customerRate.ratePerSquareMeter.toFixed(2)}/m²</p>
+                    <p className="text-white font-bold">€{customerRate.pricePerSquareMeter.toFixed(2)}/m²</p>
                   </div>
                   <div>
                     <p className="text-gray-400">Tarifa mínima</p>
-                    <p className="text-white font-bold">€{customerRate.minimumRate.toFixed(2)}</p>
+                    <p className="text-white font-bold">€{customerRate.minimumPrice.toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -286,17 +298,33 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                 {/* Colors */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Color RAL
-                    </label>
-                    <input
-                      type="text"
-                      value={item.racColor || ''}
-                      onChange={(e) => updateItem(index, 'racColor', e.target.value)}
-                      disabled={isLoading}
-                      className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                      placeholder="Ej: RAL 7016, RAL 9010"
-                    />
+
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Color RAL
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={item.racColor || ''}
+                          onChange={(e) => updateItem(index, 'racColor', e.target.value)}
+                          disabled={isLoading}
+                          className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 appearance-none transition-all disabled:opacity-50"
+                        >
+                          <option value="">Seleccionar Color...</option>
+                          {RAL_COLORS.map((color) => (
+                            <option key={color.code} value={color.code}>
+                              {color.code} - {color.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                          <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -372,9 +400,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                       <div>
                         <p className="text-green-400 font-medium">💰 Precio calculado</p>
                         <p className="text-gray-400 text-xs mt-1">
-                          {item.linearMeters ? `${item.linearMeters} ml × €${customerRate.ratePerLinearMeter.toFixed(2)}` :
-                            item.squareMeters ? `${item.squareMeters} m² × €${customerRate.ratePerSquareMeter.toFixed(2)}` : ''}
-                          {itemPrice === customerRate.minimumRate && ' (tarifa mínima)'}
+                          {item.linearMeters ? `${item.linearMeters} ml × €${customerRate.pricePerLinearMeter.toFixed(2)}` :
+                            item.squareMeters ? `${item.squareMeters} m² × €${customerRate.pricePerSquareMeter.toFixed(2)}` : ''}
+                          {itemPrice === customerRate.minimumPrice && ' (tarifa mínima)'}
                         </p>
                       </div>
                       <div className="text-right">

@@ -105,12 +105,16 @@ export const useUpdateDeliveryNote = () => {
   })
 }
 
+import { DeleteDeliveryNoteUseCase } from '../../../application/use-cases/DeleteDeliveryNoteUseCase'
+
+const deleteUseCase = new DeleteDeliveryNoteUseCase(repository)
+
 export const useDeleteDeliveryNote = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      await repository.delete(id)
+      await deleteUseCase.execute(id)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deliveryNotes'] })

@@ -1,3 +1,5 @@
+import { Measurements } from '../value-objects/Measurements'
+
 /**
  * ENTITY: Rate (Tarifa)
  * Represents the pricing agreement for a customer.
@@ -71,5 +73,44 @@ export class Rate {
         if (price < 0) throw new Error('Price cannot be negative')
         this._specialPieces.push({ name, price })
         this._updatedAt = new Date()
+    }
+
+    replaceSpecialPieces(pieces: SpecialPiece[]): void {
+        pieces.forEach(p => {
+            if (p.price < 0) throw new Error('Price cannot be negative')
+        })
+        this._specialPieces = [...pieces]
+        this._updatedAt = new Date()
+    }
+
+    calculatePrice(measurements: Measurements, itemName?: string): number {
+        // 1. Check Special Pieces
+        if (itemName) {
+            const specialPiece = this._specialPieces.find(p => p.name.toLowerCase() === itemName.toLowerCase())
+            if (specialPiece) {
+                return specialPiece.price
+            }
+        }
+
+        // 2. Calculate based on dimensions
+        let calculatedPrice = 0
+        const lm = measurements.getLinearMeters()
+        const sm = measurements.getSquareMeters()
+
+        if (lm) {
+            calculatedPrice += lm * this._pricePerLinearMeter
+        }
+
+        if (sm) {
+            calculatedPrice += sm * this._pricePerSquareMeter
+        }
+
+        // 3. Apply Minimum Price (only if not a special piece, which exited early)
+        // If no measurements, we also apply minimum price (assumed rule: "Minimum per piece")
+        if (calculatedPrice < this._minimumPrice) {
+            return this._minimumPrice
+        }
+
+        return calculatedPrice
     }
 }

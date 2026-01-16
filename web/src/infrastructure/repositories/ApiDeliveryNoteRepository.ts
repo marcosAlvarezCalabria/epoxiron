@@ -3,14 +3,16 @@ import type { DeliveryNote } from '../../domain/entities/DeliveryNote'
 import { DeliveryNoteMapper } from '../mappers/DeliveryNoteMapper'
 import { apiClient } from '../../lib/apiClient'
 import type { DeliveryNote as ApiDeliveryNote } from '../../features/delivery-notes/types/DeliveryNote'
+import { ServerError, ConnectionError } from '../../domain/errors/DomainErrors'
 
 export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
     async findById(id: string): Promise<DeliveryNote | null> {
         try {
             const data = await apiClient<ApiDeliveryNote>(`/delivery-notes/${id}`)
             return DeliveryNoteMapper.toDomain(data)
-        } catch (error) {
+        } catch (error: any) {
             console.warn(`DeliveryNote ${id} not found or error`, error)
+            // Usually we return null for 404, throw for others. Keeping null for safety if 404.
             return null
         }
     }
@@ -19,42 +21,53 @@ export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
         try {
             const data = await apiClient<ApiDeliveryNote[]>('/delivery-notes')
             return data.map(item => DeliveryNoteMapper.toDomain(item))
-        } catch (error) {
-            console.error('Error fetching delivery notes', error)
-            return []
+        } catch (error: any) {
+            throw new ConnectionError(error.message || 'Failed to fetch delivery notes')
         }
     }
 
     async save(deliveryNote: DeliveryNote): Promise<DeliveryNote> {
-        const apiModel = DeliveryNoteMapper.toApi(deliveryNote)
+        try {
+            const apiModel = DeliveryNoteMapper.toApi(deliveryNote)
 
-        // POST returns the created object from backend
-        const response = await apiClient<ApiDeliveryNote>('/delivery-notes', {
-            method: 'POST',
-            body: JSON.stringify(apiModel)
-        })
+            // POST returns the created object from backend
+            const response = await apiClient<ApiDeliveryNote>('/delivery-notes', {
+                method: 'POST',
+                body: JSON.stringify(apiModel)
+            })
 
-        // Map response back to Domain Entity
-        return DeliveryNoteMapper.toDomain(response)
+            // Map response back to Domain Entity
+            return DeliveryNoteMapper.toDomain(response)
+        } catch (error: any) {
+            throw new ServerError(error.message || 'Error saving delivery note')
+        }
     }
 
     async update(deliveryNote: DeliveryNote): Promise<DeliveryNote> {
-        const apiModel = DeliveryNoteMapper.toApi(deliveryNote)
+        try {
+            const apiModel = DeliveryNoteMapper.toApi(deliveryNote)
 
-        // PUT returns the updated object from backend
-        const response = await apiClient<ApiDeliveryNote>(`/delivery-notes/${deliveryNote.id}`, {
-            method: 'PUT',
-            body: JSON.stringify(apiModel)
-        })
+            // PUT returns the updated object from backend
+            const response = await apiClient<ApiDeliveryNote>(`/delivery-notes/${deliveryNote.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(apiModel)
+            })
 
-        // Map response back to Domain Entity
-        return DeliveryNoteMapper.toDomain(response)
+            // Map response back to Domain Entity
+            return DeliveryNoteMapper.toDomain(response)
+        } catch (error: any) {
+            throw new ServerError(error.message || 'Error updating delivery note')
+        }
     }
 
     async delete(id: string): Promise<void> {
-        await apiClient(`/delivery-notes/${id}`, {
-            method: 'DELETE'
-        })
+        try {
+            await apiClient(`/delivery-notes/${id}`, {
+                method: 'DELETE'
+            })
+        } catch (error: any) {
+            throw new ServerError(error.message || 'Error deleting delivery note')
+        }
     }
 
     async nextIdentity(): Promise<string> {

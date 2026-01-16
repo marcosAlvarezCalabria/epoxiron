@@ -19,9 +19,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <BrowserRouter>
+      <Toaster />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
