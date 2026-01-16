@@ -23,7 +23,7 @@ interface RateFormProps {
 
 export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFormProps) {
   const { data: customers } = useCustomers()
-  
+
   // Form state
   const [formData, setFormData] = useState({
     customerId: '',
@@ -34,6 +34,9 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Special Pieces State
+  const [specialPieces, setSpecialPieces] = useState<{ name: string, price: number }[]>([])
+
   // Pre-populate form when editing
   useEffect(() => {
     if (rate) {
@@ -43,8 +46,35 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
         ratePerSquareMeter: rate.ratePerSquareMeter.toString(),
         minimumRate: rate.minimumRate.toString()
       })
+      // @ts-ignore - Assuming rate has specialPieces (it should based on Domain)
+      if (rate.specialPieces) {
+        // @ts-ignore
+        setSpecialPieces(rate.specialPieces)
+      }
+    } else {
+      setFormData({
+        customerId: '',
+        ratePerLinearMeter: '',
+        ratePerSquareMeter: '',
+        minimumRate: ''
+      })
+      setSpecialPieces([])
     }
   }, [rate])
+
+  const addSpecialPiece = () => {
+    setSpecialPieces([...specialPieces, { name: '', price: 0 }])
+  }
+
+  const removeSpecialPiece = (index: number) => {
+    setSpecialPieces(specialPieces.filter((_, i) => i !== index))
+  }
+
+  const updateSpecialPiece = (index: number, field: 'name' | 'price', value: string | number) => {
+    const updated = [...specialPieces]
+    updated[index] = { ...updated[index], [field]: value }
+    setSpecialPieces(updated)
+  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -52,15 +82,15 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
     if (!formData.customerId) {
       newErrors.customerId = 'El cliente es obligatorio'
     }
-    
+
     if (!formData.ratePerLinearMeter || isNaN(Number(formData.ratePerLinearMeter))) {
       newErrors.ratePerLinearMeter = 'El precio por metro lineal debe ser un número válido'
     }
-    
+
     if (!formData.ratePerSquareMeter || isNaN(Number(formData.ratePerSquareMeter))) {
       newErrors.ratePerSquareMeter = 'El precio por metro cuadrado debe ser un número válido'
     }
-    
+
     if (!formData.minimumRate || isNaN(Number(formData.minimumRate))) {
       newErrors.minimumRate = 'La tarifa mínima debe ser un número válido'
     }
@@ -71,14 +101,15 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     const submitData = {
       customerId: formData.customerId,
       ratePerLinearMeter: Number(formData.ratePerLinearMeter),
       ratePerSquareMeter: Number(formData.ratePerSquareMeter),
-      minimumRate: Number(formData.minimumRate)
+      minimumRate: Number(formData.minimumRate),
+      specialPieces: specialPieces.filter(p => p.name.trim()) // Filter empty names
     }
 
     onSubmit(submitData)
@@ -111,7 +142,7 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>
@@ -128,11 +159,10 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               value={formData.customerId}
               onChange={(e) => handleChange('customerId', e.target.value)}
               disabled={isLoading}
-              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                errors.customerId 
-                  ? 'border-red-600 focus:border-red-600' 
-                  : 'border-gray-700 focus:border-blue-600'
-              }`}
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.customerId
+                ? 'border-red-600 focus:border-red-600'
+                : 'border-gray-700 focus:border-blue-600'
+                }`}
             >
               <option value="">Selecciona un cliente</option>
               {customers?.map((customer) => (
@@ -159,11 +189,10 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               value={formData.ratePerLinearMeter}
               onChange={(e) => handleChange('ratePerLinearMeter', e.target.value)}
               disabled={isLoading}
-              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                errors.ratePerLinearMeter 
-                  ? 'border-red-600 focus:border-red-600' 
-                  : 'border-gray-700 focus:border-blue-600'
-              }`}
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.ratePerLinearMeter
+                ? 'border-red-600 focus:border-red-600'
+                : 'border-gray-700 focus:border-blue-600'
+                }`}
               placeholder="25.50"
             />
             {errors.ratePerLinearMeter && (
@@ -184,11 +213,10 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               value={formData.ratePerSquareMeter}
               onChange={(e) => handleChange('ratePerSquareMeter', e.target.value)}
               disabled={isLoading}
-              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                errors.ratePerSquareMeter 
-                  ? 'border-red-600 focus:border-red-600' 
-                  : 'border-gray-700 focus:border-blue-600'
-              }`}
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.ratePerSquareMeter
+                ? 'border-red-600 focus:border-red-600'
+                : 'border-gray-700 focus:border-blue-600'
+                }`}
               placeholder="45.00"
             />
             {errors.ratePerSquareMeter && (
@@ -209,11 +237,10 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               value={formData.minimumRate}
               onChange={(e) => handleChange('minimumRate', e.target.value)}
               disabled={isLoading}
-              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                errors.minimumRate 
-                  ? 'border-red-600 focus:border-red-600' 
-                  : 'border-gray-700 focus:border-blue-600'
-              }`}
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.minimumRate
+                ? 'border-red-600 focus:border-red-600'
+                : 'border-gray-700 focus:border-blue-600'
+                }`}
               placeholder="100.00"
             />
             {errors.minimumRate && (
@@ -221,21 +248,61 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
             )}
           </div>
 
-          {/* Info Box */}
-          <div className="bg-blue-900/20 border border-blue-800/30 rounded-lg p-4">
-            <div className="flex gap-3">
-              <div className="text-blue-400 mt-0.5">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                </svg>
-              </div>
-              <div className="text-sm">
-                <p className="text-blue-300 font-medium mb-1">Sobre las Tarifas</p>
-                <p className="text-blue-200/80">
-                  Configura precios específicos por cliente. La tarifa mínima se aplica cuando el cálculo por metros es inferior.
-                </p>
-              </div>
+          {/* Special Pieces */}
+          <div className="bg-gray-700/30 rounded-xl p-4 border border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-white font-medium">Piezas Especiales</h4>
+              <button
+                type="button"
+                onClick={addSpecialPiece}
+                disabled={isLoading}
+                className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                + Añadir Pieza
+              </button>
             </div>
+
+            {specialPieces.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-2">
+                No hay piezas especiales definidas
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {specialPieces.map((piece, index) => (
+                  <div key={index} className="flex gap-3">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={piece.name}
+                        onChange={(e) => updateSpecialPiece(index, 'name', e.target.value)}
+                        placeholder="Nombre (ej. Reja)"
+                        className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 h-10 px-3 text-sm"
+                      />
+                    </div>
+                    <div className="w-24">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={piece.price}
+                        onChange={(e) => updateSpecialPiece(index, 'price', Number(e.target.value))}
+                        placeholder="€"
+                        className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 h-10 px-3 text-sm"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSpecialPiece(index)}
+                      className="text-red-400 hover:text-red-300 p-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -261,7 +328,7 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                   </svg>
                   {rate ? 'Actualizar Tarifa' : 'Crear Tarifa'}
                 </>
