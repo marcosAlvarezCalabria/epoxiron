@@ -45,7 +45,7 @@ export function useCreateCustomer() {
 
 
 
-import { UpdateCustomerUseCase } from '../../../application/use-cases/UpdateCustomerUseCase'
+import { UpdateCustomerUseCase, type UpdateCustomerDTO } from '../../../application/use-cases/UpdateCustomerUseCase'
 import { DeleteCustomerUseCase } from '../../../application/use-cases/DeleteCustomerUseCase'
 
 export function useUpdateCustomer() {
@@ -54,8 +54,8 @@ export function useUpdateCustomer() {
   const updateUseCase = new UpdateCustomerUseCase(repository)
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateCustomerRequest }) =>
-      updateUseCase.execute({ id, ...data }),
+    mutationFn: (data: UpdateCustomerDTO) =>
+      updateUseCase.execute(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
     },

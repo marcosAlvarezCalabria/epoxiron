@@ -3,6 +3,8 @@ import type { CustomerRepository } from '../../domain/repositories/CustomerRepos
 
 interface CreateCustomerDTO {
     name: string
+    email?: string
+    phone?: string
     rateId?: string
 }
 
@@ -26,6 +28,8 @@ export class CreateCustomerUseCase {
         const customer = new Customer({
             id: id,
             name: data.name,
+            email: data.email,
+            phone: data.phone,
             rateId: data.rateId,
             createdAt: new Date(),
             updatedAt: new Date()

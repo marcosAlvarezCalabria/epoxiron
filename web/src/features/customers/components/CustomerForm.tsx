@@ -15,7 +15,7 @@ interface CustomerFormProps {
 
 export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }: CustomerFormProps) {
   const { data: rates } = useRates()
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -63,7 +63,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     // Limpiar campos vacíos
@@ -101,7 +101,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>
@@ -119,11 +119,10 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               disabled={isLoading}
-              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                errors.name 
-                  ? 'border-red-600 focus:border-red-600' 
-                  : 'border-gray-700 focus:border-blue-600'
-              }`}
+              className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.name
+                ? 'border-red-600 focus:border-red-600'
+                : 'border-gray-700 focus:border-blue-600'
+                }`}
               placeholder="Ej: Empresa SA, Juan Pérez..."
             />
             {errors.name && (
@@ -143,11 +142,10 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 disabled={isLoading}
-                className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                  errors.email 
-                    ? 'border-red-600 focus:border-red-600' 
-                    : 'border-gray-700 focus:border-blue-600'
-                }`}
+                className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.email
+                  ? 'border-red-600 focus:border-red-600'
+                  : 'border-gray-700 focus:border-blue-600'
+                  }`}
                 placeholder="cliente@empresa.com"
               />
               {errors.email && (
@@ -165,11 +163,10 @@ export function CustomerForm({ customer, onSubmit, onCancel, isLoading = false }
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
                 disabled={isLoading}
-                className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${
-                  errors.phone 
-                    ? 'border-red-600 focus:border-red-600' 
-                    : 'border-gray-700 focus:border-blue-600'
-                }`}
+                className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.phone
+                  ? 'border-red-600 focus:border-red-600'
+                  : 'border-gray-700 focus:border-blue-600'
+                  }`}
                 placeholder="+34 600 000 000"
               />
               {errors.phone && (

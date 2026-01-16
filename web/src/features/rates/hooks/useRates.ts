@@ -5,6 +5,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as ratesApi from '../api/ratesApi'
+import { RateMapper } from '../../../infrastructure/mappers/RateMapper'
 import type { CreateRateRequest, UpdateRateRequest } from '../types/Rate'
 
 // Re-export Rate type
@@ -52,6 +53,7 @@ export function useCreateRate() {
     mutationFn: (data: CreateRateDTO) => createUseCase.execute(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rates'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
   })
 }
@@ -65,10 +67,20 @@ export function useUpdateRate() {
   const updateUseCase = new UpdateRateUseCase(repository)
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Omit<UpdateRateDTO, 'id'> }) =>
-      updateUseCase.execute({ id, ...data }),
-    onSuccess: () => {
+    mutationFn: (data: UpdateRateDTO) =>
+      updateUseCase.execute(data),
+    onSuccess: (updatedRate) => {
+      // 1. Optimistic Update (update local cache instantly)
+      const apiRate = RateMapper.toApi(updatedRate)
+
+      queryClient.setQueryData<Rate[]>(['rates'], (oldRates) => {
+        if (!oldRates) return [apiRate]
+        return oldRates.map(r => r.id === apiRate.id ? apiRate : r)
+      })
+
+      // 2. Refresh lists (consistency check)
       queryClient.invalidateQueries({ queryKey: ['rates'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
   })
 }
@@ -82,6 +94,7 @@ export function useDeleteRate() {
     mutationFn: (rateId: string) => deleteUseCase.execute(rateId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rates'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
   })
 }

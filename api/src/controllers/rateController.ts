@@ -11,6 +11,7 @@
 import type { Request, Response } from 'express'
 import type { Rate } from '../types/rate'
 import { ratesStorage } from '../storage/ratesStorage'
+import * as customersStorage from '../storage/customersStorage'
 import { randomUUID } from 'node:crypto'
 
 /**
@@ -18,6 +19,14 @@ import { randomUUID } from 'node:crypto'
  * List all rates
  */
 export async function listRates(req: Request, res: Response): Promise<void> {
+  const customerId = req.query.customerId as string
+
+  if (customerId) {
+    const rate = ratesStorage.findByCustomerId(customerId)
+    res.status(200).json(rate ? [rate] : [])
+    return
+  }
+
   const rates = ratesStorage.findAll()
   res.status(200).json(rates)
 }
@@ -99,6 +108,9 @@ export async function createRate(req: Request, res: Response): Promise<void> {
 
   const createdRate = ratesStorage.create(newRate)
 
+  // Sync: Update customer with the new rate ID
+  customersStorage.update(customerId.trim(), { rateId: createdRate.id })
+
   res.status(201).json(createdRate)
 }
 
@@ -149,6 +161,16 @@ export async function updateRate(req: Request, res: Response): Promise<void> {
  */
 export async function deleteRate(req: Request, res: Response): Promise<void> {
   const { id } = req.params
+
+  const rate = ratesStorage.findById(id)
+
+  if (!rate) {
+    res.status(404).json({ error: 'Rate not found' })
+    return
+  }
+
+  // Sync: Remove rate ID from customer
+  customersStorage.update(rate.customerId, { rateId: undefined })
 
   const deleted = ratesStorage.delete(id)
 

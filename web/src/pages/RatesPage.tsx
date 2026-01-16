@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/stores/authStore'
-import { useRates, useCreateRate, useUpdateRate } from '@/features/rates/hooks/useRates'
+import { useRates, useCreateRate, useUpdateRate, useDeleteRate } from '@/features/rates/hooks/useRates'
 import { RateForm } from '../features/rates/components/RateForm'
 import { useCustomers } from '@/features/customers/hooks/useCustomers'
 
@@ -69,10 +69,13 @@ export function RatesPage() {
     }
   }
 
+  const { mutate: deleteRate, isPending: isDeleting } = useDeleteRate() // Add hook
+
+  // ...
+
   const handleDeleteRate = (rateId: string) => {
     if (confirm('¿Estás seguro de que quieres eliminar esta tarifa?')) {
-      console.log('Eliminando tarifa:', rateId)
-      // TODO: Implementar eliminación
+      deleteRate(rateId)
     }
   }
 

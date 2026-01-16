@@ -4,6 +4,8 @@ import type { CustomerRepository } from '../../domain/repositories/CustomerRepos
 export interface UpdateCustomerDTO {
     id: string
     name?: string
+    email?: string
+    phone?: string
     rateId?: string
 }
 
@@ -24,6 +26,10 @@ export class UpdateCustomerUseCase {
         // 2. Apply Domain Changes
         if (data.name !== undefined) {
             customer.changeName(data.name)
+        }
+
+        if (data.email !== undefined || data.phone !== undefined) {
+            customer.changeContactInfo(data.email, data.phone)
         }
 
         if (data.rateId !== undefined) {
