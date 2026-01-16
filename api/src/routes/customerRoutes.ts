@@ -10,9 +10,13 @@ import {
   updateCustomer,
   deleteCustomer
 } from '../controllers/customerController'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 // Create the router
 const router = Router()
+
+// 🔒 PROTECT ALL ROUTES: Apply auth middleware to all customer routes
+router.use(authMiddleware)
 
 // 🏗️ ANALOGY: Routes are like the ENTRANCE SIGNS to different workshops
 // Each sign says: "For this type of work, go to this workshop (controller)"

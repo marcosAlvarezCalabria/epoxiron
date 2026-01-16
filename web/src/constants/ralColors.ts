@@ -1,0 +1,26 @@
+export const RAL_COLORS = [
+    { code: 'RAL 1003', name: 'Amarillo Señales' },
+    { code: 'RAL 1013', name: 'Blanco Perla' },
+    { code: 'RAL 1015', name: 'Marfil Claro' },
+    { code: 'RAL 3000', name: 'Rojo Fuego' },
+    { code: 'RAL 3005', name: 'Rojo Vino' },
+    { code: 'RAL 5010', name: 'Azul Genciana' },
+    { code: 'RAL 6005', name: 'Verde Musgo' },
+    { code: 'RAL 6009', name: 'Verde Abeto' },
+    { code: 'RAL 7004', name: 'Gris Señales' },
+    { code: 'RAL 7011', name: 'Gris Hierro' },
+    { code: 'RAL 7016', name: 'Gris Antracita' },
+    { code: 'RAL 7021', name: 'Gris Negruzco' },
+    { code: 'RAL 7024', name: 'Gris Grafito' },
+    { code: 'RAL 7035', name: 'Gris Luminoso' },
+    { code: 'RAL 7040', name: 'Gris Ventana' },
+    { code: 'RAL 8014', name: 'Marrón Sepia' },
+    { code: 'RAL 8017', name: 'Marrón Chocolate' },
+    { code: 'RAL 9003', name: 'Blanco Señales' },
+    { code: 'RAL 9005', name: 'Negro Intenso' },
+    { code: 'RAL 9006', name: 'Aluminio Blanco' },
+    { code: 'RAL 9010', name: 'Blanco Puro' },
+    { code: 'RAL 9016', name: 'Blanco Tráfico' },
+] as const
+
+export type RalColorCode = typeof RAL_COLORS[number]['code']

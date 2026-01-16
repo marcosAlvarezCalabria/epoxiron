@@ -6,6 +6,7 @@ import { Request, Response } from 'express'
 import { randomUUID } from 'crypto'
 import type { Customer, CreateCustomerRequest, UpdateCustomerRequest } from '../types/customer'
 import * as customersStorage from '../storage/customersStorage'
+import { ratesStorage } from '../storage/ratesStorage'
 
 // 🏗️ ANALOGY: The controller is the FOREMAN of the construction site
 // - Receives orders (HTTP requests)
@@ -70,7 +71,7 @@ export async function getCustomer(req: Request, res: Response) {
 export async function createCustomer(req: Request, res: Response) {
   try {
     // 1. Get data from body
-    const { name } = req.body as CreateCustomerRequest
+    const { name, email, phone } = req.body as CreateCustomerRequest
 
     // 2. VALIDATE: Name is required
     if (!name || name.trim().length === 0) {
@@ -88,6 +89,8 @@ export async function createCustomer(req: Request, res: Response) {
     const newCustomer: Customer = {
       id: randomUUID(),              // Generate unique ID (UUID)
       name: name.trim(),             // Clean spaces
+      email: email?.trim(),
+      phone: phone?.trim(),
       rateId: undefined,             // No rate at the beginning
       createdAt: new Date(),         // Creation date
       updatedAt: new Date()          // Update date
@@ -117,10 +120,10 @@ export async function updateCustomer(req: Request, res: Response) {
     const { id } = req.params
 
     // 2. Get data from body
-    const { name, rateId } = req.body as UpdateCustomerRequest
+    const { name, rateId, email, phone } = req.body as UpdateCustomerRequest
 
     // 3. VALIDATE: At least one field must be provided
-    if (!name && !rateId) {
+    if (!name && !rateId && email === undefined && phone === undefined) {
       return res.status(400).json({
         message: 'At least one field must be provided to update'
       })
@@ -137,6 +140,12 @@ export async function updateCustomer(req: Request, res: Response) {
     const updates: Partial<Customer> = {}
     if (name !== undefined) {
       updates.name = name.trim()
+    }
+    if (email !== undefined) {
+      updates.email = email.trim()
+    }
+    if (phone !== undefined) {
+      updates.phone = phone.trim()
     }
     if (rateId !== undefined) {
       updates.rateId = rateId
@@ -174,7 +183,15 @@ export async function deleteCustomer(req: Request, res: Response) {
     // 2. TODO: Validate customer doesn't have associated delivery notes
     // (We skip this for now, we'll do it when we have the DeliveryNote entity)
 
-    // 3. Delete from storage
+    // 3. Find customer to get rateId
+    const customer = customersStorage.findById(id)
+
+    if (customer && customer.rateId) {
+      // Cascade delete: Delete associated rate
+      ratesStorage.delete(customer.rateId)
+    }
+
+    // 4. Delete from storage
     const deleted = customersStorage.deleteById(id)
 
     // 4. If didn't exist, return 404 error

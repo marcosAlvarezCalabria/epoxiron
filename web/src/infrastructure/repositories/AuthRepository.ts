@@ -27,7 +27,7 @@ export class AuthRepository {
   private readonly apiUrl: string
   private readonly tokenStorageKey = 'auth_token'
 
-  constructor(apiUrl: string = 'http://localhost:3000/api/auth') {
+  constructor(apiUrl: string = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/auth` : 'http://localhost:3000/api/auth')) {
     this.apiUrl = apiUrl
   }
 

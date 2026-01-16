@@ -8,6 +8,8 @@
 export interface CustomerProps {
   id: string
   name: string
+  email?: string
+  phone?: string
   rateId?: string
   createdAt: Date
   updatedAt: Date
@@ -16,6 +18,8 @@ export interface CustomerProps {
 export class Customer {
   private readonly _id: string
   private _name: string
+  private _email?: string
+  private _phone?: string
   private _rateId?: string
   private readonly _createdAt: Date
   private _updatedAt: Date
@@ -34,6 +38,8 @@ export class Customer {
 
     this._id = props.id
     this._name = trimmedName
+    this._email = props.email
+    this._phone = props.phone
     this._rateId = props.rateId
     this._createdAt = props.createdAt
     this._updatedAt = props.updatedAt
@@ -46,6 +52,14 @@ export class Customer {
 
   get name(): string {
     return this._name
+  }
+
+  get email(): string | undefined {
+    return this._email
+  }
+
+  get phone(): string | undefined {
+    return this._phone
   }
 
   get rateId(): string | undefined {
@@ -77,6 +91,16 @@ export class Customer {
     }
 
     this._name = trimmedName
+    this._updatedAt = new Date()
+  }
+
+  changeContactInfo(email?: string, phone?: string): void {
+    if (email !== undefined) {
+      this._email = email.trim()
+    }
+    if (phone !== undefined) {
+      this._phone = phone.trim()
+    }
     this._updatedAt = new Date()
   }
 

@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "epoxiron-complete-api",
 		"name": "Epoxiron - Complete API",
-		"description": "Complete API collection with Auth + Customers. Automatic token and ID handling.",
+		"description": "Complete API collection with Auth + Customers + Rates + Delivery Notes. Automatic token and ID handling.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -261,7 +261,444 @@
 			"description": "Customer CRUD operations (no auth required for now)"
 		},
 		{
-			"name": "3. Error Cases",
+			"name": "3. Rates",
+			"item": [
+				{
+					"name": "List All Rates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rates",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates"]
+						},
+						"description": "Get all pricing rates"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('rateId', response.id);",
+									"    console.log('✅ Rate created with ID:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"ratePerLinearMeter\": 15.50,\n  \"ratePerSquareMeter\": 25.00,\n  \"minimumRate\": 50.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rates",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates"]
+						},
+						"description": "Create rate for a customer.\n\n**Uses:** `{{customerId}}` from Create Customer\n**Auto-saves:** Rate ID to `{{rateId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rate with Special Pieces",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('rateId', response.id);",
+									"    console.log('✅ Rate with special pieces created');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"ratePerLinearMeter\": 15.50,\n  \"ratePerSquareMeter\": 25.00,\n  \"minimumRate\": 50.00,\n  \"specialPieces\": [\n    {\n      \"name\": \"Bumper\",\n      \"price\": 80.00\n    },\n    {\n      \"name\": \"Hood\",\n      \"price\": 100.00\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rates",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates"]
+						},
+						"description": "Create rate with special pieces pricing"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rate by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rates/{{rateId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates", "{{rateId}}"]
+						},
+						"description": "Get one rate by ID.\n\n**Uses:** `{{rateId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rate by Customer ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rates/customer/{{customerId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates", "customer", "{{customerId}}"]
+						},
+						"description": "Get rate for a specific customer.\n\n**Uses:** `{{customerId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✏️ Rate updated');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ratePerLinearMeter\": 18.00,\n  \"ratePerSquareMeter\": 28.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rates/{{rateId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates", "{{rateId}}"]
+						},
+						"description": "Update rate pricing.\n\n**Uses:** `{{rateId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log('🗑️ Rate deleted');",
+									"    pm.collectionVariables.set('rateId', '');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rates/{{rateId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rates", "{{rateId}}"]
+						},
+						"description": "Delete rate.\n\n**Uses:** `{{rateId}}`\n**Auto-cleans:** Clears variable"
+					},
+					"response": []
+				}
+			],
+			"description": "Rate CRUD operations - pricing management"
+		},
+		{
+			"name": "4. Delivery Notes (Albaranes)",
+			"item": [
+				{
+					"name": "List All Delivery Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes"]
+						},
+						"description": "Get all delivery notes"
+					},
+					"response": []
+				},
+				{
+					"name": "List Delivery Notes by Customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes?customerId={{customerId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes"],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								}
+							]
+						},
+						"description": "Get delivery notes for a specific customer.\n\n**Uses:** `{{customerId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "List Delivery Notes by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes?status=draft",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes"],
+							"query": [
+								{
+									"key": "status",
+									"value": "draft",
+									"description": "Filter: draft | pending | reviewed"
+								}
+							]
+						},
+						"description": "Get delivery notes by status.\n\n**Status values:** draft, pending, reviewed"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Delivery Note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('deliveryNoteId', response.id);",
+									"    console.log('✅ Delivery Note created with ID:', response.id);",
+									"    console.log('💰 Total Amount:', response.totalAmount);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"date\": \"2026-01-13\",\n  \"items\": [\n    {\n      \"description\": \"Puerta metálica\",\n      \"color\": \"RAL9016\",\n      \"measurements\": {\n        \"linearMeters\": 10.5\n      },\n      \"quantity\": 2\n    },\n    {\n      \"description\": \"Ventana de aluminio\",\n      \"color\": \"RAL7016\",\n      \"measurements\": {\n        \"squareMeters\": 25.3\n      },\n      \"quantity\": 1\n    }\n  ],\n  \"notes\": \"Acabado mate, sin brillo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes"]
+						},
+						"description": "Create a new delivery note (albarán).\n\n**Uses:** `{{customerId}}`\n**Auto-saves:** Delivery Note ID to `{{deliveryNoteId}}`\n**Auto-calculates:** Prices based on customer's rate"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Delivery Note by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes/{{deliveryNoteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes", "{{deliveryNoteId}}"]
+						},
+						"description": "Get one delivery note by ID.\n\n**Uses:** `{{deliveryNoteId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Delivery Note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✏️ Delivery Note updated');",
+									"    console.log('Status:', response.status);",
+									"    console.log('Items count:', response.items.length);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Actualizados con nuevas especificaciones\",\n  \"items\": [\n    {\n      \"id\": \"item-1\",\n      \"description\": \"Puerta metálica revisada\",\n      \"color\": \"RAL9016\",\n      \"measurements\": {\n        \"linearMeters\": 12.0\n      },\n      \"quantity\": 2,\n      \"unitPrice\": 155.00,\n      \"totalPrice\": 310.00\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes/{{deliveryNoteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes", "{{deliveryNoteId}}"]
+						},
+						"description": "Update delivery note.\n\n**Uses:** `{{deliveryNoteId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Delivery Note Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✏️ Status updated to:', response.status);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"pending\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes/{{deliveryNoteId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes", "{{deliveryNoteId}}", "status"]
+						},
+						"description": "Update delivery note status.\n\n**Status values:** draft, pending, reviewed\n**Uses:** `{{deliveryNoteId}}`"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Delivery Note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 204) {",
+									"    console.log('🗑️ Delivery Note deleted');",
+									"    pm.collectionVariables.set('deliveryNoteId', '');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/delivery-notes/{{deliveryNoteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["delivery-notes", "{{deliveryNoteId}}"]
+						},
+						"description": "Delete delivery note.\n\n**Uses:** `{{deliveryNoteId}}`"
+					},
+					"response": []
+				}
+			],
+			"description": "Delivery Notes (Albaranes) CRUD operations - Manage painted pieces"
+		},
+		{
+			"name": "5. Error Cases",
 			"item": [
 				{
 					"name": "Auth - Invalid Credentials",
@@ -365,6 +802,16 @@
 		},
 		{
 			"key": "customerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "rateId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "deliveryNoteId",
 			"value": "",
 			"type": "string"
 		}

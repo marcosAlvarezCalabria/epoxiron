@@ -10,9 +10,9 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { useAuthStore } from '../stores/authStore'
-import { LoginUseCase, type LoginInput } from '@/application/use-cases/LoginUseCase'
-import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
-import { AuthException } from '@/domain/exceptions/AuthException'
+import { LoginUseCase, type LoginInput } from '../../../application/use-cases/LoginUseCase'
+import { AuthRepository } from '../../../infrastructure/repositories/AuthRepository'
+import { AuthException } from '../../../domain/exceptions/AuthException'
 
 const authRepository = new AuthRepository()
 const loginUseCase = new LoginUseCase(authRepository)
