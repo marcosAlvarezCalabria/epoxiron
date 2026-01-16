@@ -6,7 +6,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as ratesApi from '../api/ratesApi'
 import { RateMapper } from '../../../infrastructure/mappers/RateMapper'
-import type { CreateRateRequest, UpdateRateRequest } from '../types/Rate'
+import type { CreateRateRequest, Rate, UpdateRateRequest } from '../types/Rate'
 
 // Re-export Rate type
 export type { Rate } from '../types/Rate'
