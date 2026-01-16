@@ -48,7 +48,8 @@ export function RatesPage() {
       customerId: rateData.customerId,
       pricePerLinearMeter: rateData.ratePerLinearMeter,
       pricePerSquareMeter: rateData.ratePerSquareMeter,
-      minimumPrice: rateData.minimumRate
+      minimumPrice: rateData.minimumRate,
+      specialPieces: rateData.specialPieces
     }
 
     if (editingRate) {

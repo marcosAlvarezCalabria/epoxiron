@@ -36,12 +36,15 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   const [items, setItems] = useState<FormItem[]>(
     deliveryNote?.items || [{
       name: '',
-      quantity: 1
+      quantity: 0
     }]
   )
 
   const { data: customers } = useCustomers()
   const { data: customerRate, isLoading: isLoadingRate } = useRateByCustomer(customerId)
+
+
+
   const createDeliveryNote = useCreateDeliveryNote()
   const updateDeliveryNote = useUpdateDeliveryNote()
 
@@ -144,7 +147,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
     setItems([{
       name: '',
-      quantity: 1
+      quantity: 0
     }, ...items])
   }
 
@@ -209,7 +212,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                   </svg>
                   Tarifa del Cliente
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm border-b border-blue-800/30 pb-3 mb-3">
                   <div>
                     <p className="text-gray-400">Metros lineales</p>
                     <p className="text-white font-bold">€{customerRate.pricePerLinearMeter.toFixed(2)}/ml</p>
@@ -223,6 +226,21 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                     <p className="text-white font-bold">€{customerRate.minimumPrice.toFixed(2)}</p>
                   </div>
                 </div>
+
+                {/* Special Pieces List */}
+                {customerRate.specialPieces.length > 0 && (
+                  <div>
+                    <p className="text-blue-300 font-bold text-xs uppercase tracking-wider mb-2">Piezas Especiales Disponibles:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {customerRate.specialPieces.map((piece, i) => (
+                        <span key={i} className="inline-flex items-center px-2 py-1 rounded bg-blue-900/40 border border-blue-700/50 text-xs text-blue-200">
+                          <span className="font-medium mr-1.5">{piece.name}</span>
+                          <span className="font-mono text-blue-100 bg-blue-800/50 px-1 rounded">€{piece.price}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-yellow-400 text-sm">
@@ -250,6 +268,10 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         <div className="space-y-4">
           {items.map((item, index) => {
             const itemPrice = calculateItemPrice(item)
+            const isSpecialPiece = customerRate?.specialPieces.some(p =>
+              p.name.trim().toLowerCase() === item.name.trim().toLowerCase()
+            )
+
             const itemTotal = itemPrice * item.quantity
 
             return (
@@ -302,9 +324,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                     </label>
                     <input
                       type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                      min="0"
+                      value={item.quantity || ''}
+                      onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
                       required
                       disabled={isLoading}
                       className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
@@ -360,74 +382,103 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                 </div>
 
                 {/* Measurements */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Metros Lineales
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={item.linearMeters || ''}
-                      onChange={(e) => updateItem(index, 'linearMeters', safeParseFloat(e.target.value))}
-                      disabled={isLoading}
-                      className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                      placeholder="0.0"
-                    />
-                  </div>
+                {/* Measurements */}
+                <div className="mb-4 relative">
+                  {isSpecialPiece ? (
+                    <div className="bg-red-900/10 border border-red-500/30 rounded-lg p-6 flex items-center justify-center">
+                      <span className="text-red-200 font-bold bg-gray-900/90 px-4 py-2 rounded-full border border-red-500/50 shadow-lg shadow-red-900/20 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                        BLOQUEADO: Medidas no necesarias (Precio por Unidad)
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Metros Lineales
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={item.linearMeters || ''}
+                          onChange={(e) => updateItem(index, 'linearMeters', safeParseFloat(e.target.value))}
+                          disabled={isLoading}
+                          className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                          placeholder="0.0"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Metros Cuadrados
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={item.squareMeters || ''}
-                      onChange={(e) => updateItem(index, 'squareMeters', safeParseFloat(e.target.value))}
-                      disabled={isLoading}
-                      className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                      placeholder="0.0"
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Metros Cuadrados
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={item.squareMeters || ''}
+                          onChange={(e) => updateItem(index, 'squareMeters', safeParseFloat(e.target.value))}
+                          disabled={isLoading}
+                          className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                          placeholder="0.0"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Grosor (mm)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={item.thickness || ''}
-                      onChange={(e) => updateItem(index, 'thickness', safeParseFloat(e.target.value))}
-                      disabled={isLoading}
-                      className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                      placeholder="0.0"
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Grosor (mm)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={item.thickness || ''}
+                          onChange={(e) => updateItem(index, 'thickness', safeParseFloat(e.target.value))}
+                          disabled={isLoading}
+                          className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
+                          placeholder="0.0"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Price Preview */}
-                {customerRate && (item.linearMeters || item.squareMeters) && (
-                  <div className="bg-green-900/20 border border-green-800/30 rounded-lg p-3">
-                    <div className="flex justify-between items-center text-sm">
-                      <div>
-                        <p className="text-green-400 font-medium">💰 Precio calculado</p>
-                        <p className="text-gray-400 text-xs mt-1">
-                          {item.linearMeters ? `${item.linearMeters} ml × €${customerRate.pricePerLinearMeter.toFixed(2)}` :
-                            item.squareMeters ? `${item.squareMeters} m² × €${customerRate.pricePerSquareMeter.toFixed(2)}` : ''}
-                          {itemPrice === customerRate.minimumPrice && ' (tarifa mínima)'}
-                        </p>
+                {customerRate && (
+                  (() => {
+                    const isSpecialPiece = customerRate.specialPieces.some(p => p.name.toLowerCase() === item.name.trim().toLowerCase())
+                    const hasMeasurements = item.linearMeters || item.squareMeters
+
+                    if (!isSpecialPiece && !hasMeasurements) return null
+
+                    return (
+                      <div className={`border rounded-lg p-3 ${isSpecialPiece ? 'bg-purple-900/20 border-purple-800/30' : 'bg-green-900/20 border-green-800/30'}`}>
+                        <div className="flex justify-between items-center text-sm">
+                          <div>
+                            <p className={`${isSpecialPiece ? 'text-purple-400' : 'text-green-400'} font-medium`}>
+                              {isSpecialPiece ? '✨ Pieza Especial Detectada' : '💰 Precio calculado'}
+                            </p>
+                            <p className="text-gray-400 text-xs mt-1">
+                              {isSpecialPiece
+                                ? `${item.quantity} ud × €${(itemPrice).toFixed(2)}/ud`
+                                : item.linearMeters
+                                  ? `${item.linearMeters} ml × €${customerRate.pricePerLinearMeter.toFixed(2)}`
+                                  : `${item.squareMeters} m² × €${customerRate.pricePerSquareMeter.toFixed(2)}`
+                              }
+                              {!isSpecialPiece && itemPrice === customerRate.minimumPrice && ' (tarifa mínima)'}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-white font-bold text-lg">€{itemTotal.toFixed(2)}</p>
+                            <p className="text-gray-400 text-xs">Total Item</p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-white font-bold text-lg">€{itemPrice.toFixed(2)}</p>
-                        <p className="text-gray-400 text-xs">Total: €{itemTotal.toFixed(2)}</p>
-                      </div>
-                    </div>
-                  </div>
+                    )
+                  })()
                 )}
               </div>
             )
