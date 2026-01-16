@@ -136,10 +136,16 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   }
 
   const addItem = () => {
-    setItems([...items, {
+    // Validate current top item
+    if (items.length > 0 && !items[0].name.trim()) {
+      alert('Por favor, completa el nombre del item actual antes de añadir otro.')
+      return
+    }
+
+    setItems([{
       name: '',
       quantity: 1
-    }])
+    }, ...items])
   }
 
   const removeItem = (index: number) => {
@@ -276,7 +282,18 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                       disabled={isLoading}
                       className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
                       placeholder="Ej: Puerta principal, Ventana lateral"
+                      list={`special-pieces-${customerId}`} // Connect to datalist
                     />
+                    {/* Autocomplete from Rate Special Pieces */}
+                    {customerRate && customerRate.specialPieces.length > 0 && (
+                      <datalist id={`special-pieces-${customerId}`}>
+                        {customerRate.specialPieces.map((piece, i) => (
+                          <option key={i} value={piece.name}>
+                            {piece.name} - €{piece.price}
+                          </option>
+                        ))}
+                      </datalist>
+                    )}
                   </div>
 
                   <div>
