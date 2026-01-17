@@ -24,8 +24,7 @@ export function DeliveryNoteCard({ note, onClick }: DeliveryNoteCardProps) {
         currency: 'EUR'
     }).format(note.totalAmount);
 
-    // Formatear fecha
-    const formattedDate = format(new Date(note.date), 'dd MMM yyyy', { locale: es });
+
 
     return (
         <div
@@ -35,14 +34,16 @@ export function DeliveryNoteCard({ note, onClick }: DeliveryNoteCardProps) {
             <div className="flex justify-between items-start mb-2">
                 <div>
                     <h3 className="font-semibold text-gray-900">{note.customerName}</h3>
-                    <p className="text-sm text-gray-500">#{note.id.slice(0, 8)}</p>
+                    <p className="text-sm text-gray-500 font-mono">
+                        {note.number || `#${note.id.slice(0, 8)}`}
+                    </p>
                 </div>
                 <StatusBadge status={note.status} />
             </div>
 
             <div className="flex justify-between items-end mt-4">
                 <div className="text-sm text-gray-600">
-                    <p>{formattedDate}</p>
+                    <p>{format(new Date(note.date), 'dd/MM/yyyy')}</p>
                     <p>{note.items.length} {note.items.length === 1 ? 'item' : 'items'}</p>
                 </div>
                 <div className="font-bold text-lg text-gray-900">

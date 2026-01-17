@@ -43,19 +43,19 @@ export function DeliveryNoteDetailsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      reviewed: {
+      finalized: {
         bg: 'bg-green-900/30',
         text: 'text-green-400',
         border: 'border-green-800/30',
         icon: 'check_circle',
-        label: 'Revisado'
+        label: 'Finalizado'
       },
-      pending: {
+      validated: {
         bg: 'bg-amber-900/30',
         text: 'text-amber-400',
         border: 'border-amber-800/30',
         icon: 'schedule',
-        label: 'Pendiente'
+        label: 'Validado'
       },
       draft: {
         bg: 'bg-blue-900/30',
@@ -96,7 +96,7 @@ export function DeliveryNoteDetailsPage() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">Albarán #{deliveryNote.id}</h1>
+                <h1 className="text-2xl font-bold text-white">Albarán #{deliveryNote.number}</h1>
                 <p className="text-gray-400">Cliente: {deliveryNote.customerName}</p>
               </div>
             </div>

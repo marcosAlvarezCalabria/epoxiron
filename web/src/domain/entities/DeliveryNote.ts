@@ -33,6 +33,7 @@ export interface DeliveryNoteProps {
   id: string
   number: string        // Auto-generated number (e.g., "DN-2024-0001")
   customerId: string
+  customerName: string
   date: Date
   status: DeliveryNoteStatus
   items: Item[]
@@ -42,6 +43,7 @@ export class DeliveryNote {
   private readonly _id: string
   private readonly _number: string
   private readonly _customerId: string
+  private readonly _customerName: string
   private readonly _date: Date
   private _status: DeliveryNoteStatus
   private _items: Item[]
@@ -63,6 +65,7 @@ export class DeliveryNote {
     this._id = props.id
     this._number = props.number
     this._customerId = props.customerId
+    this._customerName = props.customerName || 'Unknown Customer' // Fallback
     this._date = props.date
     this._status = props.status
     this._items = props.items
@@ -79,6 +82,10 @@ export class DeliveryNote {
 
   get customerId(): string {
     return this._customerId
+  }
+
+  get customerName(): string {
+    return this._customerName
   }
 
   get date(): Date {
@@ -235,6 +242,7 @@ export class DeliveryNote {
       id: this._id,
       number: this._number,
       customerId: this._customerId,
+      customerName: this._customerName,
       date: this._date.toISOString(),
       status: this._status,
       items: this._items.map((i) => i.toJSON()),
@@ -250,11 +258,13 @@ export class DeliveryNote {
     id: string
     number: string
     customerId: string
+    customerName: string
   }): DeliveryNote {
     return new DeliveryNote({
       id: params.id,
       number: params.number,
       customerId: params.customerId,
+      customerName: params.customerName,
       date: new Date(),
       status: 'draft',
       items: [],

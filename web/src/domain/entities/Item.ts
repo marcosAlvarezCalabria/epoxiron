@@ -31,6 +31,7 @@ export interface ItemProps {
   quantity: number
   measurements: Measurements  // Can be "no measurements" (will use minimum rate)
   price?: Price   // Optional: can be calculated later
+  isHighThickness?: boolean
 }
 
 export class Item {
@@ -40,6 +41,7 @@ export class Item {
   private _quantity: number
   private _measurements: Measurements
   private _price: Price | null
+  private _isHighThickness: boolean
 
   constructor(props: ItemProps) {
     // Validations
@@ -61,6 +63,7 @@ export class Item {
     this._quantity = props.quantity
     this._measurements = props.measurements  // Can be "no measurements"
     this._price = props.price ?? null
+    this._isHighThickness = props.isHighThickness ?? false
   }
 
   // Getters (readonly from outside)
@@ -88,6 +91,10 @@ export class Item {
     return this._price
   }
 
+  get isHighThickness(): boolean {
+    return this._isHighThickness
+  }
+
   // Methods to change properties (entities are mutable)
 
   changeName(newName: string): void {
@@ -110,6 +117,10 @@ export class Item {
 
   changeMeasurements(newMeasurements: Measurements): void {
     this._measurements = newMeasurements
+  }
+
+  setHighThickness(value: boolean): void {
+    this._isHighThickness = value
   }
 
   assignPrice(price: Price): void {
@@ -139,7 +150,7 @@ export class Item {
   }
 
   hasSpecialThickness(): boolean {
-    return this._measurements.hasSpecialThickness()
+    return this._isHighThickness
   }
 
   calculateTotalPrice(): Price | null {
@@ -166,6 +177,7 @@ export class Item {
       linearMeters: this._measurements.getLinearMeters(),
       squareMeters: this._measurements.getSquareMeters(),
       thickness: this._measurements.getThickness(),
+      isHighThickness: this._isHighThickness,
       price: this._price?.getValue() ?? null,
       totalPrice: this.calculateTotalPrice()?.getValue() ?? null,
     }

@@ -2,13 +2,13 @@ import type { DeliveryNoteRepository } from '../../domain/repositories/DeliveryN
 import type { DeliveryNote } from '../../domain/entities/DeliveryNote'
 import { DeliveryNoteMapper } from '../mappers/DeliveryNoteMapper'
 import { apiClient } from '../../lib/apiClient'
-import type { DeliveryNote as ApiDeliveryNote } from '../../features/delivery-notes/types/DeliveryNote'
+import type { DeliveryNoteDTO } from '../dtos/DeliveryNoteDTO'
 import { ServerError, ConnectionError } from '../../domain/errors/DomainErrors'
 
 export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
     async findById(id: string): Promise<DeliveryNote | null> {
         try {
-            const data = await apiClient<ApiDeliveryNote>(`/delivery-notes/${id}`)
+            const data = await apiClient<DeliveryNoteDTO>(`/delivery-notes/${id}`)
             return DeliveryNoteMapper.toDomain(data)
         } catch (error: any) {
             console.warn(`DeliveryNote ${id} not found or error`, error)
@@ -19,7 +19,7 @@ export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
 
     async findAll(): Promise<DeliveryNote[]> {
         try {
-            const data = await apiClient<ApiDeliveryNote[]>('/delivery-notes')
+            const data = await apiClient<DeliveryNoteDTO[]>('/delivery-notes')
             return data.map(item => DeliveryNoteMapper.toDomain(item))
         } catch (error: any) {
             throw new ConnectionError(error.message || 'Failed to fetch delivery notes')
@@ -31,7 +31,7 @@ export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
             const apiModel = DeliveryNoteMapper.toApi(deliveryNote)
 
             // POST returns the created object from backend
-            const response = await apiClient<ApiDeliveryNote>('/delivery-notes', {
+            const response = await apiClient<DeliveryNoteDTO>('/delivery-notes', {
                 method: 'POST',
                 body: JSON.stringify(apiModel)
             })
@@ -48,7 +48,7 @@ export class ApiDeliveryNoteRepository implements DeliveryNoteRepository {
             const apiModel = DeliveryNoteMapper.toApi(deliveryNote)
 
             // PUT returns the updated object from backend
-            const response = await apiClient<ApiDeliveryNote>(`/delivery-notes/${deliveryNote.id}`, {
+            const response = await apiClient<DeliveryNoteDTO>(`/delivery-notes/${deliveryNote.id}`, {
                 method: 'PUT',
                 body: JSON.stringify(apiModel)
             })

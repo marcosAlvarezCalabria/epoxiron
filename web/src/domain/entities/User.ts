@@ -44,9 +44,7 @@ export class User {
     return this._role === 'admin'
   }
 
-  puedeVerTodasLasTarifas(): boolean {
-    return this._role === 'admin'
-  }
+
 
   puedeModificarDatos(): boolean {
     return this._role !== 'guest'

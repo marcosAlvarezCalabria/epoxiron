@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { DeliveryNote, CreateDeliveryNoteRequest, UpdateDeliveryNoteRequest } from '../types/DeliveryNote'
 import { ApiDeliveryNoteRepository } from '../../../infrastructure/repositories/ApiDeliveryNoteRepository'
+import { ApiCustomerRepository } from '../../../infrastructure/repositories/ApiCustomerRepository'
 import { CreateDeliveryNoteUseCase } from '../../../application/use-cases/CreateDeliveryNoteUseCase'
 import { UpdateDeliveryNoteUseCase } from '../../../application/use-cases/UpdateDeliveryNoteUseCase'
 import { DeliveryNoteMapper } from '../../../infrastructure/mappers/DeliveryNoteMapper'
 
 // Instantiate Repository (Singleton-ish for hooks)
 const repository = new ApiDeliveryNoteRepository()
-const createUseCase = new CreateDeliveryNoteUseCase(repository)
+const customerRepository = new ApiCustomerRepository()
+const createUseCase = new CreateDeliveryNoteUseCase(repository, customerRepository)
 const updateUseCase = new UpdateDeliveryNoteUseCase(repository)
 
 export const useDeliveryNotes = () => {

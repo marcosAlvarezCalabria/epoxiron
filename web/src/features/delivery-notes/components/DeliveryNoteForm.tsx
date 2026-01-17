@@ -30,6 +30,7 @@ interface FormItem {
 
   notes?: string
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, onCancel }: DeliveryNoteFormProps) {
@@ -49,7 +50,8 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
       thickness: item.measurements?.thickness ? Number(item.measurements.thickness) : undefined,
 
       notes: item.notes,
-      hasPrimer: item.hasPrimer
+      hasPrimer: item.hasPrimer,
+      isHighThickness: item.isHighThickness
     })) || [{
       name: '',
       quantity: 0
@@ -80,21 +82,32 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
       const specialPiece = selectedCustomer.specialPieces?.find(p => p.name.trim().toLowerCase() === item.name.trim().toLowerCase())
 
       if (specialPiece) {
-        return item.hasPrimer ? specialPiece.price * 2 : specialPiece.price
+        let basePrice = specialPiece.price
+        if (item.hasPrimer) basePrice *= 2
+        // Special pieces usually don't have "thickness" surcharge in the same way, but if user wants it globally:
+        if (item.isHighThickness) basePrice *= 1.7
+        return basePrice
       }
 
       if (isLinear) {
-        price = (item.linearMeters || 0) * (selectedCustomer.pricePerLinearMeter || 0)
-      } else if (isSquare) {
-        price = (item.squareMeters || 0) * (selectedCustomer.pricePerSquareMeter || 0)
+        price += (item.linearMeters || 0) * (selectedCustomer.pricePerLinearMeter || 0)
       }
 
-      // Apply minimum rate if needed (only if price > 0 to avoid applying min rate to empty items)
+      if (isSquare) {
+        price += (item.squareMeters || 0) * (selectedCustomer.pricePerSquareMeter || 0)
+      }
+
+      // Apply minimum rate if needed
       if (price > 0 && price < (selectedCustomer.minimumRate || 0)) {
         price = selectedCustomer.minimumRate
       }
 
-      // Apply Primer Logic
+      // Apply High Thickness Surcharge (+70%)
+      if (item.isHighThickness) {
+        price *= 1.7
+      }
+
+      // Apply Primer Logic (x2)
       if (item.hasPrimer) {
         price *= 2
       }
@@ -125,7 +138,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           measurements: {
             linearMeters: item.linearMeters,
             squareMeters: item.squareMeters,
-            thickness: item.thickness
+            // Thickness is now managed via boolean flag, mapped to domain if needed
+            // For now sending undefined or 0 as thickness measurement
+            thickness: undefined
           },
           racColor: item.racColor,
           specialColor: item.specialColor,
@@ -133,7 +148,8 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           unitPrice: undefined,
           totalPrice: 0,
           notes: item.notes,
-          hasPrimer: item.hasPrimer
+          hasPrimer: item.hasPrimer,
+          isHighThickness: item.isHighThickness // New field
         }))
 
       if (isEditing && deliveryNote) {
@@ -168,10 +184,26 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   }
 
   const addItem = () => {
-    // Validate current top item
-    if (items.length > 0 && !items[0].name.trim()) {
-      alert('Por favor, completa el nombre del item actual antes de añadir otro.')
-      return
+    // Validate current top item before adding a new one
+    if (items.length > 0) {
+      const currentItem = items[0]
+      const isSpecialPiece = selectedCustomer?.specialPieces?.some(p => p.name.trim().toLowerCase() === currentItem.name.trim().toLowerCase())
+      const hasMeasurements = (currentItem.linearMeters && currentItem.linearMeters > 0) || (currentItem.squareMeters && currentItem.squareMeters > 0)
+
+      if (!currentItem.name.trim()) {
+        alert('Por favor, indica el nombre del item actual antes de añadir otro.')
+        return
+      }
+
+      if (!currentItem.quantity || currentItem.quantity <= 0) {
+        alert('Por favor, indica una cantidad válida para el item actual.')
+        return
+      }
+
+      if (!isSpecialPiece && !hasMeasurements) {
+        alert('Por favor, indica las medidas (lineales o cuadradas) o selecciona una pieza especial.')
+        return
+      }
     }
 
     setItems([{
@@ -204,7 +236,25 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   }, 0)
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 relative">
+      {/* Mobile Sticky Summary Bar */}
+      {selectedCustomer && (
+        <div className="md:hidden sticky -top-6 -mx-6 px-6 py-3 bg-gray-900/95 backdrop-blur shadow-lg border-b border-blue-900/30 mb-6 z-30 flex justify-between items-center transition-all">
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-400">Items añadidos</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-white font-bold">{items.filter(i => i.name.trim()).length}</span>
+              <span className="text-gray-500 text-xs">/ {items.length}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end">
+            <span className="text-xs text-gray-400">Total Estimado</span>
+            <span className="text-blue-400 font-bold font-mono">€{estimatedTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Customer */}
         <div>
@@ -447,20 +497,24 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Grosor (mm)
+                      <div className="flex flex-col">
+                        <label className="block text-sm font-medium text-gray-300 mb-2 invisible">
+                          Grosor
                         </label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          value={item.thickness || ''}
-                          onChange={(e) => updateItem(index, 'thickness', safeParseFloat(e.target.value))}
-                          disabled={isLoading}
-                          className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all disabled:opacity-50"
-                          placeholder="0.0"
-                        />
+                        <div className="flex items-center h-10 gap-2 bg-gray-800 border border-gray-600 rounded-lg px-3 cursor-pointer hover:border-gray-500 transition-colors"
+                          onClick={() => updateItem(index, 'isHighThickness', !item.isHighThickness)}>
+                          <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${item.isHighThickness
+                              ? 'bg-orange-600 border-orange-500 text-white'
+                              : 'bg-gray-700 border-gray-500 text-transparent'
+                            }`}>
+                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <span className={`${item.isHighThickness ? 'text-orange-300' : 'text-gray-400'} text-sm font-medium`}>
+                            Grosor Especial (+70%)
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -503,9 +557,12 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                             <p className="text-gray-400 text-xs mt-1">
                               {isSpecialPiece
                                 ? `${item.quantity} ud × €${(itemPrice).toFixed(2)}/ud`
-                                : item.linearMeters
-                                  ? `${item.linearMeters} ml × €${selectedCustomer.pricePerLinearMeter.toFixed(2)}`
-                                  : `${item.squareMeters} m² × €${selectedCustomer.pricePerSquareMeter.toFixed(2)}`
+                                : (() => {
+                                  const parts = []
+                                  if (item.linearMeters) parts.push(`${item.linearMeters} ml × €${selectedCustomer.pricePerLinearMeter.toFixed(2)}`)
+                                  if (item.squareMeters) parts.push(`${item.squareMeters} m² × €${selectedCustomer.pricePerSquareMeter.toFixed(2)}`)
+                                  return parts.join(' + ')
+                                })()
                               }
                               {!isSpecialPiece && itemPrice === selectedCustomer.minimumRate && ' (tarifa mínima)'}
                             </p>

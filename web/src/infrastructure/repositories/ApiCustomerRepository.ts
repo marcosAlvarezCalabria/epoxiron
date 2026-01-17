@@ -2,13 +2,13 @@ import type { CustomerRepository } from '../../domain/repositories/CustomerRepos
 import type { Customer } from '../../domain/entities/Customer'
 import { CustomerMapper } from '../mappers/CustomerMapper'
 import { apiClient } from '../../lib/apiClient'
-import type { Customer as ApiCustomer } from '../../features/customers/types/Customer'
+import type { CustomerDTO } from '../dtos/CustomerDTO'
 import { NotFoundError, ServerError, ConnectionError } from '../../domain/errors/DomainErrors'
 
 export class ApiCustomerRepository implements CustomerRepository {
     async findById(id: string): Promise<Customer | null> {
         try {
-            const data = await apiClient<ApiCustomer>(`/customers/${id}`)
+            const data = await apiClient<CustomerDTO>(`/customers/${id}`)
             return CustomerMapper.toDomain(data)
         } catch (error: any) {
             if (error.status === 404) return null // Use Case handles null logic usually
@@ -18,7 +18,7 @@ export class ApiCustomerRepository implements CustomerRepository {
 
     async findAll(): Promise<Customer[]> {
         try {
-            const data = await apiClient<ApiCustomer[]>('/customers')
+            const data = await apiClient<CustomerDTO[]>('/customers')
             return data.map(item => CustomerMapper.toDomain(item))
         } catch (error: any) {
             throw new ConnectionError(error.message || 'Failed to connect to server')
@@ -28,7 +28,7 @@ export class ApiCustomerRepository implements CustomerRepository {
     async save(customer: Customer): Promise<void> {
         try {
             const apiModel = CustomerMapper.toApi(customer)
-            await apiClient<ApiCustomer>('/customers', {
+            await apiClient<CustomerDTO>('/customers', {
                 method: 'POST',
                 body: JSON.stringify(apiModel)
             })
@@ -40,7 +40,7 @@ export class ApiCustomerRepository implements CustomerRepository {
     async update(customer: Customer): Promise<void> {
         try {
             const apiModel = CustomerMapper.toApi(customer)
-            await apiClient<ApiCustomer>(`/customers/${customer.id}`, {
+            await apiClient<CustomerDTO>(`/customers/${customer.id}`, {
                 method: 'PUT',
                 body: JSON.stringify(apiModel)
             })
