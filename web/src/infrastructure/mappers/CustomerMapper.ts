@@ -8,7 +8,15 @@ export class CustomerMapper {
             name: apiModel.name,
             email: apiModel.email,
             phone: apiModel.phone,
-            rateId: apiModel.rateId,
+            address: apiModel.address,
+            notes: apiModel.notes,
+
+            // Pricing
+            pricePerLinearMeter: apiModel.pricePerLinearMeter,
+            pricePerSquareMeter: apiModel.pricePerSquareMeter,
+            minimumRate: apiModel.minimumRate,
+            specialPieces: apiModel.specialPieces || [],
+
             createdAt: new Date(apiModel.createdAt),
             updatedAt: new Date(apiModel.updatedAt)
         })
@@ -20,7 +28,15 @@ export class CustomerMapper {
             name: domainEntity.name,
             email: domainEntity.email,
             phone: domainEntity.phone,
-            rateId: domainEntity.rateId,
+            address: domainEntity.address,
+            notes: domainEntity.notes,
+
+            // Pricing
+            pricePerLinearMeter: domainEntity.pricePerLinearMeter,
+            pricePerSquareMeter: domainEntity.pricePerSquareMeter,
+            minimumRate: domainEntity.minimumRate,
+            specialPieces: domainEntity.specialPieces,
+
             createdAt: domainEntity.createdAt.toISOString(),
             updatedAt: domainEntity.updatedAt.toISOString()
         }

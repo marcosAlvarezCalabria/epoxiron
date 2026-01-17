@@ -6,7 +6,14 @@ export interface UpdateCustomerDTO {
     name?: string
     email?: string
     phone?: string
-    rateId?: string
+    address?: string
+    notes?: string
+
+    // Pricing
+    pricePerLinearMeter?: number
+    pricePerSquareMeter?: number
+    minimumRate?: number
+    specialPieces?: Array<{ name: string; price: number }>
 }
 
 export class UpdateCustomerUseCase {
@@ -28,16 +35,23 @@ export class UpdateCustomerUseCase {
             customer.changeName(data.name)
         }
 
-        if (data.email !== undefined || data.phone !== undefined) {
-            customer.changeContactInfo(data.email, data.phone)
+        if (data.email !== undefined || data.phone !== undefined || data.address !== undefined || data.notes !== undefined) {
+            customer.changeContactInfo(data.email, data.phone, data.address, data.notes)
         }
 
-        if (data.rateId !== undefined) {
-            if (data.rateId) {
-                customer.assignRate(data.rateId)
-            } else {
-                customer.removeRate() // Or handle unassignment if logic permits
-            }
+        // Pricing Update
+        if (
+            data.pricePerLinearMeter !== undefined ||
+            data.pricePerSquareMeter !== undefined ||
+            data.minimumRate !== undefined ||
+            data.specialPieces !== undefined
+        ) {
+            customer.updatePricing(
+                data.pricePerLinearMeter ?? customer.pricePerLinearMeter,
+                data.pricePerSquareMeter ?? customer.pricePerSquareMeter,
+                data.minimumRate ?? customer.minimumRate,
+                data.specialPieces ?? customer.specialPieces
+            )
         }
 
         // 3. Persist

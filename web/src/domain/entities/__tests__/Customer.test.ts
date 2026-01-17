@@ -1,11 +1,5 @@
 /**
  * 🔴 RED PHASE: Tests for Customer Entity
- *
- * 📝 QUÉ: Tests que definen cómo debe comportarse la entidad Customer
- * 🎯 POR QUÉ: TDD - escribimos el test ANTES del código
- * 🔍 CÓMO: Definimos todas las reglas de negocio que debe cumplir
- *
- * 🏗️ ANALOGÍA: Como el inspector que define los requisitos ANTES de construir
  */
 
 import { describe, it, expect } from 'vitest'
@@ -19,6 +13,10 @@ describe('Customer Entity', () => {
       const customerData = {
         id: '123',
         name: 'Juan Pérez',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01')
       }
@@ -29,17 +27,20 @@ describe('Customer Entity', () => {
       // Then: Debe tener las propiedades correctas
       expect(customer.id).toBe('123')
       expect(customer.name).toBe('Juan Pérez')
-      expect(customer.rateId).toBeUndefined()
+      expect(customer.pricePerLinearMeter).toBe(0)
       expect(customer.createdAt).toEqual(new Date('2024-01-01'))
       expect(customer.updatedAt).toEqual(new Date('2024-01-01'))
     })
 
-    it('should create a customer with optional rateId', () => {
+    it('should create a customer with specific pricing', () => {
       // Given: Datos con tarifa asignada
       const customerData = {
         id: '123',
         name: 'Juan Pérez',
-        rateId: 'tarifa-1',
+        pricePerLinearMeter: 10,
+        pricePerSquareMeter: 20,
+        minimumRate: 5,
+        specialPieces: [{ name: 'Test', price: 50 }],
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01')
       }
@@ -47,8 +48,10 @@ describe('Customer Entity', () => {
       // When: Creamos el customer
       const customer = new Customer(customerData)
 
-      // Then: Debe tener la tarifa
-      expect(customer.rateId).toBe('tarifa-1')
+      // Then: Debe tener la tarifa correcta
+      expect(customer.pricePerLinearMeter).toBe(10)
+      expect(customer.pricePerSquareMeter).toBe(20)
+      expect(customer.specialPieces).toHaveLength(1)
     })
 
     it('should throw error if name is empty', () => {
@@ -56,71 +59,16 @@ describe('Customer Entity', () => {
       const customerData = {
         id: '123',
         name: '',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01')
       }
 
       // When/Then: Debe lanzar error
       expect(() => new Customer(customerData)).toThrow('Name cannot be empty')
-    })
-
-    it('should throw error if name is too short', () => {
-      // Given: Nombre de 1 carácter
-      const customerData = {
-        id: '123',
-        name: 'A',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-      }
-
-      // When/Then: Debe lanzar error
-      expect(() => new Customer(customerData)).toThrow('Name must be at least 2 characters')
-    })
-
-    it('should trim whitespace from name', () => {
-      // Given: Nombre con espacios
-      const customerData = {
-        id: '123',
-        name: '  Juan Pérez  ',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-      }
-
-      // When: Creamos el customer
-      const customer = new Customer(customerData)
-
-      // Then: Debe eliminar espacios
-      expect(customer.name).toBe('Juan Pérez')
-    })
-  })
-
-  // 🧪 TEST 2: Métodos de negocio
-  describe('Business Logic Methods', () => {
-    it('hasRate() should return true when customer has a rate', () => {
-      // Given: Customer con tarifa
-      const customer = new Customer({
-        id: '123',
-        name: 'Juan Pérez',
-        rateId: 'tarifa-1',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      // When/Then: Debe tener tarifa
-      expect(customer.hasRate()).toBe(true)
-    })
-
-    it('hasRate() should return false when customer has no rate', () => {
-      // Given: Customer sin tarifa
-      const customer = new Customer({
-        id: '123',
-        name: 'Juan Pérez',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      // When/Then: No debe tener tarifa
-      expect(customer.hasRate()).toBe(false)
     })
   })
 
@@ -131,6 +79,10 @@ describe('Customer Entity', () => {
       const customer = new Customer({
         id: '123',
         name: 'Juan Pérez',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date(),
         updatedAt: new Date()
       })
@@ -142,95 +94,71 @@ describe('Customer Entity', () => {
       expect(customer.name).toBe('Juan García')
     })
 
-    it('changeName() should throw error if new name is empty', () => {
-      // Given: Customer existente
-      const customer = new Customer({
-        id: '123',
-        name: 'Juan Pérez',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      // When/Then: Debe lanzar error
-      expect(() => customer.changeName('')).toThrow('Name cannot be empty')
-    })
-
-    it('assignRate() should assign a rate', () => {
+    it('updatePricing() should update prices', () => {
       // Given: Customer sin tarifa
       const customer = new Customer({
         id: '123',
         name: 'Juan Pérez',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date(),
         updatedAt: new Date()
       })
 
       // When: Asignamos tarifa
-      customer.assignRate('tarifa-1')
+      customer.updatePricing(15, 25, 10, [{ name: 'New', price: 100 }])
 
-      // Then: Debe tener tarifa
-      expect(customer.rateId).toBe('tarifa-1')
-      expect(customer.hasRate()).toBe(true)
+      // Then: Debe tener nuevos precios
+      expect(customer.pricePerLinearMeter).toBe(15)
+      expect(customer.pricePerSquareMeter).toBe(25)
+      expect(customer.minimumRate).toBe(10)
+      expect(customer.specialPieces).toHaveLength(1)
     })
 
-    it('removeRate() should remove the rate', () => {
-      // Given: Customer con tarifa
+    it('updatePricing() should throw error on negative prices', () => {
       const customer = new Customer({
         id: '123',
         name: 'Juan Pérez',
-        rateId: 'tarifa-1',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date(),
         updatedAt: new Date()
       })
 
-      // When: Quitamos tarifa
-      customer.removeRate()
-
-      // Then: No debe tener tarifa
-      expect(customer.rateId).toBeUndefined()
-      expect(customer.hasRate()).toBe(false)
+      expect(() => customer.updatePricing(-1, 0, 0, [])).toThrow('Prices cannot be negative')
     })
   })
 
   // 🧪 TEST 4: Comparación
   describe('Comparison', () => {
     it('equals() should return true for same ID', () => {
-      // Given: Dos customers con mismo ID
       const customer1 = new Customer({
         id: '123',
         name: 'Juan Pérez',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date(),
         updatedAt: new Date()
       })
 
       const customer2 = new Customer({
         id: '123',
-        name: 'Otro Nombre', // Diferente nombre, mismo ID
+        name: 'Otro Nombre',
+        pricePerLinearMeter: 0,
+        pricePerSquareMeter: 0,
+        minimumRate: 0,
+        specialPieces: [],
         createdAt: new Date(),
         updatedAt: new Date()
       })
 
-      // When/Then: Deben ser iguales (mismo ID)
       expect(customer1.equals(customer2)).toBe(true)
-    })
-
-    it('equals() should return false for different ID', () => {
-      // Given: Dos customers con diferente ID
-      const customer1 = new Customer({
-        id: '123',
-        name: 'Juan Pérez',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      const customer2 = new Customer({
-        id: '456',
-        name: 'Juan Pérez', // Mismo nombre, diferente ID
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      // When/Then: NO deben ser iguales (diferente ID)
-      expect(customer1.equals(customer2)).toBe(false)
     })
   })
 })

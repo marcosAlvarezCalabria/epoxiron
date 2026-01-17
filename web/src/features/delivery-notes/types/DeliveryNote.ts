@@ -20,6 +20,7 @@ export interface DeliveryNoteItem {
   unitPrice?: number
   totalPrice: number
   notes?: string
+  hasPrimer?: boolean
 }
 
 export interface DeliveryNote {

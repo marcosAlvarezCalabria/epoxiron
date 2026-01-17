@@ -27,7 +27,9 @@ interface FormItem {
   linearMeters?: number
   squareMeters?: number
   thickness?: number
+
   notes?: string
+  hasPrimer?: boolean
 }
 
 export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, onCancel }: DeliveryNoteFormProps) {
@@ -45,7 +47,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
       linearMeters: item.measurements?.linearMeters ? Number(item.measurements.linearMeters) : undefined,
       squareMeters: item.measurements?.squareMeters ? Number(item.measurements.squareMeters) : undefined,
       thickness: item.measurements?.thickness ? Number(item.measurements.thickness) : undefined,
-      notes: item.notes
+
+      notes: item.notes,
+      hasPrimer: item.hasPrimer
     })) || [{
       name: '',
       quantity: 0
@@ -76,7 +80,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
       const specialPiece = selectedCustomer.specialPieces?.find(p => p.name.trim().toLowerCase() === item.name.trim().toLowerCase())
 
       if (specialPiece) {
-        return specialPiece.price
+        return item.hasPrimer ? specialPiece.price * 2 : specialPiece.price
       }
 
       if (isLinear) {
@@ -87,7 +91,12 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
       // Apply minimum rate if needed (only if price > 0 to avoid applying min rate to empty items)
       if (price > 0 && price < (selectedCustomer.minimumRate || 0)) {
-        return selectedCustomer.minimumRate
+        price = selectedCustomer.minimumRate
+      }
+
+      // Apply Primer Logic
+      if (item.hasPrimer) {
+        price *= 2
       }
 
       return price
@@ -123,7 +132,8 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           // NO enviamos unitPrice ni totalPrice - el backend los calcula
           unitPrice: undefined,
           totalPrice: 0,
-          notes: item.notes
+          notes: item.notes,
+          hasPrimer: item.hasPrimer
         }))
 
       if (isEditing && deliveryNote) {
@@ -176,7 +186,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
     }
   }
 
-  const updateItem = (index: number, field: keyof FormItem, value: string | number | undefined) => {
+  const updateItem = (index: number, field: keyof FormItem, value: string | number | boolean | undefined) => {
     const updatedItems = [...items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
     setItems(updatedItems)
@@ -454,6 +464,25 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Primer Checkbox (Imprimación) */}
+                <div className="mb-4 flex items-center gap-3 bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
+                  <input
+                    type="checkbox"
+                    id={`primer-${index}`}
+                    checked={item.hasPrimer || false}
+                    onChange={(e) => updateItem(index, 'hasPrimer', e.target.checked)}
+                    disabled={isLoading}
+                    className="w-5 h-5 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900"
+                  />
+                  <label htmlFor={`primer-${index}`} className="flex flex-col cursor-pointer select-none">
+                    <span className="text-gray-200 font-medium text-sm flex items-center gap-2">
+                      Aplicar Imprimación
+                      {item.hasPrimer && <span className="text-xs bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded border border-blue-700/30">x2 Precio</span>}
+                    </span>
+                    <span className="text-gray-500 text-xs">Aplica una capa base anticorrosiva (Duplica el precio del pintado)</span>
+                  </label>
                 </div>
 
                 {/* Price Preview */}

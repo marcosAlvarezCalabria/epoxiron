@@ -118,6 +118,11 @@ export async function createDeliveryNote(req: Request, res: Response) {
             unitPrice = rate.minimumRate
           }
         }
+
+        // Apply Primer multiplier (Double price)
+        if (item.hasPrimer) {
+          unitPrice *= 2
+        }
       }
 
       return {
