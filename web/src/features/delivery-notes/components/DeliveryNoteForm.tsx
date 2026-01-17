@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useCustomers } from '../../customers/hooks/useCustomers'
-import { useRateByCustomer } from '../../rates/hooks/useRates'
 import { useCreateDeliveryNote, useUpdateDeliveryNote } from '../hooks/useDeliveryNotes'
 import type { DeliveryNote, CreateDeliveryNoteRequest, DeliveryNoteItem } from '../types/DeliveryNote'
 import { Measurements } from '../../../domain/value-objects/Measurements'
@@ -31,48 +31,67 @@ interface FormItem {
 }
 
 export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, onCancel }: DeliveryNoteFormProps) {
+  const navigate = useNavigate()
   const [customerId, setCustomerId] = useState(deliveryNote?.customerId || '')
   const [notes, setNotes] = useState(deliveryNote?.notes || '')
+
+  // FIX: Map nested measurements to flat FormItem structure to prevent data loss on edit
   const [items, setItems] = useState<FormItem[]>(
-    deliveryNote?.items || [{
+    deliveryNote?.items.map(item => ({
+      name: item.name || item.description,
+      quantity: Number(item.quantity) || 0,
+      racColor: item.racColor,
+      specialColor: item.specialColor,
+      linearMeters: item.measurements?.linearMeters ? Number(item.measurements.linearMeters) : undefined,
+      squareMeters: item.measurements?.squareMeters ? Number(item.measurements.squareMeters) : undefined,
+      thickness: item.measurements?.thickness ? Number(item.measurements.thickness) : undefined,
+      notes: item.notes
+    })) || [{
       name: '',
       quantity: 0
     }]
   )
 
   const { data: customers } = useCustomers()
-  const { data: customerRate, isLoading: isLoadingRate } = useRateByCustomer(customerId)
 
-
+  // Get selected customer with embedded rates
+  const selectedCustomer = customers?.find(c => c.id === customerId)
 
   const createDeliveryNote = useCreateDeliveryNote()
   const updateDeliveryNote = useUpdateDeliveryNote()
 
   const isLoading = createDeliveryNote.isPending || updateDeliveryNote.isPending
 
-  // ...
-
   // Función para calcular precio de un item basado en tarifa
   const calculateItemPrice = (item: FormItem): number => {
-    if (!customerRate) return 0
+    if (!selectedCustomer) return 0
 
     try {
-      // Construct Domain Value Object
-      // Treat <= 0 as undefined to avoid Domain Validation errors while typing (e.g. "0.5")
-      const linearMeters = item.linearMeters && item.linearMeters > 0 ? item.linearMeters : undefined
-      const squareMeters = item.squareMeters && item.squareMeters > 0 ? item.squareMeters : undefined
-      const thickness = item.thickness && item.thickness > 0 ? item.thickness : undefined
+      // Basic calculation logic
+      let price = 0
+      const isLinear = item.linearMeters && item.linearMeters > 0
+      const isSquare = item.squareMeters && item.squareMeters > 0
 
-      const measurements = new Measurements({
-        linearMeters,
-        squareMeters,
-        thickness
-      })
+      // Check for special pieces first
+      const specialPiece = selectedCustomer.specialPieces?.find(p => p.name.trim().toLowerCase() === item.name.trim().toLowerCase())
 
-      // Delegate calculation to Domain Entity
-      return customerRate.calculatePrice(measurements, item.name)
+      if (specialPiece) {
+        return specialPiece.price
+      }
+
+      if (isLinear) {
+        price = (item.linearMeters || 0) * (selectedCustomer.pricePerLinearMeter || 0)
+      } else if (isSquare) {
+        price = (item.squareMeters || 0) * (selectedCustomer.pricePerSquareMeter || 0)
+      }
+
+      // Apply minimum rate if needed (only if price > 0 to avoid applying min rate to empty items)
+      if (price > 0 && price < (selectedCustomer.minimumRate || 0)) {
+        return selectedCustomer.minimumRate
+      }
+
+      return price
     } catch (error) {
-      // Silently fail for invalid inputs during typing
       return 0
     }
   }
@@ -200,54 +219,45 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         </div>
 
         {/* Rate Info Card */}
-        {customerId && (
+        {selectedCustomer && (
           <div className="bg-blue-900/20 border border-blue-800/30 rounded-lg p-4">
-            {isLoadingRate ? (
-              <p className="text-blue-400 text-sm">Cargando tarifa...</p>
-            ) : customerRate ? (
-              <div>
-                <h3 className="text-blue-400 font-bold text-sm mb-2 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" />
-                  </svg>
-                  Tarifa del Cliente
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm border-b border-blue-800/30 pb-3 mb-3">
-                  <div>
-                    <p className="text-gray-400">Metros lineales</p>
-                    <p className="text-white font-bold">€{customerRate.pricePerLinearMeter.toFixed(2)}/ml</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Metros cuadrados</p>
-                    <p className="text-white font-bold">€{customerRate.pricePerSquareMeter.toFixed(2)}/m²</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Tarifa mínima</p>
-                    <p className="text-white font-bold">€{customerRate.minimumPrice.toFixed(2)}</p>
+            <div>
+              <h3 className="text-blue-400 font-bold text-sm mb-2 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" />
+                </svg>
+                Tarifas Asignadas
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm border-b border-blue-800/30 pb-3 mb-3">
+                <div>
+                  <p className="text-gray-400">Metros lineales</p>
+                  <p className="text-white font-bold">€{selectedCustomer.pricePerLinearMeter.toFixed(2)}/ml</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Metros cuadrados</p>
+                  <p className="text-white font-bold">€{selectedCustomer.pricePerSquareMeter.toFixed(2)}/m²</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Tarifa mínima</p>
+                  <p className="text-white font-bold">€{selectedCustomer.minimumRate.toFixed(2)}</p>
+                </div>
+              </div>
+
+              {/* Special Pieces List */}
+              {selectedCustomer.specialPieces && selectedCustomer.specialPieces.length > 0 && (
+                <div>
+                  <p className="text-blue-300 font-bold text-xs uppercase tracking-wider mb-2">Piezas Especiales Disponibles:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCustomer.specialPieces.map((piece, i) => (
+                      <span key={i} className="inline-flex items-center px-2 py-1 rounded bg-blue-900/40 border border-blue-700/50 text-xs text-blue-200">
+                        <span className="font-medium mr-1.5">{piece.name}</span>
+                        <span className="font-mono text-blue-100 bg-blue-800/50 px-1 rounded">€{piece.price}</span>
+                      </span>
+                    ))}
                   </div>
                 </div>
-
-                {/* Special Pieces List */}
-                {customerRate.specialPieces.length > 0 && (
-                  <div>
-                    <p className="text-blue-300 font-bold text-xs uppercase tracking-wider mb-2">Piezas Especiales Disponibles:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {customerRate.specialPieces.map((piece, i) => (
-                        <span key={i} className="inline-flex items-center px-2 py-1 rounded bg-blue-900/40 border border-blue-700/50 text-xs text-blue-200">
-                          <span className="font-medium mr-1.5">{piece.name}</span>
-                          <span className="font-mono text-blue-100 bg-blue-800/50 px-1 rounded">€{piece.price}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-yellow-400 text-sm">
-                <p className="font-bold mb-1">⚠️ Cliente sin tarifa asignada</p>
-                <p className="text-yellow-300/80">Los precios se calcularán con la tarifa mínima por defecto.</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
@@ -268,7 +278,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         <div className="space-y-4">
           {items.map((item, index) => {
             const itemPrice = calculateItemPrice(item)
-            const isSpecialPiece = customerRate?.specialPieces.some(p =>
+            const isSpecialPiece = selectedCustomer?.specialPieces?.some(p =>
               p.name.trim().toLowerCase() === item.name.trim().toLowerCase()
             )
 
@@ -307,9 +317,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                       list={`special-pieces-${customerId}`} // Connect to datalist
                     />
                     {/* Autocomplete from Rate Special Pieces */}
-                    {customerRate && customerRate.specialPieces.length > 0 && (
+                    {selectedCustomer && selectedCustomer.specialPieces && selectedCustomer.specialPieces.length > 0 && (
                       <datalist id={`special-pieces-${customerId}`}>
-                        {customerRate.specialPieces.map((piece, i) => (
+                        {selectedCustomer.specialPieces.map((piece, i) => (
                           <option key={i} value={piece.name}>
                             {piece.name} - €{piece.price}
                           </option>
@@ -447,9 +457,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                 </div>
 
                 {/* Price Preview */}
-                {customerRate && (
+                {selectedCustomer && (
                   (() => {
-                    const isSpecialPiece = customerRate.specialPieces.some(p => p.name.toLowerCase() === item.name.trim().toLowerCase())
+                    const isSpecialPiece = selectedCustomer.specialPieces?.some(p => p.name.toLowerCase() === item.name.trim().toLowerCase())
                     const hasMeasurements = item.linearMeters || item.squareMeters
 
                     if (!isSpecialPiece && !hasMeasurements) return null
@@ -465,10 +475,10 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                               {isSpecialPiece
                                 ? `${item.quantity} ud × €${(itemPrice).toFixed(2)}/ud`
                                 : item.linearMeters
-                                  ? `${item.linearMeters} ml × €${customerRate.pricePerLinearMeter.toFixed(2)}`
-                                  : `${item.squareMeters} m² × €${customerRate.pricePerSquareMeter.toFixed(2)}`
+                                  ? `${item.linearMeters} ml × €${selectedCustomer.pricePerLinearMeter.toFixed(2)}`
+                                  : `${item.squareMeters} m² × €${selectedCustomer.pricePerSquareMeter.toFixed(2)}`
                               }
-                              {!isSpecialPiece && itemPrice === customerRate.minimumPrice && ' (tarifa mínima)'}
+                              {!isSpecialPiece && itemPrice === selectedCustomer.minimumRate && ' (tarifa mínima)'}
                             </p>
                           </div>
                           <div className="text-right">
@@ -502,7 +512,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         </div>
 
         {/* Estimated Total */}
-        {customerRate && estimatedTotal > 0 && (
+        {selectedCustomer && estimatedTotal > 0 && (
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-300 font-medium">Total Estimado:</span>

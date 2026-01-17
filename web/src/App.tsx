@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { CustomersPage } from './pages/CustomersPage';
-import { RatesPage } from './pages/RatesPage';
+
 import { DeliveryNotesPage } from './pages/DeliveryNotesPage';
 import { DeliveryNoteDetailsPage } from './pages/DeliveryNoteDetailsPage';
 import { CreateDeliveryNotePage } from './pages/CreateDeliveryNotePage';
@@ -43,14 +43,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/rates"
-          element={
-            <ProtectedRoute>
-              <RatesPage />
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/delivery-notes"
           element={

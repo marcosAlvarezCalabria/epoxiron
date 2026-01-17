@@ -12,6 +12,8 @@ export function useCustomers() {
   return useQuery({
     queryKey: ['customers'],
     queryFn: customersApi.fetchCustomers,
+    staleTime: 0, // Always fetch fresh
+    refetchOnMount: true
   })
 }
 

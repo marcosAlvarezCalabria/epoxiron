@@ -12,21 +12,34 @@ interface Rate {
   ratePerLinearMeter: number
   ratePerSquareMeter: number
   minimumRate: number
+  specialPieces?: { name: string, price: number }[]
 }
 
 interface RateFormProps {
   rate?: Rate | null
+  initialCustomerId?: string
+  initialCustomerName?: string
+  isForced?: boolean // New prop
   onSubmit: (rateData: any) => void
   onCancel: () => void
   isLoading?: boolean
 }
 
-export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFormProps) {
+export function RateForm({ rate, initialCustomerId, initialCustomerName, isForced = false, onSubmit, onCancel, isLoading = false }: RateFormProps) {
   const { data: customers } = useCustomers()
+
+  // Synthesize customer list if initialCustomer is missing from fetched list
+  const effectiveCustomers = [...(customers || [])]
+  if (initialCustomerId && initialCustomerName) {
+    const exists = effectiveCustomers.some(c => c.id === initialCustomerId)
+    if (!exists) {
+      effectiveCustomers.push({ id: initialCustomerId, name: initialCustomerName } as any)
+    }
+  }
 
   // Form state
   const [formData, setFormData] = useState({
-    customerId: '',
+    customerId: initialCustomerId || '',
     ratePerLinearMeter: '',
     ratePerSquareMeter: '',
     minimumRate: ''
@@ -46,21 +59,19 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
         ratePerSquareMeter: rate.ratePerSquareMeter.toString(),
         minimumRate: rate.minimumRate.toString()
       })
-      // @ts-ignore - Assuming rate has specialPieces (it should based on Domain)
       if (rate.specialPieces) {
-        // @ts-ignore
         setSpecialPieces(rate.specialPieces)
       }
     } else {
       setFormData({
-        customerId: '',
+        customerId: initialCustomerId || '',
         ratePerLinearMeter: '',
         ratePerSquareMeter: '',
         minimumRate: ''
       })
       setSpecialPieces([])
     }
-  }, [rate])
+  }, [rate, initialCustomerId])
 
   const addSpecialPiece = () => {
     setSpecialPieces([...specialPieces, { name: '', price: 0 }])
@@ -95,6 +106,13 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
       newErrors.minimumRate = 'La tarifa mínima debe ser un número válido'
     }
 
+    // Validate Special Pieces
+    // Ensure all special pieces have a price > 0
+    const invalidPieces = specialPieces.filter(p => !p.price || p.price <= 0)
+    if (invalidPieces.length > 0) {
+      newErrors.specialPieces = 'Todas las piezas especiales deben tener un precio mayor a 0'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -102,7 +120,9 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateForm()) return
+    if (!validateForm()) {
+      return
+    }
 
     const submitData = {
       customerId: formData.customerId,
@@ -136,15 +156,18 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               {rate ? 'Modifica los precios de la tarifa' : 'Configura una nueva tarifa de precios'}
             </p>
           </div>
-          <button
-            onClick={onCancel}
-            disabled={isLoading}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            </svg>
-          </button>
+          {/* Hide Close button if forced */}
+          {!isForced && (
+            <button
+              onClick={onCancel}
+              disabled={isLoading}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* Form */}
@@ -158,14 +181,14 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               id="customerId"
               value={formData.customerId}
               onChange={(e) => handleChange('customerId', e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || !!initialCustomerId} // Disable if preselected
               className={`w-full rounded-xl text-white bg-gray-900 border h-12 px-4 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600/40 ${errors.customerId
                 ? 'border-red-600 focus:border-red-600'
                 : 'border-gray-700 focus:border-blue-600'
                 }`}
             >
               <option value="">Selecciona un cliente</option>
-              {customers?.map((customer) => (
+              {effectiveCustomers?.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
                 </option>
@@ -262,6 +285,12 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
               </button>
             </div>
 
+            {errors.specialPieces && (
+              <div className="bg-red-900/40 border border-red-500/50 text-red-300 text-sm p-3 rounded-lg mb-4">
+                {errors.specialPieces}
+              </div>
+            )}
+
             {specialPieces.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-2">
                 No hay piezas especiales definidas
@@ -284,8 +313,8 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
                         type="number"
                         min="0"
                         step="0.01"
-                        value={piece.price}
-                        onChange={(e) => updateSpecialPiece(index, 'price', Number(e.target.value))}
+                        value={piece.price === 0 ? '' : piece.price}
+                        onChange={(e) => updateSpecialPiece(index, 'price', e.target.value === '' ? 0 : Number(e.target.value))}
                         placeholder="€"
                         className="w-full rounded-lg text-white bg-gray-800 border border-gray-600 focus:border-blue-600 h-10 px-3 text-sm"
                       />
@@ -307,14 +336,16 @@ export function RateForm({ rate, onSubmit, onCancel, isLoading = false }: RateFo
 
           {/* Actions */}
           <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-gray-700">
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isLoading}
-              className="w-full sm:w-auto bg-gray-700 text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 font-medium"
-            >
-              Cancelar
-            </button>
+            {!isForced && (
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={isLoading}
+                className="w-full sm:w-auto bg-gray-700 text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 font-medium"
+              >
+                Cancelar
+              </button>
+            )}
             <button
               type="submit"
               disabled={isLoading || !formData.customerId || !formData.ratePerLinearMeter || !formData.ratePerSquareMeter || !formData.minimumRate}

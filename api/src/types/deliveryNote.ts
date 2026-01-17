@@ -12,6 +12,7 @@
 // Each painted piece/item in the delivery note
 export interface DeliveryNoteItem {
   id: string                    // Unique item ID
+  name: string                  // Item name (e.g. "Viga 5m")
   description: string           // What was painted (e.g., "Metal door", "Window frame")
   color: string                 // RAC color code (e.g., "RAL9016", "RAL7016")
   measurements: {

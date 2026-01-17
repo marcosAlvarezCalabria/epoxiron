@@ -6,7 +6,6 @@ import { Request, Response } from 'express'
 import { randomUUID } from 'crypto'
 import type { Customer, CreateCustomerRequest, UpdateCustomerRequest } from '../types/customer'
 import * as customersStorage from '../storage/customersStorage'
-import { ratesStorage } from '../storage/ratesStorage'
 
 // 🏗️ ANALOGY: The controller is the FOREMAN of the construction site
 // - Receives orders (HTTP requests)
@@ -68,10 +67,25 @@ export async function getCustomer(req: Request, res: Response) {
  *
  * Like adding new material to the warehouse
  */
+/**
+ * ➕ CREATE NEW CUSTOMER
+ * POST /api/customers
+ * Body: { "name": "John Doe", "pricePerLinearMeter": 10 ... }
+ *
+ * Like adding new material to the warehouse
+ */
 export async function createCustomer(req: Request, res: Response) {
   try {
     // 1. Get data from body
-    const { name, email, phone } = req.body as CreateCustomerRequest
+    const {
+      name,
+      email,
+      phone,
+      pricePerLinearMeter,
+      pricePerSquareMeter,
+      minimumRate,
+      specialPieces
+    } = req.body as CreateCustomerRequest
 
     // 2. VALIDATE: Name is required
     if (!name || name.trim().length === 0) {
@@ -91,7 +105,13 @@ export async function createCustomer(req: Request, res: Response) {
       name: name.trim(),             // Clean spaces
       email: email?.trim(),
       phone: phone?.trim(),
-      rateId: undefined,             // No rate at the beginning
+
+      // Default to 0 if not provided, to ensure type safety
+      pricePerLinearMeter: pricePerLinearMeter || 0,
+      pricePerSquareMeter: pricePerSquareMeter || 0,
+      minimumRate: minimumRate || 0,
+      specialPieces: specialPieces || [],
+
       createdAt: new Date(),         // Creation date
       updatedAt: new Date()          // Update date
     }
@@ -110,7 +130,7 @@ export async function createCustomer(req: Request, res: Response) {
 /**
  * ✏️ UPDATE EXISTING CUSTOMER
  * PUT /api/customers/:id
- * Body: { "name": "John Doe Updated", "rateId": "123" }
+ * Body: { "name": "John Doe Updated", "pricePerLinearMeter": 15 ... }
  *
  * Like replacing a material with a new one
  */
@@ -120,10 +140,19 @@ export async function updateCustomer(req: Request, res: Response) {
     const { id } = req.params
 
     // 2. Get data from body
-    const { name, rateId, email, phone } = req.body as UpdateCustomerRequest
+    const {
+      name,
+      email,
+      phone,
+      pricePerLinearMeter,
+      pricePerSquareMeter,
+      minimumRate,
+      specialPieces
+    } = req.body as UpdateCustomerRequest
 
     // 3. VALIDATE: At least one field must be provided
-    if (!name && !rateId && email === undefined && phone === undefined) {
+    // (We check if objects are empty)
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
         message: 'At least one field must be provided to update'
       })
@@ -138,18 +167,15 @@ export async function updateCustomer(req: Request, res: Response) {
 
     // 5. Prepare data to update
     const updates: Partial<Customer> = {}
-    if (name !== undefined) {
-      updates.name = name.trim()
-    }
-    if (email !== undefined) {
-      updates.email = email.trim()
-    }
-    if (phone !== undefined) {
-      updates.phone = phone.trim()
-    }
-    if (rateId !== undefined) {
-      updates.rateId = rateId
-    }
+    if (name !== undefined) updates.name = name.trim()
+    if (email !== undefined) updates.email = email.trim()
+    if (phone !== undefined) updates.phone = phone.trim()
+
+    // Pricing updates
+    if (pricePerLinearMeter !== undefined) updates.pricePerLinearMeter = pricePerLinearMeter
+    if (pricePerSquareMeter !== undefined) updates.pricePerSquareMeter = pricePerSquareMeter
+    if (minimumRate !== undefined) updates.minimumRate = minimumRate
+    if (specialPieces !== undefined) updates.specialPieces = specialPieces
 
     // 6. Update in storage
     const updatedCustomer = customersStorage.update(id, updates)
@@ -183,23 +209,18 @@ export async function deleteCustomer(req: Request, res: Response) {
     // 2. TODO: Validate customer doesn't have associated delivery notes
     // (We skip this for now, we'll do it when we have the DeliveryNote entity)
 
-    // 3. Find customer to get rateId
+    // 3. Find customer (to verify existence)
     const customer = customersStorage.findById(id)
-
-    if (customer && customer.rateId) {
-      // Cascade delete: Delete associated rate
-      ratesStorage.delete(customer.rateId)
-    }
 
     // 4. Delete from storage
     const deleted = customersStorage.deleteById(id)
 
-    // 4. If didn't exist, return 404 error
+    // 5. If didn't exist, return 404 error
     if (!deleted) {
       return res.status(404).json({ message: 'Customer not found' })
     }
 
-    // 5. Return successful response without content
+    // 6. Return successful response without content
     return res.status(204).send()  // 204 = No Content (success without body)
   } catch (error) {
     console.error('Error deleting customer:', error)

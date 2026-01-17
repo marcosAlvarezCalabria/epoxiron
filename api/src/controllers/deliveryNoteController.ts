@@ -17,7 +17,6 @@ import type {
 } from '../types/deliveryNote'
 import * as deliveryNotesStorage from '../storage/deliveryNotesStorage'
 import * as customersStorage from '../storage/customersStorage'
-import { ratesStorage } from '../storage/ratesStorage'
 
 /**
  * 📋 LIST ALL DELIVERY NOTES
@@ -89,26 +88,35 @@ export async function createDeliveryNote(req: Request, res: Response) {
       return res.status(404).json({ error: 'Customer not found' })
     }
 
-    // 2. Get customer's rate if available
-    const rate = customer.rateId
-      ? ratesStorage.findById(customer.rateId)
-      : null
+    // 2. Get pricing (now embedded in customer)
+    // We treat the customer itself as the rate provider
+    const rate = customer
 
     // 3. Calculate prices for each item
     const itemsWithPrices: DeliveryNoteItem[] = data.items.map(item => {
       let unitPrice = 0
 
       if (rate) {
-        // Calculate price based on measurements
-        if (item.measurements.linearMeters) {
-          unitPrice = rate.ratePerLinearMeter * item.measurements.linearMeters
-        } else if (item.measurements.squareMeters) {
-          unitPrice = rate.ratePerSquareMeter * item.measurements.squareMeters
-        }
+        // 1. Check for special pieces FIRST (doesn't require measurements)
+        const specialPiece = rate.specialPieces?.find(p =>
+          (item.name && p.name.toLowerCase() === item.name.toLowerCase()) ||
+          (item.description && p.name.toLowerCase() === item.description.toLowerCase())
+        )
 
-        // Apply minimum rate if calculated price is lower
-        if (unitPrice < rate.minimumRate) {
-          unitPrice = rate.minimumRate
+        if (specialPiece) {
+          unitPrice = specialPiece.price
+        } else if (item.measurements) {
+          // 2. Fallback to measurements calculation
+          if (item.measurements.linearMeters) {
+            unitPrice = rate.pricePerLinearMeter * item.measurements.linearMeters
+          } else if (item.measurements.squareMeters) {
+            unitPrice = rate.pricePerSquareMeter * item.measurements.squareMeters
+          }
+
+          // Apply minimum rate if calculated price is lower (and not 0)
+          if (unitPrice > 0 && unitPrice < rate.minimumRate) {
+            unitPrice = rate.minimumRate
+          }
         }
       }
 
