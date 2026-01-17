@@ -4,7 +4,7 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom'
-import { useDeliveryNotes } from '../features/delivery-notes/hooks/useDeliveryNotes'
+import { useDeliveryNotes, useUpdateDeliveryNote } from '../features/delivery-notes/hooks/useDeliveryNotes'
 
 export function DeliveryNoteDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -80,6 +80,29 @@ export function DeliveryNoteDetailsPage() {
     )
   }
 
+
+  const { mutateAsync: updateDeliveryNote, isPending: isUpdating } = useUpdateDeliveryNote()
+
+  const handleValidate = async () => {
+    if (!deliveryNote) return
+    if (!confirm('¿Estás seguro de que deseas validar este albarán? Una vez validado, quedará bloqueado para edición.')) return
+
+    try {
+      await updateDeliveryNote({
+        id: deliveryNote.id,
+        data: {
+          customerId: deliveryNote.customerId,
+          items: deliveryNote.items, // Pass existing items
+          status: 'validated'
+        }
+      })
+      // The query invalidation in hook will refresh the page data
+    } catch (error) {
+      console.error('Error validating:', error)
+      alert('Error al validar el albarán. Asegúrate de que tenga items y datos correctos.')
+    }
+  }
+
   return (
     <div className="bg-gray-900 min-h-screen text-gray-200">
       {/* Header */}
@@ -90,6 +113,7 @@ export function DeliveryNoteDetailsPage() {
               <button
                 onClick={() => navigate('/dashboard')}
                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                disabled={isUpdating}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
@@ -172,6 +196,16 @@ export function DeliveryNoteDetailsPage() {
                           Grosor: {item.measurements.thickness}mm
                         </span>
                       )}
+                      {item.isHighThickness && (
+                        <span className="bg-orange-900/30 text-orange-400 px-2 py-1 rounded border border-orange-700/50">
+                          Grosor Especial (+70%)
+                        </span>
+                      )}
+                      {item.hasPrimer && (
+                        <span className="bg-indigo-900/30 text-indigo-400 px-2 py-1 rounded border border-indigo-700/50">
+                          Imprimación (x2)
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -207,16 +241,31 @@ export function DeliveryNoteDetailsPage() {
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h2 className="text-lg font-semibold text-white mb-4">Acciones</h2>
               <div className="space-y-3">
-                <button
-                  onClick={() => navigate(`/delivery-notes/${id}/edit`)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Editar Albarán
-                </button>
-                <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                {deliveryNote.status === 'draft' && (
+                  <button
+                    onClick={handleValidate}
+                    disabled={isUpdating}
+                    className="w-full bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center gap-2 font-bold shadow-lg shadow-amber-900/20 disabled:opacity-50"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
+                    Validar Albarán
+                  </button>
+                )}
+
+                {deliveryNote.status === 'draft' && (
+                  <button
+                    onClick={() => navigate(`/delivery-notes/${id}/edit`)}
+                    disabled={isUpdating}
+                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    Editar Albarán
+                  </button>
+                )}
+
+                <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50">
                   Generar PDF
                 </button>
-                <button className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors">
+                <button className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50">
                   Duplicar
                 </button>
               </div>

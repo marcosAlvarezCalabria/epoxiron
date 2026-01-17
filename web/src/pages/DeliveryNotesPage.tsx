@@ -51,18 +51,18 @@ export function DeliveryNotesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-900/30 text-gray-400 border-gray-800/30'
-      case 'pending': return 'bg-yellow-900/30 text-yellow-400 border-yellow-800/30'
-      case 'reviewed': return 'bg-green-900/30 text-green-400 border-green-800/30'
+      case 'draft': return 'bg-blue-900/30 text-blue-400 border-blue-800/30'
+      case 'validated': return 'bg-amber-900/30 text-amber-400 border-amber-800/30'
+      case 'finalized': return 'bg-green-900/30 text-green-400 border-green-800/30'
       default: return 'bg-gray-900/30 text-gray-400 border-gray-800/30'
     }
   }
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'draft': return 'En Edición'
-      case 'pending': return 'Pendiente Precios'
-      case 'reviewed': return 'Finalizado'
+      case 'draft': return 'Borrador'
+      case 'validated': return 'Validado'
+      case 'finalized': return 'Finalizado'
       default: return 'Desconocido'
     }
   }
@@ -226,11 +226,11 @@ export function DeliveryNotesPage() {
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Validados</p>
-              <p className="text-2xl font-bold text-yellow-400">{deliveryNotes.filter(n => n.status === 'pending').length}</p>
+              <p className="text-2xl font-bold text-amber-400">{deliveryNotes.filter(n => n.status === 'validated').length}</p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Finalizados</p>
-              <p className="text-2xl font-bold text-green-400">{deliveryNotes.filter(n => n.status === 'reviewed').length}</p>
+              <p className="text-2xl font-bold text-green-400">{deliveryNotes.filter(n => n.status === 'finalized').length}</p>
             </div>
           </div>
         </div>
@@ -265,9 +265,9 @@ export function DeliveryNotesPage() {
                   className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all focus:outline-none"
                 >
                   <option value="">Todos los estados</option>
-                  <option value="draft">En Edición</option>
-                  <option value="pending">Pendiente Precios</option>
-                  <option value="reviewed">Finalizado</option>
+                  <option value="draft">Borrador</option>
+                  <option value="validated">Validado</option>
+                  <option value="finalized">Finalizado</option>
                 </select>
               </div>
             </div>

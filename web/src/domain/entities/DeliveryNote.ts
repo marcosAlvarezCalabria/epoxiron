@@ -156,8 +156,18 @@ export class DeliveryNote {
       throw DeliveryNoteException.withoutItems()
     }
 
-    // Validate that all items have measurements or name
-    // (according to design.md, items may not have price)
+    // Validate that all items have measurements or name and PRICE
+    if (!this.allItemsHavePrice()) {
+      // Although old design said "may not have price", user now enforces strict pricing.
+      // However, Item.hasPrice() depends on having a value.
+      // If calculator always returns a value (even 0?), we might need to check > 0.
+      // But let's stick to hasPrice() existence check for now as a first step.
+      // Actually, if mapped from UI, price might be undefined if no match.
+    }
+    // Strict business rule: All items must have a price before validation
+    if (!this.allItemsHavePrice()) {
+      throw DeliveryNoteException.itemsWithoutPrice(this.itemsWithoutPrice().map(i => i.name).join(', '))
+    }
 
     this._status = 'validated'
   }

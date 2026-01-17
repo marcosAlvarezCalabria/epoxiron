@@ -43,12 +43,14 @@ export const useCreateDeliveryNote = () => {
       // We map 'name' to 'description' as required by the Use Case / Schema
       const formData = {
         customerId: data.customerId,
-        date: data.date,
-        items: data.items.map(i => ({
+        date: data.date ? new Date(data.date) : new Date(),
+        items: (data.items || []).map(i => ({
           description: i.description || i.name, // Fallback if description is missing
           color: i.color,
           quantity: i.quantity,
-          measurements: i.measurements
+          measurements: i.measurements,
+          isHighThickness: i.isHighThickness,
+          hasPrimer: i.hasPrimer
         })),
         notes: data.notes
       }
@@ -93,9 +95,12 @@ export const useUpdateDeliveryNote = () => {
           measurements: i.measurements,
           unitPrice: i.unitPrice,
           // totalPrice is ignored by input
-          notes: i.notes
+          notes: i.notes,
+          isHighThickness: i.isHighThickness,
+          hasPrimer: i.hasPrimer
         })),
-        notes: data.notes
+        notes: data.notes,
+        status: data.status
       })
 
       return DeliveryNoteMapper.toApi(output.deliveryNote)
@@ -108,6 +113,7 @@ export const useUpdateDeliveryNote = () => {
 }
 
 import { DeleteDeliveryNoteUseCase } from '../../../application/use-cases/DeleteDeliveryNoteUseCase'
+
 
 const deleteUseCase = new DeleteDeliveryNoteUseCase(repository)
 

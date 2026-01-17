@@ -40,8 +40,9 @@ export interface DeliveryNote {
 
 export interface CreateDeliveryNoteRequest {
   customerId: string
-  date: string
-  items: Omit<DeliveryNoteItem, 'id'>[]
+  date?: string
+  status?: 'draft' | 'validated' | 'finalized'
+  items?: Array<Omit<DeliveryNoteItem, 'id'>>
   notes?: string
 }
 

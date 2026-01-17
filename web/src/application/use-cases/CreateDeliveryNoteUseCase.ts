@@ -82,24 +82,7 @@ export class CreateDeliveryNoteUseCase {
                 measurements: measurements,
                 price: undefined,
                 isHighThickness: itemData.isHighThickness,
-                // Also ensuring hasPrimer is passed (it was likely needed but missed in my manual reconstruction or implicit?)
-                // Looking at ItemProps, it has no `hasPrimer` property?
-                // Let's check Item.ts again.
-                // ItemProps has no `hasPrimer`. It should?
-                // `hasPrimer` increases PRICE. But is it a property of ITEM?
-                // User said "si el grosor se clica aumentamos precio".
-                // `hasPrimer` multiplies price.
-                // If Item doesn't store `hasPrimer`, how do we know why price is high?
-                // I checked Item.ts and it DID NOT have hasPrimer in props!
-                // Wait. `DeliveryNoteForm` handles `hasPrimer`.
-                // If `Item` entity doesn't have `hasPrimer`, where is it stored?
-                // In DTO `hasPrimer` exists.
-                // In `Item` Entity I might have missed it?
-                // I will add `hasPrimer` to `Item` Entity as well!
-                // But for now, let's fix `isHighThickness`.
-                // Actually `ItemProps` doesn't have `hasPrimer` in my previous view_file of Item.ts.
-                // I should add `hasPrimer` too if I want it persisted logically.
-                // But let's stick to `isHighThickness` for now.
+                hasPrimer: itemData.hasPrimer
             })
         })
 

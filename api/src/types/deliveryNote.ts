@@ -34,7 +34,7 @@ export interface DeliveryNote {
   customerId: string            // Reference to the customer
   customerName: string          // Customer name (for display, cached from Customer)
   date: Date                    // Delivery note date
-  status: 'draft' | 'pending' | 'reviewed'  // Current status
+  status: 'draft' | 'validated' | 'finalized'  // Current status
   items: DeliveryNoteItem[]     // All items in this delivery note
   totalAmount: number           // Total amount in euros (sum of all item totals)
   notes?: string                // Optional notes or comments
@@ -56,8 +56,8 @@ export interface CreateDeliveryNoteRequest {
 // Data that can be modified in an existing delivery note
 export interface UpdateDeliveryNoteRequest {
   customerId?: string           // OPTIONAL - can change customer
-  date?: Date                   // OPTIONAL - can change date
-  status?: 'draft' | 'pending' | 'reviewed'  // OPTIONAL - can change status
+  date?: Date | string          // OPTIONAL - can change date
+  status?: 'draft' | 'validated' | 'finalized'  // OPTIONAL - can change status
   items?: DeliveryNoteItem[]    // OPTIONAL - can modify items
   notes?: string                // OPTIONAL - can change notes
 }
@@ -71,7 +71,7 @@ export interface DeliveryNoteResponse {
   customerId: string
   customerName: string
   date: string  // ISO string format for JSON
-  status: 'draft' | 'pending' | 'reviewed'
+  status: 'draft' | 'validated' | 'finalized'
   items: DeliveryNoteItem[]
   totalAmount: number
   notes?: string

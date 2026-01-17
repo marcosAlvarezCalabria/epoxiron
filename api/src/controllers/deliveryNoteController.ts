@@ -176,6 +176,11 @@ export async function updateDeliveryNote(req: Request, res: Response) {
       return res.status(404).json({ error: 'Delivery note not found' })
     }
 
+    // Ensure date is a Date object if present
+    if (data.date) {
+      data.date = new Date(data.date)
+    }
+
     const updated = deliveryNotesStorage.update(id, data)
     return res.json(updated)
   } catch (error) {
@@ -229,7 +234,7 @@ export async function updateDeliveryNoteStatus(req: Request, res: Response) {
     const { id } = req.params
     const { status } = req.body
 
-    const validStatuses = ['draft', 'pending', 'reviewed']
+    const validStatuses = ['draft', 'validated', 'finalized']
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' })
     }

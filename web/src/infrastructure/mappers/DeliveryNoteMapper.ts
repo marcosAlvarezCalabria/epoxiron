@@ -40,7 +40,8 @@ export class DeliveryNoteMapper {
                 quantity: item.quantity,
                 price: item.unitPrice !== undefined ? new Price(item.unitPrice) : undefined,
                 measurements: measurements,
-                isHighThickness: item.isHighThickness
+                isHighThickness: item.isHighThickness,
+                hasPrimer: item.hasPrimer
             })
         })
 
