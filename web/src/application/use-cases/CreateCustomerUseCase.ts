@@ -5,7 +5,14 @@ interface CreateCustomerDTO {
     name: string
     email?: string
     phone?: string
-    rateId?: string
+    address?: string
+    notes?: string
+
+    // Pricing
+    pricePerLinearMeter?: number
+    pricePerSquareMeter?: number
+    minimumRate?: number
+    specialPieces?: Array<{ name: string; price: number }>
 }
 
 export class CreateCustomerUseCase {
@@ -30,7 +37,15 @@ export class CreateCustomerUseCase {
             name: data.name,
             email: data.email,
             phone: data.phone,
-            rateId: data.rateId,
+            address: data.address,
+            notes: data.notes,
+
+            // Pricing Defaults
+            pricePerLinearMeter: data.pricePerLinearMeter || 0,
+            pricePerSquareMeter: data.pricePerSquareMeter || 0,
+            minimumRate: data.minimumRate || 0,
+            specialPieces: data.specialPieces || [],
+
             createdAt: new Date(),
             updatedAt: new Date()
         })

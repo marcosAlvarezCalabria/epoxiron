@@ -45,6 +45,7 @@ export async function apiClient<T>(
   const response = await fetch(url, {
     ...restOptions,
     headers: requestHeaders,
+    cache: 'no-store' // Ensure we never read from browser cache for API calls
   })
 
   // Handle errors

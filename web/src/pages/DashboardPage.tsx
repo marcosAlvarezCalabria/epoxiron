@@ -21,7 +21,7 @@ export function DashboardPage() {
 
   // Calculate stats
   const todayDeliveryNotes = deliveryNotes?.length || 0
-  const pendingNotes = deliveryNotes?.filter(note => note.status === 'pending').length || 0
+  const pendingNotes = deliveryNotes?.filter(note => note.status === 'validated').length || 0
   const totalPieces = deliveryNotes?.reduce((total, note) =>
     total + note.items.reduce((sum, item) => sum + item.quantity, 0), 0
   ) || 0
@@ -36,19 +36,19 @@ export function DashboardPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      reviewed: {
+      finalized: {
         bg: 'bg-green-900/30',
         text: 'text-green-400',
         border: 'border-green-800/30',
         icon: 'check_circle',
-        label: 'Revisado'
+        label: 'Finalizado'
       },
-      pending: {
+      validated: {
         bg: 'bg-amber-900/30',
         text: 'text-amber-400',
         border: 'border-amber-800/30',
         icon: 'schedule',
-        label: 'Pendiente'
+        label: 'Validado'
       },
       draft: {
         bg: 'bg-blue-900/30',
@@ -108,15 +108,6 @@ export function DashboardPage() {
                 <path d="M7 10l5 5 5-5z" />
               </svg>
             </button>
-            <button
-              onClick={() => navigate('/rates')}
-              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
-            >
-              Tarifas
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
-            </button>
           </div>
 
           {/* User Actions */}
@@ -151,12 +142,6 @@ export function DashboardPage() {
             className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Clientes</p>
-          </button>
-          <button
-            onClick={() => navigate('/rates')}
-            className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
-          >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Tarifas</p>
           </button>
         </div>
       </header>

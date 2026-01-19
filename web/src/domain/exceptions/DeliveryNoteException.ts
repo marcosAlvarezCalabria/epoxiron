@@ -21,6 +21,7 @@ export type DeliveryNoteErrorCode =
   | 'DELIVERY_NOTE_NOT_EDITABLE'
   | 'ITEM_NOT_FOUND'
   | 'INVALID_STATUS'
+  | 'ITEMS_WITHOUT_PRICE'
 
 export class DeliveryNoteException extends Error {
   public readonly code: DeliveryNoteErrorCode
@@ -79,6 +80,13 @@ export class DeliveryNoteException extends Error {
     return new DeliveryNoteException(
       'INVALID_STATUS',
       `Cannot change status from '${currentStatus}' to '${desiredStatus}'`
+    )
+  }
+
+  static itemsWithoutPrice(itemNames: string): DeliveryNoteException {
+    return new DeliveryNoteException(
+      'ITEMS_WITHOUT_PRICE',
+      `Cannot validate: The following items do not have a calculated price: ${itemNames}`
     )
   }
 }

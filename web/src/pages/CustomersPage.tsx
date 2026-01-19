@@ -5,18 +5,20 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import { useAuthStore } from '../features/auth/stores/authStore'
 import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from '@/features/customers/hooks/useCustomers'
-import { useRates } from '@/features/rates/hooks/useRates'
+
 import { CustomerForm } from '../features/customers/components/CustomerForm'
 
 export function CustomersPage() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const { data: customers, isLoading } = useCustomers()
-  const { data: rates } = useRates()
+
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer()
   const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer()
+  const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer()
 
   const [showForm, setShowForm] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<any>(null)
@@ -49,7 +51,11 @@ export function CustomersPage() {
         { id: editingCustomer.id, ...customerData },
         {
           onSuccess: () => {
+            toast.success('Cliente actualizado correctamente')
             handleCloseForm()
+          },
+          onError: (error: any) => {
+            toast.error(error.message || 'Error al actualizar cliente')
           }
         }
       )
@@ -57,36 +63,41 @@ export function CustomersPage() {
       // Crear nuevo cliente
       createCustomer(customerData, {
         onSuccess: () => {
+          toast.success('Cliente creado correctamente')
           handleCloseForm()
+        },
+        onError: (error: any) => {
+          if (error.message?.includes('already exists')) {
+            toast.error('Ya existe un cliente con este nombre')
+          } else {
+            toast.error(error.message || 'Error al crear cliente')
+          }
         }
       })
     }
   }
 
-  const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer()
+  const handleDeleteCustomer = () => {
+    if (!editingCustomer) return
 
-  // ...
-
-  const handleDeleteCustomer = (customerId: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
-      deleteCustomer(customerId)
+    if (confirm(`¿Estás seguro de que quieres eliminar al cliente "${editingCustomer.name}"?`)) {
+      deleteCustomer(editingCustomer.id, {
+        onSuccess: () => {
+          toast.success('Cliente eliminado correctamente')
+          handleCloseForm()
+        },
+        onError: () => {
+          toast.error('Error al eliminar cliente')
+        }
+      })
     }
-  }
-
-  const getRateName = (rateId: string) => {
-    if (!rates || !rateId) return 'Sin tarifa'
-    const rate = rates.find(r => r.id === rateId)
-    if (!rate) return 'Sin tarifa'
-
-    // Simplemente mostrar "Tarifa asignada" ya que las tarifas son específicas por cliente
-    return 'Tarifa asignada'
   }
 
   const filteredCustomers = customers?.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
 
-  const isFormLoading = isCreating || isUpdating
+  const isFormLoading = isCreating || isUpdating || isDeleting
 
   return (
     <div className="bg-gray-900 font-sans text-gray-200 min-h-screen">
@@ -106,44 +117,29 @@ export function CustomersPage() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 px-4 flex-1 justify-center">
             <button
-              onClick={() => navigate('/delivery-notes')}
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
+            >
+              Resumen del Día
+            </button>
+            <button
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
             >
               Albaranes
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
             </button>
             <button
-              className="flex items-center gap-1 text-blue-600 font-bold text-sm hover:text-blue-400 transition-colors"
+              className="flex items-center gap-1 text-blue-600 font-bold text-sm"
             >
-              Clientes
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => navigate('/rates')}
-              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
-            >
-              Tarifas
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
+              Clientes y Tarifas
             </button>
           </div>
 
           {/* User Actions */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
-              title="Dashboard"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-              </svg>
-            </button>
+            <div className="text-sm text-gray-300">
+              Hola, {user?.email?.getValue().split('@')[0]}
+            </div>
             <button
               onClick={handleLogout}
               className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
@@ -168,12 +164,6 @@ export function CustomersPage() {
             className="flex flex-col items-center justify-center border-b-[3px] border-blue-600 text-blue-600 pb-[10px] pt-3 whitespace-nowrap"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Clientes</p>
-          </button>
-          <button
-            onClick={() => navigate('/rates')}
-            className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
-          >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Tarifas</p>
           </button>
         </div>
       </header>
@@ -218,24 +208,12 @@ export function CustomersPage() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - Simplified */}
         <div className="px-4 mb-6">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 grid grid-cols-2 md:grid-cols-2 gap-6 items-center">
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Total Clientes</p>
               <p className="text-2xl font-bold text-white">{customers?.length || 0}</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Con Tarifa</p>
-              <p className="text-2xl font-bold text-green-400">
-                {customers?.filter(c => c.rateId).length || 0}
-              </p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Sin Tarifa</p>
-              <p className="text-2xl font-bold text-red-400">
-                {customers?.filter(c => !c.rateId).length || 0}
-              </p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Filtrados</p>
@@ -265,7 +243,6 @@ export function CustomersPage() {
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Email</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Teléfono</th>
-                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Tarifa</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acciones</th>
                     </tr>
                   </thead>
@@ -275,6 +252,9 @@ export function CustomersPage() {
                         <td className="px-4 py-4">
                           <div>
                             <p className="font-bold text-white">{customer.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {customer.pricePerLinearMeter > 0 ? 'Con tarifa' : 'Sin precios'}
+                            </p>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-gray-200">
@@ -305,23 +285,6 @@ export function CustomersPage() {
                             <span className="text-gray-500 text-sm">Sin teléfono</span>
                           )}
                         </td>
-                        <td className="px-4 py-4 text-gray-200">
-                          {customer.rateId ? (
-                            <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-green-900/30 text-green-400 border border-green-800/30">
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                              </svg>
-                              {getRateName(customer.rateId)}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-red-900/30 text-red-400 border border-red-800/30">
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 7 9.5l5 5 5-5L15.5 8z" />
-                              </svg>
-                              Sin tarifa
-                            </span>
-                          )}
-                        </td>
                         <td className="px-4 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             <button
@@ -332,16 +295,6 @@ export function CustomersPage() {
                             >
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCustomer(customer.id)}
-                              disabled={isFormLoading}
-                              className="p-2 text-red-600 hover:bg-red-600/20 rounded-lg transition-colors disabled:opacity-50"
-                              title="Eliminar cliente"
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                               </svg>
                             </button>
                           </div>
@@ -380,12 +333,13 @@ export function CustomersPage() {
         </div>
       </main>
 
-      {/* Reemplazar el modal placeholder con el nuevo CustomerForm */}
+      {/* Modal CustomerForm */}
       {showForm && (
         <CustomerForm
           customer={editingCustomer}
           onSubmit={handleSubmitCustomer}
           onCancel={handleCloseForm}
+          onDelete={editingCustomer ? handleDeleteCustomer : undefined}
           isLoading={isFormLoading}
         />
       )}

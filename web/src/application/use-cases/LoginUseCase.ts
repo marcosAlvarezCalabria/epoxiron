@@ -12,7 +12,7 @@ import { User } from '../../domain/entities/User'
 import { Email } from '../../domain/value-objects/Email'
 import { Token } from '../../domain/value-objects/Token'
 import { AuthException } from '@/domain/exceptions/AuthException'
-import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
+import type { AuthRepository } from '../../domain/repositories/AuthRepository'
 
 export type LoginInput = {
   email: string

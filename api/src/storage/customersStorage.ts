@@ -1,88 +1,155 @@
-// 📝 WHAT: Temporary in-memory storage for customers
-// 🎯 WHY: Need to store customers somewhere
-// 🔍 HOW: Using an array for now (later will be a real database)
 
-import { Customer } from '../types/customer'
 
-// 🏗️ ANALOGY: Like a materials warehouse on the construction site
-// For now it's a simple array, later it will be a real database
+// 📝 WHAT: Database storage for customers using Prisma
+// 🎯 WHY: Persistent storage instead of in-memory array
 
-// 📦 STORAGE - Empty array at start
-let customers: Customer[] = []
-
-// 🔧 STORAGE OPERATIONS (CRUD)
+import { Customer as DomainCustomer } from '../types/customer'
+import { prisma } from '../prisma'
 
 /**
- * 📋 LIST ALL - Like doing inventory of the warehouse
- * Returns all existing customers
+ * 🔄 MAPPER: Helper to convert Prisma DB result to Domain Model
  */
-export function findAll(): Customer[] {
-  return customers
-}
-
-/**
- * 🔍 FIND ONE BY ID - Like searching for a specific material by code
- * @param id - Customer ID to find
- * @returns Found customer or undefined if doesn't exist
- */
-export function findById(id: string): Customer | undefined {
-  return customers.find(customer => customer.id === id)
-}
-
-/**
- * ➕ CREATE NEW - Like adding new material to the warehouse
- * @param customer - Customer to save (already has ID, dates, etc.)
- * @returns The customer we just saved
- */
-export function create(customer: Customer): Customer {
-  customers.push(customer)  // Add it to the array
-  return customer
-}
-
-/**
- * ✏️ UPDATE - Like replacing a material with a new one
- * @param id - Customer ID to update
- * @param updates - New data (only what we want to change)
- * @returns Updated customer or undefined if doesn't exist
- */
-export function update(id: string, updates: Partial<Customer>): Customer | undefined {
-  // 1. Find the customer's index in the array
-  const index = customers.findIndex(customer => customer.id === id)
-
-  // 2. If doesn't exist, return undefined
-  if (index === -1) {
-    return undefined
+function toDomain(dbCustomer: any): DomainCustomer {
+  return {
+    ...dbCustomer,
+    // Map specialPrices (DB) -> specialPieces (Domain)
+    specialPieces: dbCustomer.specialPrices?.map((sp: any) => ({
+      name: sp.name,
+      price: sp.price
+    })) || []
   }
+}
 
-  // 3. Update the customer (merge old data with new)
-  customers[index] = {
-    ...customers[index],   // Old data
-    ...updates,            // New data (overwrites old)
-    updatedAt: new Date()  // Update the date
+/**
+ * 📋 LIST ALL
+ */
+export async function findAll(): Promise<DomainCustomer[]> {
+  const customers = await prisma.customer.findMany({
+    include: {
+      specialPrices: true
+    }
+  })
+
+  return customers.map(toDomain)
+}
+
+/**
+ * 🔍 FIND ONE BY ID
+ */
+export async function findById(id: string): Promise<DomainCustomer | undefined> {
+  const customer = await prisma.customer.findUnique({
+    where: { id },
+    include: { specialPrices: true }
+  })
+
+  if (!customer) return undefined
+  return toDomain(customer)
+}
+
+/**
+ * ➕ CREATE NEW
+ */
+export async function create(customer: DomainCustomer): Promise<DomainCustomer> {
+  const { specialPieces, ...customerData } = customer
+
+  // Remove ID if present to let DB generate it, or use it if we want to enforce it
+  // Usually clean architectures separate CreateRequest from DomainEntity, but here we reuse
+
+  const newCustomer = await prisma.customer.create({
+    data: {
+      id: customerData.id,
+      name: customerData.name,
+      email: customerData.email,
+      phone: customerData.phone,
+      pricePerLinearMeter: customerData.pricePerLinearMeter,
+      pricePerSquareMeter: customerData.pricePerSquareMeter,
+      minimumRate: customerData.minimumRate,
+      createdAt: customerData.createdAt,
+      updatedAt: customerData.updatedAt,
+
+      // Map SpecialPiece[] to Prisma create structure
+      specialPrices: {
+        create: specialPieces?.map(sp => ({
+          name: sp.name,
+          price: sp.price
+        }))
+      }
+    },
+    include: { specialPrices: true }
+  })
+
+  return toDomain(newCustomer)
+}
+
+/**
+ * ✏️ UPDATE
+ */
+export async function update(id: string, updates: Partial<DomainCustomer>): Promise<DomainCustomer | undefined> {
+  const { specialPieces, ...dataToUpdate } = updates
+
+  // Clean undefined fields to avoid overwriting with null/undefined if Prisma behaves oddly (though usually it ignores undefined)
+  // Warning: We are using "Partial<DomainCustomer>", so we need to be careful with types compatible with Prisma UpdateInput
+
+  if (specialPieces) {
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.customer.update({
+        where: { id },
+        data: {
+          name: dataToUpdate.name,
+          email: dataToUpdate.email,
+          phone: dataToUpdate.phone,
+          pricePerLinearMeter: dataToUpdate.pricePerLinearMeter,
+          pricePerSquareMeter: dataToUpdate.pricePerSquareMeter,
+          minimumRate: dataToUpdate.minimumRate,
+        }
+      })
+
+      await tx.specialPrice.deleteMany({ where: { customerId: id } })
+      await tx.specialPrice.createMany({
+        data: specialPieces.map(sp => ({
+          name: sp.name,
+          price: sp.price,
+          customerId: id
+        }))
+      })
+
+      return tx.customer.findUnique({ where: { id }, include: { specialPrices: true } })
+    })
+
+    if (!result) return undefined
+    return toDomain(result)
+  } else {
+    const updated = await prisma.customer.update({
+      where: { id },
+      data: {
+        name: dataToUpdate.name,
+        email: dataToUpdate.email,
+        phone: dataToUpdate.phone,
+        pricePerLinearMeter: dataToUpdate.pricePerLinearMeter,
+        pricePerSquareMeter: dataToUpdate.pricePerSquareMeter,
+        minimumRate: dataToUpdate.minimumRate,
+      },
+      include: { specialPrices: true }
+    })
+    return toDomain(updated)
   }
-
-  return customers[index]
 }
 
 /**
- * 🗑️ DELETE - Like removing a material from the warehouse
- * @param id - Customer ID to delete
- * @returns true if deleted, false if didn't exist
+ * 🗑️ DELETE
  */
-export function deleteById(id: string): boolean {
-  const initialLength = customers.length
-
-  // Filter = keep all EXCEPT the one we want to delete
-  customers = customers.filter(customer => customer.id !== id)
-
-  // If size changed, we did delete it
-  return customers.length < initialLength
+export async function deleteById(id: string): Promise<boolean> {
+  try {
+    await prisma.customer.delete({ where: { id } })
+    return true
+  } catch (error) {
+    return false
+  }
 }
 
 /**
- * 🧹 CLEAR ALL - Like emptying the warehouse completely
- * (Useful for testing)
+ * 🧹 CLEAR ALL (For tests)
  */
-export function clearAll(): void {
-  customers = []
+export async function clearAll(): Promise<void> {
+  await prisma.customer.deleteMany()
 }

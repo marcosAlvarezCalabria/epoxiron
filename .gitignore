@@ -35,3 +35,4 @@ coverage/
 
 # Storybook
 storybook-static/
+/generated/prisma

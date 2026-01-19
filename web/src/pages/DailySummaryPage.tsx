@@ -24,6 +24,8 @@ export function DailySummaryPage() {
   })
   const [selectedCustomer, setSelectedCustomer] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
 
   // Diálogo de confirmación para eliminar albarán
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -39,14 +41,24 @@ export function DailySummaryPage() {
   // Filtrar albaranes
   const filteredNotes = deliveryNotes.filter(note => {
     const noteDate = note.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0]
+
+    // Filters
     const matchesDate = !selectedDate || noteDate === selectedDate
     const matchesCustomer = !selectedCustomer || note.customerId === selectedCustomer
     const matchesStatus = !selectedStatus || note.status === selectedStatus
 
-    return matchesDate && matchesCustomer && matchesStatus
+    // Search Term (ID or Customer Name)
+    const customer = customers.find(c => c.id === note.customerId)
+    const customerName = customer?.name || ''
+    const matchesSearch = searchTerm === '' ||
+      note.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (note.number && note.number.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    return matchesDate && matchesCustomer && matchesStatus && matchesSearch
   })
 
-  // Stats del día
+  // Stats del día (always relative to today regardless of filters)
   const todayNotes = deliveryNotes.filter(note => {
     const today = new Date().toISOString().split('T')[0]
     const noteDate = note.createdAt?.split('T')[0] || today
@@ -56,9 +68,9 @@ export function DailySummaryPage() {
   const stats = {
     total: todayNotes.length,
     borradores: todayNotes.filter(n => n.status === 'draft').length,
-    validados: todayNotes.filter(n => n.status === 'pending').length,
-    finalizados: todayNotes.filter(n => n.status === 'reviewed').length,
-    correctos: todayNotes.filter(n => n.status === 'reviewed').length,
+    validados: todayNotes.filter(n => n.status === 'validated').length,
+    finalizados: todayNotes.filter(n => n.status === 'finalized').length,
+    correctos: todayNotes.filter(n => n.status === 'finalized').length,
     sinPrecios: todayNotes.filter(n => n.items?.some(item => !item.totalPrice || item.totalPrice === 0)).length
   }
 
@@ -70,8 +82,8 @@ export function DailySummaryPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-900/30 text-gray-400 border-gray-800/30'
-      case 'pending': return 'bg-yellow-900/30 text-yellow-400 border-yellow-800/30'
-      case 'reviewed': return 'bg-green-900/30 text-green-400 border-green-800/30'
+      case 'validated': return 'bg-yellow-900/30 text-yellow-400 border-yellow-800/30'
+      case 'finalized': return 'bg-green-900/30 text-green-400 border-green-800/30'
       default: return 'bg-gray-900/30 text-gray-400 border-gray-800/30'
     }
   }
@@ -79,8 +91,8 @@ export function DailySummaryPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'draft': return 'Borrador'
-      case 'pending': return 'Validado'
-      case 'reviewed': return 'Finalizado'
+      case 'validated': return 'Validado'
+      case 'finalized': return 'Finalizado'
       default: return 'Desconocido'
     }
   }
@@ -103,6 +115,8 @@ export function DailySummaryPage() {
         const weekStart = new Date(today)
         weekStart.setDate(today.getDate() - today.getDay())
         return weekStart.toISOString().split('T')[0]
+      case 'all':
+        return ''
       default:
         return selectedDate
     }
@@ -154,25 +168,13 @@ export function DailySummaryPage() {
             <button
               className="flex items-center gap-1 text-blue-600 font-bold text-sm"
             >
-              Resumen del Día
+              Panel de Control
             </button>
             <button
               onClick={() => navigate('/customers')}
               className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
             >
               Clientes
-            </button>
-            <button
-              onClick={() => navigate('/rates')}
-              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
-            >
-              Tarifas
-            </button>
-            <button
-              onClick={() => navigate('/delivery-notes')}
-              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
-            >
-              Albaranes
             </button>
           </div>
 
@@ -198,25 +200,13 @@ export function DailySummaryPage() {
           <button
             className="flex flex-col items-center justify-center border-b-[3px] border-blue-600 text-blue-600 pb-[10px] pt-3 whitespace-nowrap"
           >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Resumen</p>
+            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Panel</p>
           </button>
           <button
             onClick={() => navigate('/customers')}
             className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
           >
             <p className="text-sm font-bold leading-normal tracking-[0.015em]">Clientes</p>
-          </button>
-          <button
-            onClick={() => navigate('/rates')}
-            className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
-          >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Tarifas</p>
-          </button>
-          <button
-            onClick={() => navigate('/delivery-notes')}
-            className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
-          >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Albaranes</p>
           </button>
         </div>
       </header>
@@ -226,9 +216,9 @@ export function DailySummaryPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 pt-6 pb-2">
           <div>
             <h2 className="text-white tracking-tight text-2xl font-bold leading-tight">
-              Resumen del Día
+              Panel de Control
             </h2>
-            <p className="text-gray-400 text-sm">Control diario de albaranes y avisos de precios faltantes</p>
+            <p className="text-gray-400 text-sm">Resumen diario y gestión centralizada de albaranes</p>
           </div>
           <div className="mt-4 sm:mt-0">
             <button
@@ -245,7 +235,7 @@ export function DailySummaryPage() {
 
         {/* Stats Cards - Métricas del día */}
         <div className="px-4 mb-6">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 grid grid-cols-2 md:grid-cols-6 gap-4 items-center">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Total Hoy</p>
               <p className="text-2xl font-bold text-white">{stats.total}</p>
@@ -262,114 +252,46 @@ export function DailySummaryPage() {
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Finalizados</p>
               <p className="text-2xl font-bold text-blue-400">{stats.finalizados}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Correctos</p>
-              <p className="text-2xl font-bold text-green-400">{stats.correctos}</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">⚠️ Sin Precios</p>
-              <p className="text-2xl font-bold text-red-400">{stats.sinPrecios}</p>
-            </div>
           </div>
         </div>
 
-        {/* Filtros */}
+        {/* Barra de Búsqueda y Acciones */}
         <div className="px-4 mb-6">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
-            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <div className="flex gap-4 items-center">
+            {/* Buscador - Ahora ocupa todo el ancho menos el botón de filtros */}
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Buscar por ID, cliente o número de albarán..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-xl text-white bg-gray-800 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-12 pl-11 pr-4 transition-all focus:outline-none placeholder-gray-500 shadow-sm"
+              />
+              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+              </svg>
+            </div>
+
+            {/* Botón Filtros */}
+            <button
+              onClick={() => setShowFilters(true)}
+              className={`flex items-center justify-center h-12 px-4 rounded-xl border transition-colors shadow-sm relative ${selectedCustomer || selectedStatus || selectedDate !== getDatePreset('today')
+                ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700'
+                : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                }`}
+            >
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h8v-2h-8V9h8V7h-8V5h8V3h-8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2h-8z" />
               </svg>
-              Filtros
-            </h3>
+              <span className="font-bold hidden sm:inline">Filtros</span>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Date Presets */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Fecha</label>
-                <div className="flex gap-2 mb-2 flex-wrap">
-                  <button
-                    onClick={() => setSelectedDate(getDatePreset('today'))}
-                    className={`px-3 py-1 rounded-lg text-xs transition-colors ${selectedDate === getDatePreset('today')
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                  >
-                    Hoy
-                  </button>
-                  <button
-                    onClick={() => setSelectedDate(getDatePreset('yesterday'))}
-                    className={`px-3 py-1 rounded-lg text-xs transition-colors ${selectedDate === getDatePreset('yesterday')
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                  >
-                    Ayer
-                  </button>
-                  <button
-                    onClick={() => setSelectedDate(getDatePreset('week'))}
-                    className={`px-3 py-1 rounded-lg text-xs transition-colors ${selectedDate === getDatePreset('week')
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                  >
-                    Semana
-                  </button>
-                </div>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all focus:outline-none"
-                />
-              </div>
-
-              {/* Customer Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Cliente</label>
-                <select
-                  value={selectedCustomer}
-                  onChange={(e) => setSelectedCustomer(e.target.value)}
-                  className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all focus:outline-none"
-                >
-                  <option value="">Todos los clientes</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Estado</label>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-10 px-3 transition-all focus:outline-none"
-                >
-                  <option value="">Todos los estados</option>
-                  <option value="draft">Borrador</option>
-                  <option value="pending">Validado</option>
-                  <option value="reviewed">Finalizado</option>
-                </select>
-              </div>
-
-              {/* Clear Filters */}
-              <div className="flex items-end">
-                <button
-                  onClick={() => {
-                    setSelectedDate(new Date().toISOString().split('T')[0])
-                    setSelectedCustomer('')
-                    setSelectedStatus('')
-                  }}
-                  className="w-full h-10 bg-gray-700 text-gray-300 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium"
-                >
-                  Limpiar filtros
-                </button>
-              </div>
-            </div>
+              {/* Badge count */}
+              {(selectedCustomer || selectedStatus || selectedDate !== getDatePreset('today')) && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-gray-900">
+                  {Number(!!selectedCustomer) + Number(!!selectedStatus) + Number(selectedDate !== getDatePreset('today'))}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -381,7 +303,7 @@ export function DailySummaryPage() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22 6l-8 4-8-4V4l8 4 8-4v2zM2 8l8 4v8l-8-4V8zm12 12V12l8-4v8l-8 4z" />
                 </svg>
-                Albaranes del Día
+                {selectedDate && selectedDate === getDatePreset('today') ? 'Albaranes del Día' : 'Listado de Albaranes'}
               </h3>
               <span className="text-gray-400 text-sm">{filteredNotes.length} albaranes</span>
             </div>
@@ -406,11 +328,19 @@ export function DailySummaryPage() {
                         !item.totalPrice || item.totalPrice === 0
                       ) || false
 
+                      const handleDeleteClick = (note: any, customerName: string) => {
+                        setDeleteDialog({
+                          isOpen: true,
+                          noteId: note.id,
+                          noteName: `${customerName} - ${note.number || 'Borrador'}`
+                        })
+                      }
+
                       return (
                         <tr key={note.id} className="hover:bg-white/5 transition-colors">
                           <td className="px-4 py-4">
                             <div>
-                              <p className="font-bold text-white">{note.id}</p>
+                              <p className="font-bold text-white">{note.number || '---'}</p>
                               <p className="text-gray-400 text-xs">{note.createdAt?.split('T')[0]}</p>
                             </div>
                           </td>
@@ -464,7 +394,7 @@ export function DailySummaryPage() {
                                 </button>
                               )}
 
-                              {note.status === 'pending' && (
+                              {note.status === 'validated' && (
                                 <button
                                   onClick={() => handleMarkAsCorrect(note.id)}
                                   className="p-2 text-green-600 hover:bg-green-600/20 rounded-lg transition-colors"
@@ -517,6 +447,119 @@ export function DailySummaryPage() {
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
         </svg>
       </button>
+
+      {/* Modal Filters */}
+      {showFilters && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-gray-800 rounded-2xl w-full max-w-lg border border-gray-700 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h8v-2h-8V9h8V7h-8V5h8V3h-8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2h-8z" />
+                </svg>
+                Filtros Avanzados
+              </h3>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="text-gray-400 hover:text-white p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+
+              {/* Date Filter */}
+              <div>
+                <label className="block text-sm font-bold text-gray-300 mb-3">Fecha</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                  {['today', 'yesterday', 'week', 'all'].map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => setSelectedDate(getDatePreset(preset))}
+                      className={`py-2 px-1 rounded-lg text-xs font-semibold transition-all border ${(preset === 'all' ? selectedDate === '' : selectedDate === getDatePreset(preset))
+                          ? 'bg-blue-600/20 text-blue-400 border-blue-600/50'
+                          : 'bg-gray-700/50 text-gray-400 border-gray-700 hover:border-gray-600 hover:bg-gray-700'
+                        }`}
+                    >
+                      {preset === 'today' && 'Hoy'}
+                      {preset === 'yesterday' && 'Ayer'}
+                      {preset === 'week' && 'Esta Semana'}
+                      {preset === 'all' && 'Todos'}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-11 px-4 transition-all focus:outline-none"
+                />
+              </div>
+
+              {/* Status & Customer Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-2">Estado</label>
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-11 px-3 transition-all focus:outline-none appearance-none"
+                  >
+                    <option value="">Cualquiera</option>
+                    <option value="draft">Borrador</option>
+                    <option value="validated">Validado</option>
+                    <option value="finalized">Finalizado</option>
+                  </select>
+                </div>
+
+                {/* Customer Filter */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-2">Cliente</label>
+                  <select
+                    value={selectedCustomer}
+                    onChange={(e) => setSelectedCustomer(e.target.value)}
+                    className="w-full rounded-xl text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/40 h-11 px-3 transition-all focus:outline-none appearance-none"
+                  >
+                    <option value="">Todos los clientes</option>
+                    {customers.map((customer) => (
+                      <option key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-700 bg-gray-800/50 flex gap-3">
+              <button
+                onClick={() => {
+                  setSelectedDate(new Date().toISOString().split('T')[0])
+                  setSelectedCustomer('')
+                  setSelectedStatus('')
+                }}
+                className="flex-1 h-11 rounded-xl bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
+              >
+                Limpiar
+              </button>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="flex-[2] h-11 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Ver {filteredNotes.length} resultados
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Diálogo de confirmación */}
       <ConfirmDialog

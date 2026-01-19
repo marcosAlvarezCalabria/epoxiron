@@ -23,8 +23,11 @@ export interface UpdateDeliveryNoteInput {
         }
         unitPrice?: number
         notes?: string
+        hasPrimer?: boolean
+        isHighThickness?: boolean
     }>
     notes?: string
+    status?: 'draft' | 'validated' | 'finalized'
 }
 
 export interface UpdateDeliveryNoteOutput {
@@ -75,7 +78,9 @@ export class UpdateDeliveryNoteUseCase {
                 color: color,
                 quantity: itemInput.quantity,
                 measurements: measurements,
-                price: price
+                price: price,
+                isHighThickness: itemInput.isHighThickness,
+                hasPrimer: itemInput.hasPrimer
             })
         })
 
@@ -97,12 +102,29 @@ export class UpdateDeliveryNoteUseCase {
 
         const updatedDeliveryNote = new DeliveryNote({
             id: existingNote.id,
-            number: existingNote.number, // Preserve
+            number: existingNote.number,
             customerId: input.customerId,
+            customerName: existingNote.customerName,
             date: new Date(input.date),
-            status: existingNote.status, // Preserve status (update status is a separate use case usually)
+            status: existingNote.status, // Start with existing status, then transition if needed
             items: items
         })
+
+        // Handle Status Transitions
+        if (input.status && input.status !== existingNote.status) {
+            if (input.status === 'validated') {
+                updatedDeliveryNote.validate()
+            } else if (input.status === 'finalized') {
+                // If jumping from draft to finalized, validate first?
+                // Domain rules say: draft -> validated -> finalized.
+                if (existingNote.status === 'draft') {
+                    updatedDeliveryNote.validate()
+                }
+                updatedDeliveryNote.finalize()
+            } else if (input.status === 'draft') {
+                updatedDeliveryNote.reopen()
+            }
+        }
 
         // Save (Update)
         const savedDeliveryNote = await this.deliveryNoteRepository.update(updatedDeliveryNote)

@@ -1,9 +1,8 @@
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
+import { DailySummaryPage } from './pages/DailySummaryPage';
 import { CustomersPage } from './pages/CustomersPage';
-import { RatesPage } from './pages/RatesPage';
-import { DeliveryNotesPage } from './pages/DeliveryNotesPage';
+
 import { DeliveryNoteDetailsPage } from './pages/DeliveryNoteDetailsPage';
 import { CreateDeliveryNotePage } from './pages/CreateDeliveryNotePage';
 import { EditDeliveryNotePage } from './pages/EditDeliveryNotePage';
@@ -31,7 +30,7 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <DailySummaryPage />
             </ProtectedRoute>
           }
         />
@@ -43,21 +42,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/rates"
-          element={
-            <ProtectedRoute>
-              <RatesPage />
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/delivery-notes"
-          element={
-            <ProtectedRoute>
-              <DeliveryNotesPage />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/dashboard" replace />}
         />
         <Route
           path="/delivery-notes/new"
@@ -83,7 +71,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<div style={{ padding: '20px' }}>
           <h1>Página no encontrada</h1>
           <a href="/login">Volver al Login</a>

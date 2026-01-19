@@ -20,6 +20,8 @@ export interface DeliveryNoteItem {
   unitPrice?: number
   totalPrice: number
   notes?: string
+  hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export interface DeliveryNote {
@@ -28,7 +30,7 @@ export interface DeliveryNote {
   customerId: string
   customerName: string
   date: string
-  status: 'draft' | 'pending' | 'reviewed'
+  status: 'draft' | 'validated' | 'finalized'
   items: DeliveryNoteItem[]
   totalAmount: number
   notes?: string
@@ -38,15 +40,16 @@ export interface DeliveryNote {
 
 export interface CreateDeliveryNoteRequest {
   customerId: string
-  date: string
-  items: Omit<DeliveryNoteItem, 'id'>[]
+  date?: string
+  status?: 'draft' | 'validated' | 'finalized'
+  items?: Array<Omit<DeliveryNoteItem, 'id'>>
   notes?: string
 }
 
 export interface UpdateDeliveryNoteRequest {
   customerId?: string
   date?: string
-  status?: 'draft' | 'pending' | 'reviewed'
+  status?: 'draft' | 'validated' | 'finalized'
   items?: DeliveryNoteItem[]
   notes?: string
 }

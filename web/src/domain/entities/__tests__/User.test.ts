@@ -176,31 +176,7 @@ describe('User Entity', () => {
       expect(user.puedeEliminarClientes()).toBe(false)
     })
 
-    it('puedeVerTodasLasTarifas() should return true for admin', () => {
-      // Given: User admin
-      const user = new User({
-        id: '123',
-        email: new Email('admin@example.com'),
-        name: 'Admin',
-        role: 'admin'
-      })
 
-      // When/Then: Debe poder ver todas las tarifas
-      expect(user.puedeVerTodasLasTarifas()).toBe(true)
-    })
-
-    it('puedeVerTodasLasTarifas() should return false for regular user', () => {
-      // Given: User regular
-      const user = new User({
-        id: '123',
-        email: new Email('user@example.com'),
-        name: 'User',
-        role: 'user'
-      })
-
-      // When/Then: No debe poder ver todas las tarifas
-      expect(user.puedeVerTodasLasTarifas()).toBe(false)
-    })
 
     it('puedeModificarDatos() should return true for admin', () => {
       // Given: User admin

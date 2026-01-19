@@ -4,7 +4,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import authRoutes from './routes/authRoutes'
 import customerRoutes from './routes/customerRoutes'
-import rateRoutes from './routes/rateRoutes'
+
 import deliveryNoteRoutes from './routes/deliveryNoteRoutes'
 
 // 📝 CONFIGURACIÓN - Cargar variables de entorno
@@ -28,8 +28,8 @@ app.use('/api/auth', authRoutes)
 // Todas las rutas de customerRoutes estarán bajo /api/customers
 app.use('/api/customers', customerRoutes)
 
-// Todas las rutas de rateRoutes estarán bajo /api/rates
-app.use('/api/rates', rateRoutes)
+
+
 
 // Todas las rutas de deliveryNoteRoutes estarán bajo /api/delivery-notes
 app.use('/api/delivery-notes', deliveryNoteRoutes)

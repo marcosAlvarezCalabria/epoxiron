@@ -76,7 +76,7 @@ export function EditDeliveryNotePage() {
               Albaranes
             </button>
             <span>/</span>
-            <span className="text-blue-400">Editar #{deliveryNote.id}</span>
+            <span className="text-blue-400">Editar #{deliveryNote.number}</span>
           </div>
 
           {/* User Actions */}
@@ -102,14 +102,14 @@ export function EditDeliveryNotePage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 pt-6 pb-6">
           <div>
             <h2 className="text-white tracking-tight text-2xl font-bold leading-tight">
-              Editar Albarán #{deliveryNote.id}
+              Editar Albarán #{deliveryNote.number}
             </h2>
             <p className="text-gray-400 text-sm">
-              Estado: <span className={`font-medium ${deliveryNote.status === 'reviewed' ? 'text-green-400' :
-                deliveryNote.status === 'pending' ? 'text-yellow-400' : 'text-gray-400'
+              Estado: <span className={`font-medium ${deliveryNote.status === 'finalized' ? 'text-green-400' :
+                deliveryNote.status === 'validated' ? 'text-yellow-400' : 'text-gray-400'
                 }`}>
-                {deliveryNote.status === 'reviewed' ? 'Finalizado' :
-                  deliveryNote.status === 'pending' ? 'Validado' : 'Borrador'}
+                {deliveryNote.status === 'finalized' ? 'Finalizado' :
+                  deliveryNote.status === 'validated' ? 'Validado' : 'Borrador'}
               </span>
             </p>
           </div>

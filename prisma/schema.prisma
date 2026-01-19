@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id                  String  @id @default(uuid())
+  name                String
+  email               String?
+  phone               String?
+  pricePerLinearMeter Float   @default(0)
+  pricePerSquareMeter Float   @default(0)
+  minimumRate         Float   @default(0)
+
+  specialPrices SpecialPrice[]
+  deliveryNotes DeliveryNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SpecialPrice {
+  id         String   @id @default(uuid())
+  name       String
+  price      Float
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model DeliveryNote {
+  id           String   @id @default(uuid())
+  number       String   @unique // Human readable number e.g. ALB-2024-001
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id])
+  customerName String // Snapshot of customer name at creation
+
+  date        DateTime           @default(now())
+  status      DeliveryNoteStatus @default(DRAFT)
+  totalAmount Float              @default(0)
+  notes       String?
+
+  items DeliveryNoteItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DeliveryNoteItem {
+  id             String       @id @default(uuid())
+  deliveryNoteId String
+  deliveryNote   DeliveryNote @relation(fields: [deliveryNoteId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String
+  color       String
+
+  // Measurements
+  linearMeters Float?
+  squareMeters Float?
+  thickness    Float?
+
+  quantity   Int
+  unitPrice  Float
+  totalPrice Float
+  hasPrimer  Boolean @default(false)
+}
+
+enum DeliveryNoteStatus {
+  DRAFT
+  VALIDATED
+  FINALIZED
+}
