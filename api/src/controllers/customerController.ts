@@ -23,7 +23,7 @@ export async function listCustomers(req: Request, res: Response) {
   try {
 
     // 1. Get all customers from storage
-    const customers = customersStorage.findAll()
+    const customers = await customersStorage.findAll()
 
     // 2. Return successful response
     return res.status(200).json(customers)
@@ -45,7 +45,7 @@ export async function getCustomer(req: Request, res: Response) {
     const { id } = req.params
 
     // 2. Search for customer in storage
-    const customer = customersStorage.findById(id)
+    const customer = await customersStorage.findById(id)
 
     // 3. If doesn't exist, return 404 error
     if (!customer) {
@@ -117,7 +117,7 @@ export async function createCustomer(req: Request, res: Response) {
     }
 
     // 5. Save in storage
-    const savedCustomer = customersStorage.create(newCustomer)
+    const savedCustomer = await customersStorage.create(newCustomer)
 
     // 6. Return successful response with created customer
     return res.status(201).json(savedCustomer)
@@ -178,7 +178,7 @@ export async function updateCustomer(req: Request, res: Response) {
     if (specialPieces !== undefined) updates.specialPieces = specialPieces
 
     // 6. Update in storage
-    const updatedCustomer = customersStorage.update(id, updates)
+    const updatedCustomer = await customersStorage.update(id, updates)
 
     // 7. If doesn't exist, return 404 error
     if (!updatedCustomer) {
@@ -210,10 +210,10 @@ export async function deleteCustomer(req: Request, res: Response) {
     // (We skip this for now, we'll do it when we have the DeliveryNote entity)
 
     // 3. Find customer (to verify existence)
-    const customer = customersStorage.findById(id)
+    const customer = await customersStorage.findById(id)
 
     // 4. Delete from storage
-    const deleted = customersStorage.deleteById(id)
+    const deleted = await customersStorage.deleteById(id)
 
     // 5. If didn't exist, return 404 error
     if (!deleted) {

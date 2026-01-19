@@ -16,10 +16,7 @@ export class Price {
       throw new Error(`Price cannot be negative: ${value}`)
     }
 
-    const decimals = (value.toString().split('.')[1] || '').length
-    if (decimals > 2) {
-      throw new Error(`Price cannot have more than 2 decimals: ${value}`)
-    }
+
 
     this.value = Math.round(value * 100) / 100
   }

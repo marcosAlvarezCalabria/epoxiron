@@ -33,11 +33,11 @@ export async function listDeliveryNotes(req: Request, res: Response) {
     let notes: DeliveryNote[]
 
     if (customerId) {
-      notes = deliveryNotesStorage.findByCustomerId(customerId as string)
+      notes = await deliveryNotesStorage.findByCustomerId(customerId as string)
     } else if (status) {
-      notes = deliveryNotesStorage.findByStatus(status as DeliveryNote['status'])
+      notes = await deliveryNotesStorage.findByStatus(status as DeliveryNote['status'])
     } else {
-      notes = deliveryNotesStorage.findAll()
+      notes = await deliveryNotesStorage.findAll()
     }
 
     return res.json(notes)
@@ -54,7 +54,7 @@ export async function listDeliveryNotes(req: Request, res: Response) {
 export async function getDeliveryNote(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const note = deliveryNotesStorage.findById(id)
+    const note = await deliveryNotesStorage.findById(id)
 
     if (!note) {
       return res.status(404).json({ error: 'Delivery note not found' })
@@ -83,7 +83,7 @@ export async function createDeliveryNote(req: Request, res: Response) {
     const data: CreateDeliveryNoteRequest = req.body
 
     // 1. Validate customer exists
-    const customer = customersStorage.findById(data.customerId)
+    const customer = await customersStorage.findById(data.customerId)
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' })
     }
@@ -91,6 +91,9 @@ export async function createDeliveryNote(req: Request, res: Response) {
     // 2. Get pricing (now embedded in customer)
     // We treat the customer itself as the rate provider
     const rate = customer
+
+    // Helper to round to 2 decimals
+    const round = (num: number) => Math.round(num * 100) / 100
 
     // 3. Calculate prices for each item
     const itemsWithPrices: DeliveryNoteItem[] = data.items.map(item => {
@@ -125,11 +128,14 @@ export async function createDeliveryNote(req: Request, res: Response) {
         }
       }
 
+      // Round Unit Price
+      unitPrice = round(unitPrice)
+
       return {
         ...item,
         id: nanoid(),
         unitPrice,
-        totalPrice: unitPrice * item.quantity
+        totalPrice: round(unitPrice * item.quantity)
       }
     })
 
@@ -142,7 +148,7 @@ export async function createDeliveryNote(req: Request, res: Response) {
     // 5. Create delivery note
     const newNote: DeliveryNote = {
       id: nanoid(),
-      number: deliveryNotesStorage.getNextNumber(), // Sequential number like ALB-2026-001
+      number: await deliveryNotesStorage.getNextNumber(), // Sequential number like ALB-2026-001
       customerId: data.customerId,
       customerName: customer.name,
       date: data.date ? new Date(data.date) : new Date(), // Convert string to Date
@@ -154,7 +160,7 @@ export async function createDeliveryNote(req: Request, res: Response) {
       updatedAt: new Date()
     }
 
-    const created = deliveryNotesStorage.create(newNote)
+    const created = await deliveryNotesStorage.create(newNote)
     return res.status(201).json(created)
   } catch (error) {
     console.error('Error creating delivery note:', error)
@@ -171,7 +177,7 @@ export async function updateDeliveryNote(req: Request, res: Response) {
     const { id } = req.params
     const data = req.body
 
-    const note = deliveryNotesStorage.findById(id)
+    const note = await deliveryNotesStorage.findById(id)
     if (!note) {
       return res.status(404).json({ error: 'Delivery note not found' })
     }
@@ -181,7 +187,7 @@ export async function updateDeliveryNote(req: Request, res: Response) {
       data.date = new Date(data.date)
     }
 
-    const updated = deliveryNotesStorage.update(id, data)
+    const updated = await deliveryNotesStorage.update(id, data)
     return res.json(updated)
   } catch (error) {
     console.error('Error updating delivery note:', error)
@@ -199,7 +205,7 @@ export async function deleteDeliveryNote(req: Request, res: Response) {
   try {
     const { id } = req.params
 
-    const note = deliveryNotesStorage.findById(id)
+    const note = await deliveryNotesStorage.findById(id)
     if (!note) {
       return res.status(404).json({ error: 'Delivery note not found' })
     }
@@ -211,7 +217,7 @@ export async function deleteDeliveryNote(req: Request, res: Response) {
       })
     }
 
-    const deleted = deliveryNotesStorage.remove(id)
+    const deleted = await deliveryNotesStorage.remove(id)
     if (!deleted) {
       return res.status(500).json({ error: 'Error deleting delivery note' })
     }
@@ -239,7 +245,7 @@ export async function updateDeliveryNoteStatus(req: Request, res: Response) {
       return res.status(400).json({ error: 'Invalid status' })
     }
 
-    const updated = deliveryNotesStorage.update(id, { status })
+    const updated = await deliveryNotesStorage.update(id, { status })
     if (!updated) {
       return res.status(404).json({ error: 'Delivery note not found' })
     }

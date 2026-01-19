@@ -1,0 +1,40 @@
+{
+  "name": "epoxiron",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "@types/pg": "^8.16.0",
+    "bcrypt": "^6.0.0",
+    "node-addon-api": "^8.5.0",
+    "node-gyp-build": "^4.8.4",
+    "pg": "^8.17.1",
+    "undici-types": "^7.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "dotenv": "^17.2.3",
+    "prisma": "^7.2.0",
+    "tsx": "^4.21.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcosAlvarezCalabria/epoxiron-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/marcosAlvarezCalabria/epoxiron-/issues"
+  },
+  "homepage": "https://github.com/marcosAlvarezCalabria/epoxiron-#readme"
+}
