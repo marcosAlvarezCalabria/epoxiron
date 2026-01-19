@@ -117,36 +117,29 @@ export function CustomersPage() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 px-4 flex-1 justify-center">
             <button
-              onClick={() => navigate('/delivery-notes')}
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
+            >
+              Resumen del Día
+            </button>
+            <button
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
             >
               Albaranes
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
             </button>
             <button
-              className="flex items-center gap-1 text-blue-600 font-bold text-sm hover:text-blue-400 transition-colors"
+              className="flex items-center gap-1 text-blue-600 font-bold text-sm"
             >
               Clientes y Tarifas
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
             </button>
-            {/* Rates link removed */}
           </div>
 
           {/* User Actions */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
-              title="Dashboard"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-              </svg>
-            </button>
+            <div className="text-sm text-gray-300">
+              Hola, {user?.email?.getValue().split('@')[0]}
+            </div>
             <button
               onClick={handleLogout}
               className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
