@@ -126,6 +126,14 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // 1. Check if ANY changes were made
+    if (JSON.stringify(formData) === JSON.stringify(initialFormData)) {
+      if (confirm('No has realizado ningún cambio. ¿Quieres salir sin guardar?')) {
+        onCancel()
+      }
+      return
+    }
+
     if (!validateForm()) {
       toast.error('Hay errores en el formulario. Por favor, revisa los campos en rojo.')
       return
