@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client';
+import { PrismaClient } from '../api/src/generated/client/client';
 import process from 'node:process';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -41,6 +41,9 @@ async function main() {
     // Helper to round to 2 decimals
     const round = (num: number) => Math.round(num * 100) / 100;
 
+    // Global counter for sequential delivery notes across all customers
+    let noteGlobalCounter = 1;
+
     for (let i = 1; i <= customerCount; i++) {
         const customerName = `Cliente Empresa ${i} S.L.`;
         const email = `contacto@empresa${i}.com`;
@@ -52,6 +55,7 @@ async function main() {
                 name: customerName,
                 email: email,
                 phone: `600${Math.floor(100000 + Math.random() * 900000)}`,
+                address: `Polígono Industrial ${i}, Calle Principal ${Math.floor(Math.random() * 100)}`,
                 pricePerLinearMeter: round(10 + Math.random() * 10),
                 pricePerSquareMeter: round(20 + Math.random() * 15),
                 minimumRate: 50,
@@ -66,7 +70,8 @@ async function main() {
 
         // Create 5 Delivery Notes for this Customer
         for (let j = 1; j <= notesPerCustomer; j++) {
-            const noteNumber = `ALB-2026-${i.toString().padStart(3, '0')}-${j.toString().padStart(3, '0')}`;
+            const noteNumber = `ALB-26-${noteGlobalCounter.toString().padStart(3, '0')}`;
+            noteGlobalCounter++;
 
             await prisma.deliveryNote.create({
                 data: {

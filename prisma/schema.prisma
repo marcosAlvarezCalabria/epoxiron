@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client"
+  output   = "../api/src/generated/client"
 }
 
 datasource db {
@@ -21,6 +22,8 @@ model Customer {
   name                String
   email               String?
   phone               String?
+  address             String?
+  notes               String?
   pricePerLinearMeter Float   @default(0)
   pricePerSquareMeter Float   @default(0)
   minimumRate         Float   @default(0)
@@ -44,7 +47,7 @@ model DeliveryNote {
   id           String   @id @default(uuid())
   number       String   @unique // Human readable number e.g. ALB-2024-001
   customerId   String
-  customer     Customer @relation(fields: [customerId], references: [id])
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   customerName String // Snapshot of customer name at creation
 
   date        DateTime           @default(now())

@@ -68,6 +68,26 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
     })) || []
   )
 
+  // Sync state with prop when it changes (e.g. data loaded)
+  useEffect(() => {
+    if (deliveryNote) {
+      setCustomerId(deliveryNote.customerId)
+      setNotes(deliveryNote.notes || '')
+      setItems(deliveryNote.items.map(item => ({
+        name: item.name || item.description,
+        quantity: Number(item.quantity) || 0,
+        racColor: item.racColor,
+        specialColor: item.specialColor,
+        linearMeters: item.measurements?.linearMeters ? Number(item.measurements.linearMeters) : undefined,
+        squareMeters: item.measurements?.squareMeters ? Number(item.measurements.squareMeters) : undefined,
+        thickness: item.measurements?.thickness ? Number(item.measurements.thickness) : undefined,
+        notes: item.notes,
+        hasPrimer: item.hasPrimer,
+        isHighThickness: item.isHighThickness
+      })))
+    }
+  }, [deliveryNote])
+
   // Estado del NUEVO item que se está creando (Formulario único)
   const [newItem, setNewItem] = useState<FormItem>(EMPTY_ITEM)
 

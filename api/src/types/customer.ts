@@ -14,6 +14,8 @@ export interface Customer {
   name: string            // Customer name (e.g., "John Doe", "Metal Workshop Inc")
   email?: string          // OPTIONAL - Customer email
   phone?: string          // OPTIONAL - Customer phone
+  address?: string        // OPTIONAL - Address
+  notes?: string          // OPTIONAL - Notes
 
   // PRICING (Embedded Rate)
   pricePerLinearMeter: number
@@ -31,6 +33,8 @@ export interface CreateCustomerRequest {
   name: string            // REQUIRED
   email?: string          // OPTIONAL
   phone?: string          // OPTIONAL
+  address?: string        // OPTIONAL
+  notes?: string          // OPTIONAL
 
   // PRICING (Now required directly on customer)
   pricePerLinearMeter?: number
@@ -45,6 +49,8 @@ export interface UpdateCustomerRequest {
   name?: string           // OPTIONAL
   email?: string          // OPTIONAL
   phone?: string          // OPTIONAL
+  address?: string        // OPTIONAL
+  notes?: string          // OPTIONAL
 
   // PRICING
   pricePerLinearMeter?: number

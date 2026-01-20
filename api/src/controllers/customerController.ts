@@ -81,6 +81,8 @@ export async function createCustomer(req: Request, res: Response) {
       name,
       email,
       phone,
+      address,
+      notes,
       pricePerLinearMeter,
       pricePerSquareMeter,
       minimumRate,
@@ -99,27 +101,48 @@ export async function createCustomer(req: Request, res: Response) {
       })
     }
 
-    // 4. Create the complete Customer object
+    // 4. VALIDATE: Pricing is required (except special pieces which are optional lists)
+    if (!pricePerLinearMeter || pricePerLinearMeter <= 0) {
+      return res.status(400).json({ message: 'Price per linear meter is required and must be greater than 0' })
+    }
+    if (!pricePerSquareMeter || pricePerSquareMeter <= 0) {
+      return res.status(400).json({ message: 'Price per square meter is required and must be greater than 0' })
+    }
+    if (!minimumRate || minimumRate <= 0) {
+      return res.status(400).json({ message: 'Minimum rate is required and must be greater than 0' })
+    }
+
+    // 5. VALIDATE: Special pieces prices
+    if (specialPieces && specialPieces.length > 0) {
+      for (const piece of specialPieces) {
+        if (!piece.price || piece.price <= 0) {
+          return res.status(400).json({ message: `Price for special piece "${piece.name}" is required` })
+        }
+      }
+    }
+
+    // 6. Create the complete Customer object
     const newCustomer: Customer = {
       id: randomUUID(),              // Generate unique ID (UUID)
       name: name.trim(),             // Clean spaces
       email: email?.trim(),
       phone: phone?.trim(),
+      address: address?.trim(),
+      notes: notes?.trim(),
 
-      // Default to 0 if not provided, to ensure type safety
-      pricePerLinearMeter: pricePerLinearMeter || 0,
-      pricePerSquareMeter: pricePerSquareMeter || 0,
-      minimumRate: minimumRate || 0,
+      pricePerLinearMeter,
+      pricePerSquareMeter,
+      minimumRate,
       specialPieces: specialPieces || [],
 
       createdAt: new Date(),         // Creation date
       updatedAt: new Date()          // Update date
     }
 
-    // 5. Save in storage
+    // 7. Save in storage
     const savedCustomer = await customersStorage.create(newCustomer)
 
-    // 6. Return successful response with created customer
+    // 8. Return successful response with created customer
     return res.status(201).json(savedCustomer)
   } catch (error) {
     console.error('Error creating customer:', error)
@@ -144,6 +167,8 @@ export async function updateCustomer(req: Request, res: Response) {
       name,
       email,
       phone,
+      address,
+      notes,
       pricePerLinearMeter,
       pricePerSquareMeter,
       minimumRate,
@@ -170,6 +195,8 @@ export async function updateCustomer(req: Request, res: Response) {
     if (name !== undefined) updates.name = name.trim()
     if (email !== undefined) updates.email = email.trim()
     if (phone !== undefined) updates.phone = phone.trim()
+    if (address !== undefined) updates.address = address.trim()
+    if (notes !== undefined) updates.notes = notes.trim()
 
     // Pricing updates
     if (pricePerLinearMeter !== undefined) updates.pricePerLinearMeter = pricePerLinearMeter
@@ -206,24 +233,29 @@ export async function deleteCustomer(req: Request, res: Response) {
     // 1. Get ID from parameters
     const { id } = req.params
 
-    // 2. TODO: Validate customer doesn't have associated delivery notes
-    // (We skip this for now, we'll do it when we have the DeliveryNote entity)
-
-    // 3. Find customer (to verify existence)
+    // 2. Find customer (to verify existence)
     const customer = await customersStorage.findById(id)
-
-    // 4. Delete from storage
-    const deleted = await customersStorage.deleteById(id)
-
-    // 5. If didn't exist, return 404 error
-    if (!deleted) {
+    if (!customer) {
       return res.status(404).json({ message: 'Customer not found' })
     }
 
-    // 6. Return successful response without content
+    // 3. Delete from storage
+    // NOTE: If using a real DB with Foreign Keys, this might fail if they have Delivery Notes
+    await customersStorage.deleteById(id)
+
+    // 4. Return successful response without content
     return res.status(204).send()  // 204 = No Content (success without body)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting customer:', error)
+
+    // Check for Prisma foreign key constraint error (P2003)
+    // Or generic "foreign key" message if using other driver
+    if (error.code === 'P2003' || error.message?.includes('foreign key')) {
+      return res.status(400).json({
+        message: 'Cannot delete customer because they have associated delivery notes. Please delete the delivery notes first.'
+      })
+    }
+
     return res.status(500).json({ message: 'Internal server error' })
   }
 }

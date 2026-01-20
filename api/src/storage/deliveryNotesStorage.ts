@@ -135,7 +135,7 @@ export async function update(id: string, data: Partial<DomainDeliveryNote>): Pro
   }
 
   if (items) {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       await tx.deliveryNote.update({
         where: { id },
         data: {
@@ -221,5 +221,6 @@ export async function getNextNumber(): Promise<string> {
   })
 
   const nextNumber = count + 1
-  return `ALB-${currentYear}-${nextNumber.toString().padStart(3, '0')}`
+  const shortYear = currentYear.toString().slice(-2)
+  return `ALB-${shortYear}-${nextNumber.toString().padStart(3, '0')}`
 }

@@ -61,6 +61,8 @@ export async function create(customer: DomainCustomer): Promise<DomainCustomer> 
       name: customerData.name,
       email: customerData.email,
       phone: customerData.phone,
+      address: customerData.address,
+      notes: customerData.notes,
       pricePerLinearMeter: customerData.pricePerLinearMeter,
       pricePerSquareMeter: customerData.pricePerSquareMeter,
       minimumRate: customerData.minimumRate,
@@ -91,13 +93,15 @@ export async function update(id: string, updates: Partial<DomainCustomer>): Prom
   // Warning: We are using "Partial<DomainCustomer>", so we need to be careful with types compatible with Prisma UpdateInput
 
   if (specialPieces) {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       await tx.customer.update({
         where: { id },
         data: {
           name: dataToUpdate.name,
           email: dataToUpdate.email,
           phone: dataToUpdate.phone,
+          address: dataToUpdate.address,
+          notes: dataToUpdate.notes,
           pricePerLinearMeter: dataToUpdate.pricePerLinearMeter,
           pricePerSquareMeter: dataToUpdate.pricePerSquareMeter,
           minimumRate: dataToUpdate.minimumRate,

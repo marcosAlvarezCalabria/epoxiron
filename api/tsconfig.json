@@ -8,9 +8,13 @@
         "strict": true,
         "skipLibCheck": true,
         "resolveJsonModule": true,
-        "rootDirs": [
-            "./src",
-            "../generated"
+        "types": [
+            "node",
+            "express",
+            "pg",
+            "cors",
+            "jsonwebtoken",
+            "bcryptjs"
         ]
     },
     "include": [

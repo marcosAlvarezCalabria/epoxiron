@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 
 interface SpecialPiece {
   name: string
@@ -37,26 +38,51 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
   // State for new special piece input
   const [newPiece, setNewPiece] = useState({ name: '', price: 0 })
 
+  const [initialFormData, setInitialFormData] = useState<any>(null)
+
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Pre-populate form when editing
+  // Initialize and populate form
   useEffect(() => {
-    if (customer) {
-      setFormData({
-        name: customer.name || '',
-        email: customer.email || '',
-        phone: customer.phone || '',
-        address: customer.address || '',
-        notes: customer.notes || '',
+    const startData = customer ? {
+      name: customer.name || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      address: customer.address || '',
+      notes: customer.notes || '',
 
-        // Load existing prices or defaults
-        pricePerLinearMeter: customer.pricePerLinearMeter || 0,
-        pricePerSquareMeter: customer.pricePerSquareMeter || 0,
-        minimumRate: customer.minimumRate || 0,
-        specialPieces: customer.specialPieces ? [...customer.specialPieces] : []
-      })
+      // Load existing prices or defaults
+      pricePerLinearMeter: customer.pricePerLinearMeter || 0,
+      pricePerSquareMeter: customer.pricePerSquareMeter || 0,
+      minimumRate: customer.minimumRate || 0,
+      specialPieces: customer.specialPieces ? [...customer.specialPieces] : []
+    } : {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      notes: '',
+      pricePerLinearMeter: 0,
+      pricePerSquareMeter: 0,
+      minimumRate: 0,
+      specialPieces: []
     }
+
+    setFormData(startData)
+    setInitialFormData(startData)
   }, [customer])
+
+  const handleCancel = () => {
+    // Check if dirty
+    const isDirty = JSON.stringify(formData) !== JSON.stringify(initialFormData)
+
+    if (isDirty) {
+      if (!confirm('Tienes cambios sin guardar. ¿Estás seguro de que quieres salir y perder los cambios?')) {
+        return
+      }
+    }
+    onCancel()
+  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -82,15 +108,15 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
     }
 
     if (formData.pricePerLinearMeter <= 0) {
-      newErrors.pricePerLinearMeter = 'Requerido'
+      newErrors.pricePerLinearMeter = 'Debe ser > 0'
     }
 
     if (formData.pricePerSquareMeter <= 0) {
-      newErrors.pricePerSquareMeter = 'Requerido'
+      newErrors.pricePerSquareMeter = 'Debe ser > 0'
     }
 
     if (formData.minimumRate <= 0) {
-      newErrors.minimumRate = 'Requerido'
+      newErrors.minimumRate = 'Debe ser > 0'
     }
 
     setErrors(newErrors)
@@ -100,7 +126,16 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateForm()) return
+    if (!validateForm()) {
+      toast.error('Hay errores en el formulario. Por favor, revisa los campos en rojo.')
+      return
+    }
+
+    // Check for unsaved special piece
+    if (newPiece.name.trim()) {
+      alert('Tienes una pieza especial escrita pero no añadida.\n\nPor favor, pulsa "Añadir" para incluirla o borra el texto si no deseas guardarla.')
+      return
+    }
 
     // Clean empty fields
     const cleanData = {
@@ -124,6 +159,11 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
 
   const addSpecialPiece = () => {
     if (!newPiece.name.trim()) return
+
+    if (newPiece.price <= 0) {
+      alert('El precio debe ser mayor a 0')
+      return
+    }
 
     setFormData(prev => ({
       ...prev,
@@ -153,7 +193,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
             </p>
           </div>
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
             disabled={isLoading}
             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
           >
@@ -246,77 +286,50 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
 
             {/* RIGHT COLUMN: Pricing Data */}
             <div className="space-y-6">
-              <h4 className="text-blue-400 font-bold border-b border-blue-900/50 pb-2">Tarifas y Precios</h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Linear Meter Card */}
-                <div className={`bg-gray-800 rounded-xl border p-4 flex flex-col items-center justify-center transition-all ${errors.pricePerLinearMeter ? 'border-red-500/50 bg-red-900/10' : 'border-gray-700 hover:border-blue-500/50 hover:bg-gray-700/50'}`}>
-                  <div className="text-blue-400 mb-2">
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16m-7 6h7" />
+              <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
+                <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                  <span className="p-1.5 bg-blue-500/20 rounded-lg text-blue-400">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                  </div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 text-center">Metro Lineal</label>
-                  <div className="relative w-full">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono">€</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={formData.pricePerLinearMeter || ''}
-                      onChange={(e) => handleChange('pricePerLinearMeter', parseFloat(e.target.value) || 0)}
-                      className="w-full bg-gray-900/50 border border-gray-600 rounded-lg py-2 pl-7 pr-3 text-center text-white font-bold text-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  {errors.pricePerLinearMeter && <p className="text-red-400 text-xs mt-1 font-medium">{errors.pricePerLinearMeter}</p>}
-                </div>
+                  </span>
+                  Tarifas Base
+                </h4>
 
-                {/* Square Meter Card */}
-                <div className={`bg-gray-800 rounded-xl border p-4 flex flex-col items-center justify-center transition-all ${errors.pricePerSquareMeter ? 'border-red-500/50 bg-red-900/10' : 'border-gray-700 hover:border-blue-500/50 hover:bg-gray-700/50'}`}>
-                  <div className="text-purple-400 mb-2">
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 4v16M16 4v16M4 8h16M4 16h16" />
-                    </svg>
-                  </div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 text-center">Metro Cuadrado</label>
-                  <div className="relative w-full">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono">€</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={formData.pricePerSquareMeter || ''}
-                      onChange={(e) => handleChange('pricePerSquareMeter', parseFloat(e.target.value) || 0)}
-                      className="w-full bg-gray-900/50 border border-gray-600 rounded-lg py-2 pl-7 pr-3 text-center text-white font-bold text-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  {errors.pricePerSquareMeter && <p className="text-red-400 text-xs mt-1 font-medium">{errors.pricePerSquareMeter}</p>}
-                </div>
+                <div className="grid grid-cols-1 gap-5">
+                  {[
+                    { label: 'Metro Lineal', field: 'pricePerLinearMeter', color: 'blue' },
+                    { label: 'Metro Cuadrado', field: 'pricePerSquareMeter', color: 'purple' },
+                    { label: 'Tarifa Mínima', field: 'minimumRate', color: 'green' }
+                  ].map((item) => (
+                    <div key={item.field} className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <span className={`text-${item.color}-400 font-bold text-lg`}>€</span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={(formData as any)[item.field] || ''}
+                        onChange={(e) => handleChange(item.field, parseFloat(e.target.value) || 0)}
+                        className={`block w-full pl-10 pr-4 py-4 bg-gray-900/60 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all font-mono text-lg font-medium
+                          ${(errors as any)[item.field]
+                            ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
+                            : `border-gray-700/50 focus:border-${item.color}-500 focus:ring-${item.color}-500/20 group-hover:border-gray-600`
+                          }`}
+                        placeholder="0.00"
+                      />
+                      <label className={`absolute -top-2 left-3 bg-gray-800 px-2 text-xs font-medium text-${item.color}-400 rounded-full border border-gray-700`}>
+                        {item.label}
+                      </label>
 
-                {/* Minimum Rate Card */}
-                <div className={`bg-gray-800 rounded-xl border p-4 flex flex-col items-center justify-center transition-all ${errors.minimumRate ? 'border-red-500/50 bg-red-900/10' : 'border-gray-700 hover:border-blue-500/50 hover:bg-gray-700/50'}`}>
-                  <div className="text-green-400 mb-2">
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 text-center">Tarifa Mínima</label>
-                  <div className="relative w-full">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono">€</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={formData.minimumRate || ''}
-                      onChange={(e) => handleChange('minimumRate', parseFloat(e.target.value) || 0)}
-                      className="w-full bg-gray-900/50 border border-gray-600 rounded-lg py-2 pl-7 pr-3 text-center text-white font-bold text-lg focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/50"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  {errors.minimumRate && <p className="text-red-400 text-xs mt-1 font-medium">{errors.minimumRate}</p>}
+                      {(errors as any)[item.field] && (
+                        <p className="absolute right-0 -bottom-5 text-red-400 text-xs font-medium">
+                          {(errors as any)[item.field]}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -324,24 +337,32 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
               <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                 <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">Piezas Especiales</label>
 
-                {/* List as Tags */}
-                <div className="flex flex-wrap gap-2 mb-4 min-h-[40px]">
+                {/* List as Scrollable Rows */}
+                <div className="flex flex-col gap-2 mb-4 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
                   {formData.specialPieces.length === 0 && (
-                    <p className="text-gray-500 text-sm italic py-2 w-full text-center border-2 border-dashed border-gray-700 rounded-lg">No hay piezas especiales asignadas</p>
+                    <p className="text-gray-500 text-sm italic py-8 w-full text-center border-2 border-dashed border-gray-700 rounded-lg bg-gray-800/30">
+                      No hay piezas especiales asignadas
+                    </p>
                   )}
                   {formData.specialPieces.map((piece, i) => (
-                    <div key={i} className="group flex items-center bg-blue-900/30 border border-blue-700/50 pl-3 pr-1 py-1 rounded-full text-sm hover:bg-blue-900/50 transition-colors">
-                      <span className="text-blue-200 font-medium mr-2">{piece.name}</span>
-                      <span className="bg-blue-900/80 text-blue-100 px-2 py-0.5 rounded-full text-xs font-mono border border-blue-700/50">€{piece.price}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeSpecialPiece(i)}
-                        className="ml-2 w-6 h-6 flex items-center justify-center rounded-full text-blue-400 hover:bg-blue-800 hover:text-white transition-colors"
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                    <div key={i} className="group flex items-center justify-between p-3 bg-gray-900/40 border border-gray-700/50 rounded-lg hover:bg-gray-800/60 transition-colors">
+                      <span className="text-gray-200 font-medium truncate mr-2">{piece.name}</span>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-white font-mono font-bold bg-black/40 px-3 py-1 rounded-md border border-gray-700/50">
+                          {piece.price.toFixed(2)} €
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeSpecialPiece(i)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                          title="Eliminar pieza"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -409,7 +430,7 @@ export function CustomerForm({ customer, onSubmit, onCancel, onDelete, isLoading
             <div className="flex flex-col-reverse sm:flex-row gap-3 w-full sm:w-auto">
               <button
                 type="button"
-                onClick={onCancel}
+                onClick={handleCancel}
                 disabled={isLoading}
                 className="w-full sm:w-auto bg-gray-700 text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 font-medium"
               >

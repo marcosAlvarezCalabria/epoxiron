@@ -7,17 +7,13 @@ import { useAuthStore } from '@/features/auth/stores/authStore'
 import { useNavigate } from 'react-router-dom'
 import { useDeliveryNotes } from '../features/delivery-notes/hooks/useDeliveryNotes'
 import { useCustomers } from '@/features/customers/hooks/useCustomers'
+import { Navbar } from '@/components/layout/Navbar'
 
 export function DashboardPage() {
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
   const navigate = useNavigate()
   const { data: deliveryNotes } = useDeliveryNotes()
   const { data: customers } = useCustomers()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
 
   // Calculate stats
   const todayDeliveryNotes = deliveryNotes?.length || 0
@@ -75,76 +71,7 @@ export function DashboardPage() {
 
   return (
     <div className="bg-gray-900 font-sans text-gray-200 min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gray-800 border-b border-gray-700">
-        <div className="flex items-center p-4 justify-between max-w-7xl mx-auto w-full">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-600 text-white p-1.5 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22 6l-8 4-8-4V4l8 4 8-4v2zM2 8l8 4v8l-8-4V8zm12 12V12l8-4v8l-8 4z" />
-              </svg>
-            </div>
-            <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Epoxiron</h2>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6 px-4 flex-1 justify-center">
-            <button
-              onClick={() => navigate('/delivery-notes')}
-              className="flex items-center gap-1 text-blue-600 font-bold text-sm hover:text-blue-400 transition-colors"
-            >
-              Albaranes
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => navigate('/customers')}
-              className="flex items-center gap-1 text-gray-400 font-bold text-sm hover:text-white transition-colors"
-            >
-              Clientes
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z" />
-              </svg>
-            </button>
-          </div>
-
-          {/* User Actions */}
-          <div className="flex items-center gap-2">
-            <button className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
-              </svg>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex w-10 h-10 items-center justify-center rounded-lg bg-transparent text-gray-200 hover:bg-gray-700 transition-colors"
-              title="Cerrar sesión"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="md:hidden flex border-t border-gray-700 px-4 gap-6 bg-gray-800 overflow-x-auto">
-          <button
-            onClick={() => navigate('/delivery-notes')}
-            className="flex flex-col items-center justify-center border-b-[3px] border-blue-600 text-blue-600 pb-[10px] pt-3 whitespace-nowrap"
-          >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Albaranes</p>
-          </button>
-          <button
-            onClick={() => navigate('/customers')}
-            className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-gray-400 pb-[10px] pt-3 whitespace-nowrap hover:text-white transition-colors"
-          >
-            <p className="text-sm font-bold leading-normal tracking-[0.015em]">Clientes</p>
-          </button>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto pb-24">
         {/* Page Header */}

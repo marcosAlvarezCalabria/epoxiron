@@ -315,19 +315,13 @@ export function DailySummaryPage() {
                     <tr>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">ID</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
-                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Piezas</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Total</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
-                      <th className="px-4 py-3 text-gray-400 text-sm font-bold">Avisos</th>
                       <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700">
                     {filteredNotes.map((note) => {
-                      const hasMissingPrices = note.items?.some(item =>
-                        !item.totalPrice || item.totalPrice === 0
-                      ) || false
-
                       const handleDeleteClick = (note: any, customerName: string) => {
                         setDeleteDialog({
                           isOpen: true,
@@ -348,27 +342,12 @@ export function DailySummaryPage() {
                             <p className="text-white font-medium">{getCustomerName(note.customerId)}</p>
                           </td>
                           <td className="px-4 py-4">
-                            <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-blue-900/30 text-blue-400 border border-blue-800/30">
-                              {note.items?.length || 0} piezas
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
                             <p className="font-mono font-bold text-white">€{note.totalAmount?.toFixed(2) || '0.00'}</p>
                           </td>
                           <td className="px-4 py-4">
                             <span className={`inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold border ${getStatusColor(note.status)}`}>
                               {getStatusText(note.status)}
                             </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            {hasMissingPrices && (
-                              <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-red-900/30 text-red-400 border border-red-800/30">
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-                                </svg>
-                                Sin precios
-                              </span>
-                            )}
                           </td>
                           <td className="px-4 py-4 text-center">
                             <div className="flex items-center justify-center gap-2">
@@ -482,8 +461,8 @@ export function DailySummaryPage() {
                       key={preset}
                       onClick={() => setSelectedDate(getDatePreset(preset))}
                       className={`py-2 px-1 rounded-lg text-xs font-semibold transition-all border ${(preset === 'all' ? selectedDate === '' : selectedDate === getDatePreset(preset))
-                          ? 'bg-blue-600/20 text-blue-400 border-blue-600/50'
-                          : 'bg-gray-700/50 text-gray-400 border-gray-700 hover:border-gray-600 hover:bg-gray-700'
+                        ? 'bg-blue-600/20 text-blue-400 border-blue-600/50'
+                        : 'bg-gray-700/50 text-gray-400 border-gray-700 hover:border-gray-600 hover:bg-gray-700'
                         }`}
                     >
                       {preset === 'today' && 'Hoy'}
