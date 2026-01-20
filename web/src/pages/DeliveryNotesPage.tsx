@@ -1,34 +1,16 @@
 /**
- * PAGE: Dashboard - Diseño profesional dark theme
- * Responsive para mobile y desktop con navegación moderna
+ * PAGE: DeliveryNotesPage - Listado completo de albaranes
  */
 
-import { useAuthStore } from '@/features/auth/stores/authStore'
-import { useNavigate } from 'react-router-dom'
 import { useDeliveryNotes } from '../features/delivery-notes/hooks/useDeliveryNotes'
-import { useCustomers } from '@/features/customers/hooks/useCustomers'
+import { useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/layout/Navbar'
+import { useState } from 'react'
 
-export function DashboardPage() {
-  const { user } = useAuthStore()
+export function DeliveryNotesPage() {
   const navigate = useNavigate()
-  const { data: deliveryNotes } = useDeliveryNotes()
-  const { data: customers } = useCustomers()
-
-  // Calculate stats
-  const todayDeliveryNotes = deliveryNotes?.length || 0
-  const pendingNotes = deliveryNotes?.filter(note => note.status === 'validated').length || 0
-  const totalPieces = deliveryNotes?.reduce((total, note) =>
-    total + note.items.reduce((sum, item) => sum + item.quantity, 0), 0
-  ) || 0
-  const todayBilling = deliveryNotes?.reduce((total, note) => total + (note.totalAmount || 0), 0) || 0
-
-  const currentDate = new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
+  const { data: deliveryNotes, isLoading } = useDeliveryNotes()
+  const [searchTerm, setSearchTerm] = useState('')
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -69,6 +51,12 @@ export function DashboardPage() {
     )
   }
 
+  // Filter logic
+  const filteredNotes = deliveryNotes?.filter(note =>
+    note.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (note.number || '').toLowerCase().includes(searchTerm.toLowerCase())
+  ) || []
+
   return (
     <div className="bg-gray-900 font-sans text-gray-200 min-h-screen">
       <Navbar />
@@ -77,72 +65,79 @@ export function DashboardPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 pt-6 pb-2">
           <div>
-            <h2 className="text-white tracking-tight text-2xl font-bold leading-tight capitalize">
-              {currentDate}
+            <h2 className="text-white tracking-tight text-2xl font-bold leading-tight">
+              Gestión de Albaranes
             </h2>
-            <p className="text-gray-400 text-sm">Panel de control del taller - {user?.email?.getValue()}</p>
+            <p className="text-gray-400 text-sm">Histórico completo y gestión de entregas</p>
           </div>
           <div className="mt-4 sm:mt-0">
             <button
-              onClick={() => navigate('/delivery-notes')}
+              onClick={() => navigate('/delivery-notes/new')}
               className="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
               </svg>
-              <span className="truncate">Nuevo albarán</span>
+              <span className="truncate">Nuevo Albarán</span>
             </button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="px-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 my-4 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Albaranes Hoy</p>
-              <p className="text-2xl font-bold text-white">{todayDeliveryNotes}</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Pendientes</p>
-              <p className="text-2xl font-bold text-red-400">{pendingNotes}</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Cantidad Total</p>
-              <p className="text-2xl font-bold text-white">{totalPieces}</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Facturación Hoy</p>
-              <p className="text-2xl font-bold text-green-400">{todayBilling.toFixed(2)}€</p>
+        {/* Search Bar */}
+        <div className="px-4 mt-6 mb-6">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+            <div className="relative">
+              <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Buscar por cliente o número..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600"
+              />
             </div>
           </div>
         </div>
 
         {/* Delivery Notes Table */}
-        <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-4 pt-4">
-          Lista de Albaranes
-        </h3>
         <div className="px-4 overflow-x-auto">
-          <div className="min-w-[600px] bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-black/20">
-                <tr>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nº</th>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Cant. Total</th>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold text-right">Importe</th>
-                  <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {deliveryNotes && deliveryNotes.length > 0 ? (
-                  deliveryNotes.map((note) => (
+          <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
+
+            {isLoading ? (
+              <div className="p-8 text-center text-gray-400">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                Cargando albaranes...
+              </div>
+            ) : filteredNotes.length > 0 ? (
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-black/20">
+                  <tr>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nº</th>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Fecha</th>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Cant. Total</th>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold text-right">Importe</th>
+                    <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {filteredNotes.map((note) => (
                     <tr
                       key={note.id}
                       className="hover:bg-white/5 transition-colors cursor-pointer"
                       onClick={() => navigate(`/delivery-notes/${note.id}`)}
                     >
                       <td className="px-4 py-4 font-bold text-white">{note.number || note.id}</td>
+                      <td className="px-4 py-4 text-gray-300">
+                        {new Date(note.date).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        })}
+                      </td>
                       <td className="px-4 py-4 text-gray-200">{note.customerName}</td>
                       <td className="px-4 py-4">{getStatusBadge(note.status)}</td>
                       <td className="px-4 py-4 text-center text-gray-200">
@@ -165,35 +160,17 @@ export function DashboardPage() {
                         </button>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                      No hay albaranes registrados.
-                      <button
-                        onClick={() => navigate('/delivery-notes')}
-                        className="text-blue-600 hover:text-blue-400 ml-1"
-                      >
-                        Crear el primero
-                      </button>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="p-8 text-center text-gray-400">
+                {searchTerm ? `No se encontraron resultados para "${searchTerm}"` : 'No hay albaranes registrados.'}
+              </div>
+            )}
           </div>
         </div>
       </main>
-
-      {/* Floating Action Button */}
-      <button
-        onClick={() => navigate('/delivery-notes')}
-        className="fixed bottom-6 right-6 flex w-16 h-16 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl shadow-blue-600/40 focus:outline-none hover:scale-105 transition-transform active:scale-95 z-[60]"
-      >
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
-        </svg>
-      </button>
     </div>
   )
 }

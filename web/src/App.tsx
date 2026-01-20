@@ -6,6 +6,7 @@ import { CustomersPage } from './pages/CustomersPage';
 import { DeliveryNoteDetailsPage } from './pages/DeliveryNoteDetailsPage';
 import { CreateDeliveryNotePage } from './pages/CreateDeliveryNotePage';
 import { EditDeliveryNotePage } from './pages/EditDeliveryNotePage';
+import { DeliveryNotesPage } from './pages/DeliveryNotesPage';
 import { useAuthStore } from './features/auth/stores/authStore';
 import type React from 'react';
 
@@ -45,7 +46,11 @@ function App() {
 
         <Route
           path="/delivery-notes"
-          element={<Navigate to="/dashboard" replace />}
+          element={
+            <ProtectedRoute>
+              <DeliveryNotesPage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/delivery-notes/new"

@@ -37,7 +37,10 @@ function toDomain(dbNote: any): DomainDeliveryNote {
 export async function findAll(): Promise<DomainDeliveryNote[]> {
   const notes = await prisma.deliveryNote.findMany({
     include: { items: true },
-    orderBy: { date: 'desc' }
+    orderBy: [
+      { date: 'desc' },
+      { createdAt: 'desc' }
+    ]
   })
   return notes.map(toDomain)
 }

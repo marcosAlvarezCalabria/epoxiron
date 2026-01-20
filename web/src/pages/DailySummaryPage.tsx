@@ -335,7 +335,13 @@ export function DailySummaryPage() {
                           <td className="px-4 py-4">
                             <div>
                               <p className="font-bold text-white">{note.number || '---'}</p>
-                              <p className="text-gray-400 text-xs">{note.createdAt?.split('T')[0]}</p>
+                              <p className="text-gray-400 text-xs">
+                                {new Date(note.createdAt).toLocaleDateString('es-ES', {
+                                  year: 'numeric',
+                                  month: '2-digit',
+                                  day: '2-digit'
+                                })}
+                              </p>
                             </div>
                           </td>
                           <td className="px-4 py-4">

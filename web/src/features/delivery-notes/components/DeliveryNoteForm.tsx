@@ -52,6 +52,13 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   const [customerId, setCustomerId] = useState(deliveryNote?.customerId || '')
   const [notes, setNotes] = useState(deliveryNote?.notes || '')
 
+  // Date State
+  const [date, setDate] = useState(
+    deliveryNote?.date
+      ? new Date(deliveryNote.date).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0]
+  )
+
   // Lista de items YA añadidos al albarán
   const [items, setItems] = useState<FormItem[]>(
     deliveryNote?.items.map(item => ({
@@ -73,6 +80,9 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
     if (deliveryNote) {
       setCustomerId(deliveryNote.customerId)
       setNotes(deliveryNote.notes || '')
+      if (deliveryNote.date) {
+        setDate(new Date(deliveryNote.date).toISOString().split('T')[0])
+      }
       setItems(deliveryNote.items.map(item => ({
         name: item.name || item.description,
         quantity: Number(item.quantity) || 0,
@@ -147,79 +157,93 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
     }
   }
 
-  const handleAddItem = () => {
-    // Validaciones
-    if (!newItem.name.trim()) {
-      alert('Por favor, indica el nombre del item.')
-      return
-    }
+  // --- Helpers for New Item Form ---
 
-    if (!newItem.quantity || newItem.quantity <= 0) {
-      alert('Por favor, indica una cantidad válida.')
-      return
-    }
-
-    const isSpecialPiece = selectedCustomer?.specialPieces?.some(p => p.name.trim().toLowerCase() === newItem.name.trim().toLowerCase())
-    const hasMeasurements = (newItem.linearMeters && newItem.linearMeters > 0) || (newItem.squareMeters && newItem.squareMeters > 0)
-
-    if (!isSpecialPiece && !hasMeasurements) {
-      alert('Por favor, indica las medidas (lineales o cuadradas) o selecciona una pieza especial.')
-      return
-    }
-
-    // Añadir a la lista y resetear formulario
-    setItems([...items, newItem])
-    setNewItem(EMPTY_ITEM)
-  }
-
-  const handleRemoveItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index))
+  const safeParseFloat = (value: string) => {
+    const parsed = parseFloat(value)
+    return isNaN(parsed) ? undefined : parsed
   }
 
   const updateNewItem = (field: keyof FormItem, value: any) => {
     setNewItem(prev => ({ ...prev, [field]: value }))
   }
 
+  const newItemTotal = calculateItemPrice(newItem) * (newItem.quantity || 0)
+
+  const handleAddItem = () => {
+    if (!newItem.name || !newItem.quantity) return
+
+    setItems(prev => [...prev, newItem])
+    setNewItem(EMPTY_ITEM)
+  }
+
+  const handleRemoveItem = (index: number) => {
+    setItems(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const estimatedTotal = items.reduce((sum, item) => sum + (calculateItemPrice(item) * item.quantity), 0)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Validation: Customer & Date
     if (!customerId) {
-      alert('Por favor selecciona un cliente')
+      alert('Por favor, selecciona un Cliente.')
+      return
+    }
+    if (!date) {
+      alert('Por favor, selecciona una Fecha.')
       return
     }
 
+    // Validation: Items
     if (items.length === 0) {
-      alert('Por favor añade al menos un item al albarán')
+      alert('El albarán debe tener al menos un item.')
       return
     }
+
+    // Validation: Zero Prices
+    const zeroPriceItems = items.filter(i => calculateItemPrice(i) === 0)
+    if (zeroPriceItems.length > 0) {
+      const confirmZero = window.confirm(
+        `Hay ${zeroPriceItems.length} items con precio 0.\n¿Estás seguro de que quieres continuar?`
+      )
+      if (!confirmZero) return
+    }
+
+    if (isLoading) return
 
     try {
-      // Map Items
-      const processedItems: Omit<DeliveryNoteItem, 'id'>[] = items.map(item => ({
-        name: item.name,
-        description: item.name,
-        quantity: item.quantity,
-        color: item.racColor || item.specialColor || 'Sin color',
-        measurements: {
-          linearMeters: item.linearMeters,
-          squareMeters: item.squareMeters,
-          thickness: undefined
-        },
-        racColor: item.racColor,
-        specialColor: item.specialColor,
-        unitPrice: undefined,
-        totalPrice: 0,
-        notes: item.notes,
-        hasPrimer: item.hasPrimer,
-        isHighThickness: item.isHighThickness
-      }))
+      // ... (item mapping)
+      const processedItems: Omit<DeliveryNoteItem, 'id'>[] = items.map(item => {
+        const calculatedPrice = calculateItemPrice(item)
+        return {
+          // ... (existing item map)
+          name: item.name,
+          description: item.name,
+          quantity: item.quantity,
+          color: item.racColor || item.specialColor || 'Sin color',
+          measurements: {
+            linearMeters: item.linearMeters,
+            squareMeters: item.squareMeters,
+            thickness: item.thickness
+          },
+          racColor: item.racColor,
+          specialColor: item.specialColor,
+          unitPrice: calculatedPrice, // Ensure price is sent
+          totalPrice: calculatedPrice * item.quantity, // Ensure total is sent
+          notes: item.notes,
+          hasPrimer: item.hasPrimer,
+          isHighThickness: item.isHighThickness
+        }
+      })
 
       if (isEditing && deliveryNote) {
         const result = await updateDeliveryNote.mutateAsync({
           id: deliveryNote.id,
           data: {
             customerId,
-            date: new Date().toISOString(),
+            date: new Date(date).toISOString(), // Use selected date
             items: processedItems.map((item, index) => ({
               ...item,
               id: deliveryNote.items[index]?.id || `new-${index}`,
@@ -231,7 +255,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
       } else {
         const createData: CreateDeliveryNoteRequest = {
           customerId,
-          date: new Date().toISOString(),
+          date: new Date(date).toISOString(), // Use selected date
           items: processedItems,
           notes: notes.trim() || undefined
         }
@@ -240,44 +264,18 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
         onSuccess(result.id)
       }
     } catch (error) {
-      console.error('Error:', error)
-      alert('Error guardando el albarán.')
+      console.error('Error creating/updating delivery note:', error)
+      alert('Ocurrió un error al guardar el albarán.')
     }
   }
 
-  const safeParseFloat = (value: string): number | undefined => {
-    const parsed = parseFloat(value)
-    return isNaN(parsed) ? undefined : parsed
-  }
-
-  // Calcular total estimado global
-  const estimatedTotal = items.reduce((sum, item) => {
-    return sum + (calculateItemPrice(item) * item.quantity)
-  }, 0)
-
-  // Preview del precio del NUEVO item
-  const newItemPrice = calculateItemPrice(newItem)
-  const newItemTotal = newItemPrice * newItem.quantity
-
   return (
     <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 relative">
-
-      {/* 1. Header Sticky (Resumen Global) */}
-      {selectedCustomer && (
-        <div className="md:hidden sticky -top-6 -mx-6 px-6 py-3 bg-gray-900/95 backdrop-blur shadow-lg border-b border-blue-900/30 mb-6 z-30 flex justify-between items-center transition-all">
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-400">Items: {items.length}</span>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-xs text-gray-400">Total Est.</span>
-            <span className="text-blue-400 font-bold font-mono">€{estimatedTotal.toFixed(2)}</span>
-          </div>
-        </div>
-      )}
+      {/* ... (Sticky Header) ... */}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* 2. Customer Selection */}
-        <div className="grid grid-cols-1 gap-6">
+        {/* 2. Customer & Date Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="customer" className="block text-sm font-medium text-gray-300 mb-2">
               Cliente *
@@ -298,15 +296,29 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Notas Globales</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 p-3"
-              placeholder="Notas generales..."
+            <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-2">
+              Fecha *
+            </label>
+            <input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 focus:ring-2 h-10 px-3"
+              required
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Notas Globales</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            className="w-full rounded-lg text-white bg-gray-900 border border-gray-700 focus:border-blue-600 p-3"
+            placeholder="Notas generales..."
+          />
         </div>
 
         {/* 3. List of Added Items (Read Only with Delete) */}

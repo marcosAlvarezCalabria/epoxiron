@@ -15,13 +15,21 @@ export function DashboardPage() {
   const { data: deliveryNotes } = useDeliveryNotes()
   const { data: customers } = useCustomers()
 
-  // Calculate stats
-  const todayDeliveryNotes = deliveryNotes?.length || 0
-  const pendingNotes = deliveryNotes?.filter(note => note.status === 'validated').length || 0
-  const totalPieces = deliveryNotes?.reduce((total, note) =>
+  // Filter for TODAY's notes only
+  const todayStr = new Date().toLocaleDateString('es-ES')
+
+  const todaysNotes = deliveryNotes?.filter(note => {
+    const noteDate = new Date(note.date).toLocaleDateString('es-ES')
+    return noteDate === todayStr
+  }) || []
+
+  // Calculate stats based on TODAY
+  const countToday = todaysNotes.length
+  const pendingToday = todaysNotes.filter(note => note.status === 'validated').length
+  const totalPiecesToday = todaysNotes.reduce((total, note) =>
     total + note.items.reduce((sum, item) => sum + item.quantity, 0), 0
-  ) || 0
-  const todayBilling = deliveryNotes?.reduce((total, note) => total + (note.totalAmount || 0), 0) || 0
+  )
+  const billingToday = todaysNotes.reduce((total, note) => total + (note.totalAmount || 0), 0)
 
   const currentDate = new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -30,44 +38,11 @@ export function DashboardPage() {
     day: 'numeric'
   })
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      finalized: {
-        bg: 'bg-green-900/30',
-        text: 'text-green-400',
-        border: 'border-green-800/30',
-        icon: 'check_circle',
-        label: 'Finalizado'
-      },
-      validated: {
-        bg: 'bg-amber-900/30',
-        text: 'text-amber-400',
-        border: 'border-amber-800/30',
-        icon: 'schedule',
-        label: 'Validado'
-      },
-      draft: {
-        bg: 'bg-blue-900/30',
-        text: 'text-blue-400',
-        border: 'border-blue-800/30',
-        icon: 'edit',
-        label: 'Borrador'
-      }
-    }
-
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft
-
-    return (
-      <span className={`inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold ${config.bg} ${config.text} border ${config.border}`}>
-        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-          {config.icon === 'check_circle' && <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />}
-          {config.icon === 'schedule' && <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z" />}
-          {config.icon === 'edit' && <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />}
-        </svg>
-        {config.label}
-      </span>
-    )
+  function getStatusBadge(status: string): import("react").ReactNode {
+    throw new Error('Function not implemented.')
   }
+
+  // ... helper function getStatusBadge ...
 
   return (
     <div className="bg-gray-900 font-sans text-gray-200 min-h-screen">
@@ -80,11 +55,11 @@ export function DashboardPage() {
             <h2 className="text-white tracking-tight text-2xl font-bold leading-tight capitalize">
               {currentDate}
             </h2>
-            <p className="text-gray-400 text-sm">Panel de control del taller - {user?.email?.getValue()}</p>
+            <p className="text-gray-400 text-sm">Resumen de actividad diaria</p>
           </div>
           <div className="mt-4 sm:mt-0">
             <button
-              onClick={() => navigate('/delivery-notes')}
+              onClick={() => navigate('/delivery-notes/new')}
               className="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -95,38 +70,48 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Updated to use TODAY's data */}
         <div className="px-4">
           <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 my-4 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Albaranes Hoy</p>
-              <p className="text-2xl font-bold text-white">{todayDeliveryNotes}</p>
+              <p className="text-2xl font-bold text-white">{countToday}</p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Pendientes</p>
-              <p className="text-2xl font-bold text-red-400">{pendingNotes}</p>
+              <p className="text-2xl font-bold text-red-400">{pendingToday}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Cantidad Total</p>
-              <p className="text-2xl font-bold text-white">{totalPieces}</p>
+              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Piezas Hoy</p>
+              <p className="text-2xl font-bold text-white">{totalPiecesToday}</p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Facturación Hoy</p>
-              <p className="text-2xl font-bold text-green-400">{todayBilling.toFixed(2)}€</p>
+              <p className="text-2xl font-bold text-green-400">{billingToday.toFixed(2)}€</p>
             </div>
           </div>
         </div>
 
         {/* Delivery Notes Table */}
-        <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-4 pt-4">
-          Lista de Albaranes
-        </h3>
+        <div className="flex items-center justify-between px-4 pb-4 pt-4">
+          <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
+            Últimos Albaranes
+          </h3>
+          <button
+            onClick={() => navigate('/delivery-notes')}
+            className="text-sm font-bold text-blue-500 hover:text-blue-400 transition-colors"
+          >
+            Ver todos
+          </button>
+        </div>
+
         <div className="px-4 overflow-x-auto">
           <div className="min-w-[600px] bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead className="bg-black/20">
                 <tr>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nº</th>
+                  <th className="px-4 py-3 text-gray-400 text-sm font-bold">Fecha</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
                   <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Cant. Total</th>
@@ -136,13 +121,20 @@ export function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-gray-700">
                 {deliveryNotes && deliveryNotes.length > 0 ? (
-                  deliveryNotes.map((note) => (
+                  deliveryNotes.slice(0, 5).map((note) => (
                     <tr
                       key={note.id}
                       className="hover:bg-white/5 transition-colors cursor-pointer"
                       onClick={() => navigate(`/delivery-notes/${note.id}`)}
                     >
                       <td className="px-4 py-4 font-bold text-white">{note.number || note.id}</td>
+                      <td className="px-4 py-4 text-gray-300">
+                        {new Date(note.date).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        })}
+                      </td>
                       <td className="px-4 py-4 text-gray-200">{note.customerName}</td>
                       <td className="px-4 py-4">{getStatusBadge(note.status)}</td>
                       <td className="px-4 py-4 text-center text-gray-200">
