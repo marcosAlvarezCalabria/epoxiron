@@ -6,7 +6,9 @@ import { RACColor } from '../../../domain/value-objects/RACColor'
 import { Measurements } from '../../../domain/value-objects/Measurements'
 import type { DeliveryNoteFormData } from '../../../features/delivery-notes/schemas/deliveryNoteSchema'
 
-// Mock Repository
+import type { CustomerRepository } from '../../../domain/repositories/CustomerRepository'
+
+// Mock Repositories
 const mockRepository = {
     nextIdentity: vi.fn(),
     nextNumber: vi.fn(),
@@ -16,12 +18,19 @@ const mockRepository = {
     delete: vi.fn()
 } as unknown as DeliveryNoteRepository
 
+const mockCustomerRepository = {
+    findById: vi.fn(),
+    findAll: vi.fn(),
+    save: vi.fn(),
+    delete: vi.fn()
+} as unknown as CustomerRepository
+
 describe('CreateDeliveryNoteUseCase', () => {
     let useCase: CreateDeliveryNoteUseCase
 
     beforeEach(() => {
         vi.clearAllMocks()
-        useCase = new CreateDeliveryNoteUseCase(mockRepository)
+        useCase = new CreateDeliveryNoteUseCase(mockRepository, mockCustomerRepository)
     })
 
     it('should create a valid delivery note from form data', async () => {
@@ -65,6 +74,10 @@ describe('CreateDeliveryNoteUseCase', () => {
         vi.mocked(mockRepository.nextIdentity).mockResolvedValue('dn-123')
         vi.mocked(mockRepository.nextNumber).mockResolvedValue('DN-2024-001')
         vi.mocked(mockRepository.save).mockImplementation(async (dn) => dn)
+        vi.mocked(mockCustomerRepository.findById).mockResolvedValue({
+            id: 'customer-123',
+            name: 'Test Customer'
+        } as any)
 
         // Act
         const result = await useCase.execute(formData)

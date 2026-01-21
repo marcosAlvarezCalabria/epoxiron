@@ -57,6 +57,7 @@ export type DeliveryNoteItemMinAggregateOutputType = {
   unitPrice: number | null
   totalPrice: number | null
   hasPrimer: boolean | null
+  isHighThickness: boolean | null
 }
 
 export type DeliveryNoteItemMaxAggregateOutputType = {
@@ -72,6 +73,7 @@ export type DeliveryNoteItemMaxAggregateOutputType = {
   unitPrice: number | null
   totalPrice: number | null
   hasPrimer: boolean | null
+  isHighThickness: boolean | null
 }
 
 export type DeliveryNoteItemCountAggregateOutputType = {
@@ -87,6 +89,7 @@ export type DeliveryNoteItemCountAggregateOutputType = {
   unitPrice: number
   totalPrice: number
   hasPrimer: number
+  isHighThickness: number
   _all: number
 }
 
@@ -122,6 +125,7 @@ export type DeliveryNoteItemMinAggregateInputType = {
   unitPrice?: true
   totalPrice?: true
   hasPrimer?: true
+  isHighThickness?: true
 }
 
 export type DeliveryNoteItemMaxAggregateInputType = {
@@ -137,6 +141,7 @@ export type DeliveryNoteItemMaxAggregateInputType = {
   unitPrice?: true
   totalPrice?: true
   hasPrimer?: true
+  isHighThickness?: true
 }
 
 export type DeliveryNoteItemCountAggregateInputType = {
@@ -152,6 +157,7 @@ export type DeliveryNoteItemCountAggregateInputType = {
   unitPrice?: true
   totalPrice?: true
   hasPrimer?: true
+  isHighThickness?: true
   _all?: true
 }
 
@@ -254,6 +260,7 @@ export type DeliveryNoteItemGroupByOutputType = {
   unitPrice: number
   totalPrice: number
   hasPrimer: boolean
+  isHighThickness: boolean
   _count: DeliveryNoteItemCountAggregateOutputType | null
   _avg: DeliveryNoteItemAvgAggregateOutputType | null
   _sum: DeliveryNoteItemSumAggregateOutputType | null
@@ -292,6 +299,7 @@ export type DeliveryNoteItemWhereInput = {
   unitPrice?: Prisma.FloatFilter<"DeliveryNoteItem"> | number
   totalPrice?: Prisma.FloatFilter<"DeliveryNoteItem"> | number
   hasPrimer?: Prisma.BoolFilter<"DeliveryNoteItem"> | boolean
+  isHighThickness?: Prisma.BoolFilter<"DeliveryNoteItem"> | boolean
   deliveryNote?: Prisma.XOR<Prisma.DeliveryNoteScalarRelationFilter, Prisma.DeliveryNoteWhereInput>
 }
 
@@ -308,6 +316,7 @@ export type DeliveryNoteItemOrderByWithRelationInput = {
   unitPrice?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
   hasPrimer?: Prisma.SortOrder
+  isHighThickness?: Prisma.SortOrder
   deliveryNote?: Prisma.DeliveryNoteOrderByWithRelationInput
 }
 
@@ -327,6 +336,7 @@ export type DeliveryNoteItemWhereUniqueInput = Prisma.AtLeast<{
   unitPrice?: Prisma.FloatFilter<"DeliveryNoteItem"> | number
   totalPrice?: Prisma.FloatFilter<"DeliveryNoteItem"> | number
   hasPrimer?: Prisma.BoolFilter<"DeliveryNoteItem"> | boolean
+  isHighThickness?: Prisma.BoolFilter<"DeliveryNoteItem"> | boolean
   deliveryNote?: Prisma.XOR<Prisma.DeliveryNoteScalarRelationFilter, Prisma.DeliveryNoteWhereInput>
 }, "id">
 
@@ -343,6 +353,7 @@ export type DeliveryNoteItemOrderByWithAggregationInput = {
   unitPrice?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
   hasPrimer?: Prisma.SortOrder
+  isHighThickness?: Prisma.SortOrder
   _count?: Prisma.DeliveryNoteItemCountOrderByAggregateInput
   _avg?: Prisma.DeliveryNoteItemAvgOrderByAggregateInput
   _max?: Prisma.DeliveryNoteItemMaxOrderByAggregateInput
@@ -366,6 +377,7 @@ export type DeliveryNoteItemScalarWhereWithAggregatesInput = {
   unitPrice?: Prisma.FloatWithAggregatesFilter<"DeliveryNoteItem"> | number
   totalPrice?: Prisma.FloatWithAggregatesFilter<"DeliveryNoteItem"> | number
   hasPrimer?: Prisma.BoolWithAggregatesFilter<"DeliveryNoteItem"> | boolean
+  isHighThickness?: Prisma.BoolWithAggregatesFilter<"DeliveryNoteItem"> | boolean
 }
 
 export type DeliveryNoteItemCreateInput = {
@@ -380,6 +392,7 @@ export type DeliveryNoteItemCreateInput = {
   unitPrice: number
   totalPrice: number
   hasPrimer?: boolean
+  isHighThickness?: boolean
   deliveryNote: Prisma.DeliveryNoteCreateNestedOneWithoutItemsInput
 }
 
@@ -396,6 +409,7 @@ export type DeliveryNoteItemUncheckedCreateInput = {
   unitPrice: number
   totalPrice: number
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export type DeliveryNoteItemUpdateInput = {
@@ -410,6 +424,7 @@ export type DeliveryNoteItemUpdateInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryNote?: Prisma.DeliveryNoteUpdateOneRequiredWithoutItemsNestedInput
 }
 
@@ -426,6 +441,7 @@ export type DeliveryNoteItemUncheckedUpdateInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DeliveryNoteItemCreateManyInput = {
@@ -441,6 +457,7 @@ export type DeliveryNoteItemCreateManyInput = {
   unitPrice: number
   totalPrice: number
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export type DeliveryNoteItemUpdateManyMutationInput = {
@@ -455,6 +472,7 @@ export type DeliveryNoteItemUpdateManyMutationInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DeliveryNoteItemUncheckedUpdateManyInput = {
@@ -470,6 +488,7 @@ export type DeliveryNoteItemUncheckedUpdateManyInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DeliveryNoteItemListRelationFilter = {
@@ -495,6 +514,7 @@ export type DeliveryNoteItemCountOrderByAggregateInput = {
   unitPrice?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
   hasPrimer?: Prisma.SortOrder
+  isHighThickness?: Prisma.SortOrder
 }
 
 export type DeliveryNoteItemAvgOrderByAggregateInput = {
@@ -519,6 +539,7 @@ export type DeliveryNoteItemMaxOrderByAggregateInput = {
   unitPrice?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
   hasPrimer?: Prisma.SortOrder
+  isHighThickness?: Prisma.SortOrder
 }
 
 export type DeliveryNoteItemMinOrderByAggregateInput = {
@@ -534,6 +555,7 @@ export type DeliveryNoteItemMinOrderByAggregateInput = {
   unitPrice?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
   hasPrimer?: Prisma.SortOrder
+  isHighThickness?: Prisma.SortOrder
 }
 
 export type DeliveryNoteItemSumOrderByAggregateInput = {
@@ -619,6 +641,7 @@ export type DeliveryNoteItemCreateWithoutDeliveryNoteInput = {
   unitPrice: number
   totalPrice: number
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export type DeliveryNoteItemUncheckedCreateWithoutDeliveryNoteInput = {
@@ -633,6 +656,7 @@ export type DeliveryNoteItemUncheckedCreateWithoutDeliveryNoteInput = {
   unitPrice: number
   totalPrice: number
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export type DeliveryNoteItemCreateOrConnectWithoutDeliveryNoteInput = {
@@ -677,6 +701,7 @@ export type DeliveryNoteItemScalarWhereInput = {
   unitPrice?: Prisma.FloatFilter<"DeliveryNoteItem"> | number
   totalPrice?: Prisma.FloatFilter<"DeliveryNoteItem"> | number
   hasPrimer?: Prisma.BoolFilter<"DeliveryNoteItem"> | boolean
+  isHighThickness?: Prisma.BoolFilter<"DeliveryNoteItem"> | boolean
 }
 
 export type DeliveryNoteItemCreateManyDeliveryNoteInput = {
@@ -691,6 +716,7 @@ export type DeliveryNoteItemCreateManyDeliveryNoteInput = {
   unitPrice: number
   totalPrice: number
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
 export type DeliveryNoteItemUpdateWithoutDeliveryNoteInput = {
@@ -705,6 +731,7 @@ export type DeliveryNoteItemUpdateWithoutDeliveryNoteInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DeliveryNoteItemUncheckedUpdateWithoutDeliveryNoteInput = {
@@ -719,6 +746,7 @@ export type DeliveryNoteItemUncheckedUpdateWithoutDeliveryNoteInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DeliveryNoteItemUncheckedUpdateManyWithoutDeliveryNoteInput = {
@@ -733,6 +761,7 @@ export type DeliveryNoteItemUncheckedUpdateManyWithoutDeliveryNoteInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   totalPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   hasPrimer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHighThickness?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -750,6 +779,7 @@ export type DeliveryNoteItemSelect<ExtArgs extends runtime.Types.Extensions.Inte
   unitPrice?: boolean
   totalPrice?: boolean
   hasPrimer?: boolean
+  isHighThickness?: boolean
   deliveryNote?: boolean | Prisma.DeliveryNoteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deliveryNoteItem"]>
 
@@ -766,6 +796,7 @@ export type DeliveryNoteItemSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   unitPrice?: boolean
   totalPrice?: boolean
   hasPrimer?: boolean
+  isHighThickness?: boolean
   deliveryNote?: boolean | Prisma.DeliveryNoteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deliveryNoteItem"]>
 
@@ -782,6 +813,7 @@ export type DeliveryNoteItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   unitPrice?: boolean
   totalPrice?: boolean
   hasPrimer?: boolean
+  isHighThickness?: boolean
   deliveryNote?: boolean | Prisma.DeliveryNoteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deliveryNoteItem"]>
 
@@ -798,9 +830,10 @@ export type DeliveryNoteItemSelectScalar = {
   unitPrice?: boolean
   totalPrice?: boolean
   hasPrimer?: boolean
+  isHighThickness?: boolean
 }
 
-export type DeliveryNoteItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "deliveryNoteId" | "name" | "description" | "color" | "linearMeters" | "squareMeters" | "thickness" | "quantity" | "unitPrice" | "totalPrice" | "hasPrimer", ExtArgs["result"]["deliveryNoteItem"]>
+export type DeliveryNoteItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "deliveryNoteId" | "name" | "description" | "color" | "linearMeters" | "squareMeters" | "thickness" | "quantity" | "unitPrice" | "totalPrice" | "hasPrimer" | "isHighThickness", ExtArgs["result"]["deliveryNoteItem"]>
 export type DeliveryNoteItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   deliveryNote?: boolean | Prisma.DeliveryNoteDefaultArgs<ExtArgs>
 }
@@ -829,6 +862,7 @@ export type $DeliveryNoteItemPayload<ExtArgs extends runtime.Types.Extensions.In
     unitPrice: number
     totalPrice: number
     hasPrimer: boolean
+    isHighThickness: boolean
   }, ExtArgs["result"]["deliveryNoteItem"]>
   composites: {}
 }
@@ -1265,6 +1299,7 @@ export interface DeliveryNoteItemFieldRefs {
   readonly unitPrice: Prisma.FieldRef<"DeliveryNoteItem", 'Float'>
   readonly totalPrice: Prisma.FieldRef<"DeliveryNoteItem", 'Float'>
   readonly hasPrimer: Prisma.FieldRef<"DeliveryNoteItem", 'Boolean'>
+  readonly isHighThickness: Prisma.FieldRef<"DeliveryNoteItem", 'Boolean'>
 }
     
 

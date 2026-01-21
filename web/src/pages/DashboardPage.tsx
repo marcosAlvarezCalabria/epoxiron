@@ -38,7 +38,7 @@ export function DashboardPage() {
     day: 'numeric'
   })
 
-  function getStatusBadge(status: string): import("react").ReactNode {
+  function getStatusBadge(_status: string): import("react").ReactNode {
     throw new Error('Function not implemented.')
   }
 

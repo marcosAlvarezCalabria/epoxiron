@@ -91,7 +91,8 @@ export class CreateDeliveryNoteUseCase {
             id,
             number,
             customerId: data.customerId,
-            customerName: customer.name
+            customerName: customer.name,
+            notes: data.notes
         })
 
         // 4. Add items to the delivery note

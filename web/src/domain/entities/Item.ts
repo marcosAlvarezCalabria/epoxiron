@@ -65,7 +65,7 @@ export class Item {
     this._quantity = props.quantity
     this._measurements = props.measurements  // Can be "no measurements"
     this._price = props.price ?? null
-    this._isHighThickness = props.isHighThickness ?? false
+    this._isHighThickness = props.isHighThickness ?? props.measurements.hasSpecialThickness()
     this._hasPrimer = props.hasPrimer ?? false
   }
 

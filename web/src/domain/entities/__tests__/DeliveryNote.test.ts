@@ -36,7 +36,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNoteData = {
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date('2024-01-15'),
         status: 'draft' as const,
         items: []
@@ -60,7 +60,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNoteData = {
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date('2024-01-15'),
         status: 'draft' as const,
         items: [item]
@@ -79,7 +79,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNoteData = {
         id: '',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date('2024-01-15'),
         status: 'draft' as const,
         items: []
@@ -94,7 +94,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNoteData = {
         id: 'dn-123',
         number: '',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date('2024-01-15'),
         status: 'draft' as const,
         items: []
@@ -110,6 +110,7 @@ describe('DeliveryNote Entity', () => {
         id: 'dn-123',
         number: 'DN-2024-0001',
         customerId: '',
+        customerName: 'Test Customer',
         date: new Date('2024-01-15'),
         status: 'draft' as const,
         items: []
@@ -129,7 +130,7 @@ describe('DeliveryNote Entity', () => {
       const params = {
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       }
 
       // When: Usamos el factory method
@@ -152,7 +153,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       const item = createTestItem('item-1', 'Puerta')
 
@@ -169,7 +170,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -190,7 +191,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'finalized',
         items: [createTestItem('item-1', 'Puerta')]
@@ -206,7 +207,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       const item = createTestItem('item-1', 'Puerta')
       deliveryNote.addItem(item)
@@ -223,7 +224,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When/Then: Debe lanzar error
@@ -240,7 +241,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -255,7 +256,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       const item = createTestItem('item-1', 'Puerta')
       deliveryNote.addItem(item)
@@ -273,7 +274,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When/Then: Debe lanzar error
@@ -285,7 +286,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       const item = createTestItem('item-1', 'Puerta')
       deliveryNote.addItem(item)
@@ -303,7 +304,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -322,7 +323,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'finalized',
         items: [createTestItem('item-1', 'Puerta')]
@@ -345,9 +346,9 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
-      deliveryNote.addItem(createTestItem('item-1', 'Puerta'))
+      deliveryNote.addItem(createTestItem('item-1', 'Puerta', new Price(100)))
 
       // When: Validamos
       deliveryNote.validate()
@@ -362,7 +363,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When/Then: Debe lanzar error
@@ -379,7 +380,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -399,7 +400,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta', new Price(100))]
@@ -418,7 +419,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -436,7 +437,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta'))
 
@@ -454,7 +455,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -473,7 +474,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When: Reabrimos
@@ -488,7 +489,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'finalized',
         items: [createTestItem('item-1', 'Puerta')]
@@ -511,7 +512,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When/Then: Debe ser editable
@@ -523,7 +524,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -538,7 +539,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'validated',
         items: [createTestItem('item-1', 'Puerta')]
@@ -553,7 +554,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date(),
         status: 'finalized',
         items: [createTestItem('item-1', 'Puerta')]
@@ -568,7 +569,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta'))
 
@@ -581,7 +582,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When/Then: No debe tener items
@@ -593,7 +594,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta'))
       deliveryNote.addItem(createTestItem('item-2', 'Ventana'))
@@ -608,7 +609,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta', new Price(100)))
       deliveryNote.addItem(createTestItem('item-2', 'Ventana', new Price(50)))
@@ -622,7 +623,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta', new Price(100)))
       deliveryNote.addItem(createTestItem('item-2', 'Ventana')) // Sin precio
@@ -636,7 +637,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta', new Price(100)))
       deliveryNote.addItem(createTestItem('item-2', 'Ventana')) // Sin precio
@@ -659,7 +660,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // Item 1: precio 100, cantidad 2 = 200
@@ -698,7 +699,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta', new Price(100)))
       deliveryNote.addItem(createTestItem('item-2', 'Ventana')) // Sin precio
@@ -715,7 +716,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When: Calculamos el total
@@ -734,13 +735,13 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote1 = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       const deliveryNote2 = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0002', // Diferente número, mismo ID
-        customerId: 'customer-2'
+        customerId: 'customer-2', customerName: 'Test Customer 2'
       })
 
       // When/Then: Deben ser iguales (mismo ID)
@@ -752,13 +753,13 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote1 = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       const deliveryNote2 = DeliveryNote.createDraft({
         id: 'dn-456',
         number: 'DN-2024-0001', // Mismo número, diferente ID
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
 
       // When/Then: NO deben ser iguales (diferente ID)
@@ -773,7 +774,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = new DeliveryNote({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: new Date('2024-01-15T10:00:00Z'),
         status: 'validated',
         items: [
@@ -789,14 +790,16 @@ describe('DeliveryNote Entity', () => {
       expect(json).toEqual({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1',
+        customerId: 'customer-1', customerName: 'Test Customer',
         date: '2024-01-15T10:00:00.000Z',
         status: 'validated',
         items: expect.any(Array),
         itemCount: 2,
         totalAmount: 150,
         allHavePrice: true,
-        itemsWithoutPrice: 0
+        itemsWithoutPrice: 0,
+        createdAt: expect.any(String),
+        notes: undefined
       })
     })
 
@@ -805,7 +808,7 @@ describe('DeliveryNote Entity', () => {
       const deliveryNote = DeliveryNote.createDraft({
         id: 'dn-123',
         number: 'DN-2024-0001',
-        customerId: 'customer-1'
+        customerId: 'customer-1', customerName: 'Test Customer'
       })
       deliveryNote.addItem(createTestItem('item-1', 'Puerta'))
 

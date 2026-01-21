@@ -6,10 +6,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
-import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from '@/features/customers/hooks/useCustomers'
+import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from '../features/customers/hooks/useCustomers'
 
 import { CustomerForm } from '../features/customers/components/CustomerForm'
-import { Navbar } from '@/components/layout/Navbar'
+import { Navbar } from '../components/layout/Navbar'
 
 export function CustomersPage() {
   const navigate = useNavigate()

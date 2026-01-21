@@ -11,7 +11,7 @@
 import { User } from '../../domain/entities/User'
 import { Email } from '../../domain/value-objects/Email'
 import { Token } from '../../domain/value-objects/Token'
-import { AuthException } from '@/domain/exceptions/AuthException'
+import { AuthException } from '../../domain/exceptions/AuthException'
 import type { AuthRepository } from '../../domain/repositories/AuthRepository'
 
 export type LoginInput = {

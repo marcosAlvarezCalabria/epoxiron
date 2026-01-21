@@ -53,7 +53,9 @@ export class DeliveryNoteMapper {
             number: apiModel.number,
             status: apiModel.status as DeliveryNoteStatus,
             date: new Date(apiModel.date),
-            items: items
+            items: items,
+            notes: apiModel.notes,
+            createdAt: apiModel.createdAt ? new Date(apiModel.createdAt) : undefined
         })
     }
 
@@ -82,8 +84,8 @@ export class DeliveryNoteMapper {
                     thickness: item.measurements.getThickness() ?? undefined
                 } : {}
             })),
-            notes: undefined,
-            createdAt: new Date().toISOString(),
+            notes: domainEntity.notes,
+            createdAt: domainEntity.createdAt.toISOString(),
             updatedAt: new Date().toISOString()
         }
     }

@@ -100,14 +100,25 @@ export class UpdateDeliveryNoteUseCase {
         // But looking at the Mapper, it constructs it via constructor.
         // Let's create a new instance with updated fields but preserving others.
 
+        // Logic to preserve time if the date (day) hasn't changed
+        // This prevents the note from dropping to the bottom of the list when sorting by date
+        const inputDate = new Date(input.date)
+        const existingDate = existingNote.date
+
+        // Check if it's the same day (comparing YYYY-MM-DD from ISO strings)
+        const isSameDay = inputDate.toISOString().split('T')[0] === existingDate.toISOString().split('T')[0]
+        const finalDate = isSameDay ? existingDate : inputDate
+
         const updatedDeliveryNote = new DeliveryNote({
             id: existingNote.id,
             number: existingNote.number,
             customerId: input.customerId,
             customerName: existingNote.customerName,
-            date: new Date(input.date),
+            date: finalDate, // Use preserved date if applicable
             status: existingNote.status, // Start with existing status, then transition if needed
-            items: items
+            items: items,
+            notes: input.notes,
+            createdAt: existingNote.createdAt // Preserve original creation date
         })
 
         // Handle Status Transitions

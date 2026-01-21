@@ -163,7 +163,8 @@ console.log('\n=== PRACTICE 5: Entity DeliveryNote ===')
 const deliveryNote = DeliveryNote.createDraft({
   id: 'dn-123',
   number: 'DN-2024-0001',
-  customerId: 'customer-456'
+  customerId: 'customer-456',
+  customerName: 'Test Customer'
 })
 
 console.log('Delivery Note:', deliveryNote.number)
@@ -238,7 +239,8 @@ console.log('\n=== PRACTICE 6: State Machine ===')
 const deliveryNote2 = DeliveryNote.createDraft({
   id: 'dn-124',
   number: 'DN-2024-0002',
-  customerId: 'customer-789'
+  customerId: 'customer-789',
+  customerName: 'Test Customer 2'
 })
 
 // Add item

@@ -14,6 +14,8 @@ export interface Customer {
   name: string
   email?: string
   phone?: string
+  address?: string
+  notes?: string
   // rateId removed
 
   // PRICING
@@ -30,6 +32,8 @@ export interface CreateCustomerRequest {
   name: string
   email?: string
   phone?: string
+  address?: string
+  notes?: string
 
   // PRICING
   pricePerLinearMeter?: number
@@ -42,6 +46,8 @@ export interface UpdateCustomerRequest {
   name?: string
   email?: string
   phone?: string
+  address?: string
+  notes?: string
 
   // PRICING
   pricePerLinearMeter?: number

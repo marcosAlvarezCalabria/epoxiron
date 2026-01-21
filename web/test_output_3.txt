@@ -1,0 +1,117 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/home/marcos/Desktop/epoxiron/web[39m
+
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/api/__tests__/authApi.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Item.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/stores/__tests__/authStore.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 52[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/DeliveryNote.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 110[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/User.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/value-objects/Email.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Customer.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/application/use-cases/__tests__/CreateDeliveryNoteUseCase.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Header.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1531[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 1227[2mms[22m[39m
+ [31m❯[39m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 1420[2mms[22m[39m
+[31m   [31m×[31m Default[39m[33m 314[2mms[22m[39m
+[31m   [31m×[31m Login Success[39m[33m 341[2mms[22m[39m
+[31m   [31m×[31m Login Error[39m[32m 243[2mms[22m[39m
+[31m   [31m×[31m Invalid Email[39m[33m 348[2mms[22m[39m
+[31m   [31m×[31m Short Password[39m[32m 167[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Button.stories.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 2190[2mms[22m[39m
+   [33m[2m✓[22m[39m Primary [33m 1302[2mms[22m[39m
+   [33m[2m✓[22m[39m Large [33m 373[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Page.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 2005[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged Out [33m 1313[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 683[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/App.test.tsx[2m [ src/App.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "@/features/auth/stores/authStore" from "src/lib/apiClient.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/lib/apiClient.ts[39m:8:29
+[33m  1  |  import { useAuthStore } from "@/features/auth/stores/authStore";
+     |                                ^
+  2  |  const API_BASE_URL = Object.assign(
+  3  |    /* istanbul ignore next */[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m [ src/features/auth/components/__tests__/LoginForm.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "@/domain/exceptions/AuthException" from "src/features/auth/components/LoginForm.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/features/auth/components/LoginForm.tsx[39m:16:30
+[33m  5  |  import { useLogin } from "../hooks/useLogin";
+  6  |  import { loginSchema } from "../schemas/loginSchema";
+  7  |  import { AuthException } from "@/domain/exceptions/AuthException";
+     |                                 ^
+  8  |  export function LoginForm() {
+  9  |    const navigate = useNavigate();[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx[2m [ src/features/auth/hooks/__tests__/useLogin.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "@/domain/exceptions/AuthException" from "src/application/use-cases/LoginUseCase.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/application/use-cases/LoginUseCase.ts[39m:14:30
+[33m  2  |  import { Email } from "../../domain/value-objects/Email";
+  3  |  import { Token } from "../../domain/value-objects/Token";
+  4  |  import { AuthException } from "@/domain/exceptions/AuthException";
+     |                                 ^
+  5  |  export class LoginUseCase {
+  6  |    authRepository;[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx[2m > [22mDefault
+[41m[1m FAIL [22m[49m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx[2m > [22mLogin Success
+[41m[1m FAIL [22m[49m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx[2m > [22mLogin Error
+[41m[1m FAIL [22m[49m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx[2m > [22mInvalid Email
+[41m[1m FAIL [22m[49m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx[2m > [22mShort Password
+[31m[1mError[22m: 
+[34mClick to debug the error directly in Storybook: http://localhost:6006/?path=/story/auth-loginform--default&addonPanel=storybook/interactions/panel[31m
+
+useNavigate() may be used only in the context of a <Router> component.[39m
+[90m [2m❯[22m invariant node_modules/.cache/storybook/86c43d716c9d9a761488a2dae3820d7df02ae40130cabf455cecffe3b6ba0aa1/sb-vitest/deps/react-router-dom.js?v=71c9b779:[2m631:10[22m[39m
+[90m [2m❯[22m useNavigateUnstable node_modules/.cache/storybook/86c43d716c9d9a761488a2dae3820d7df02ae40130cabf455cecffe3b6ba0aa1/sb-vitest/deps/react-router-dom.js?v=71c9b779:[2m5840:2[22m[39m
+[90m [2m❯[22m useNavigate node_modules/.cache/storybook/86c43d716c9d9a761488a2dae3820d7df02ae40130cabf455cecffe3b6ba0aa1/sb-vitest/deps/react-router-dom.js?v=71c9b779:[2m5837:45[22m[39m
+[36m [2m❯[22m LoginForm src/features/auth/components/LoginForm.tsx:[2m19:19[22m[39m
+    [90m 17| [39m
+    [90m 18| [39m[35mexport[39m [35mfunction[39m [33mLoginForm[39m() {
+    [90m 19| [39m  [35mconst[39m navigate [33m=[39m [34museNavigate[39m()
+    [90m   | [39m                  [31m^[39m
+    [90m 20| [39m  [35mconst[39m { login[33m,[39m isLoading[33m,[39m isError[33m,[39m error } [33m=[39m [34museLogin[39m()
+    [90m 21| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (15)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m172 passed[39m[22m[90m (177)[39m
+[2m   Start at [22m 07:09:40
+[2m   Duration [22m 11.22s[2m (transform 14.31s, setup 13.29s, import 15.02s, tests 7.52s, environment 20.31s)[22m
+

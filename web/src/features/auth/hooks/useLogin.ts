@@ -14,11 +14,14 @@ import { LoginUseCase, type LoginInput } from '../../../application/use-cases/Lo
 import { AuthRepository } from '../../../infrastructure/repositories/AuthRepository'
 import { AuthException } from '../../../domain/exceptions/AuthException'
 
-const authRepository = new AuthRepository()
-const loginUseCase = new LoginUseCase(authRepository)
+import { useMemo } from 'react'
 
 export function useLogin() {
   const { setAuth } = useAuthStore()
+
+  const loginUseCase = useMemo(() => {
+    return new LoginUseCase(new AuthRepository())
+  }, [])
 
   const mutation = useMutation({
     mutationFn: async (input: LoginInput) => {

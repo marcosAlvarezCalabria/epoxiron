@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import { LoginForm } from './LoginForm'
 
 // Configuración de la story
@@ -17,9 +18,11 @@ const meta = {
 
       return (
         <QueryClientProvider client={queryClient}>
-          <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-            <Story />
-          </div>
+          <MemoryRouter>
+            <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+              <Story />
+            </div>
+          </MemoryRouter>
         </QueryClientProvider>
       )
     }

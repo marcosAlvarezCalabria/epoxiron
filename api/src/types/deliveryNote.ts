@@ -24,6 +24,7 @@ export interface DeliveryNoteItem {
   unitPrice: number             // Price per unit in euros (calculated from rate)
   totalPrice: number            // Total price for this item (unitPrice * quantity)
   hasPrimer?: boolean           // Whether primer (imprimación) is applied (doubles price)
+  isHighThickness?: boolean     // Whether extra thickness is applied (+70% price)
 }
 
 // 📋 COMPLETE DELIVERY NOTE

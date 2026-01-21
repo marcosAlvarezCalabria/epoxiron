@@ -885,7 +885,8 @@ export const DeliveryNoteItemScalarFieldEnum = {
   quantity: 'quantity',
   unitPrice: 'unitPrice',
   totalPrice: 'totalPrice',
-  hasPrimer: 'hasPrimer'
+  hasPrimer: 'hasPrimer',
+  isHighThickness: 'isHighThickness'
 } as const
 
 export type DeliveryNoteItemScalarFieldEnum = (typeof DeliveryNoteItemScalarFieldEnum)[keyof typeof DeliveryNoteItemScalarFieldEnum]

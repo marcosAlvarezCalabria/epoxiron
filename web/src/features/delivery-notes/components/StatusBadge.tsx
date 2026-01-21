@@ -21,9 +21,9 @@ export function StatusBadge({ status }: StatusBadgeProps) {
         switch (status) {
             case 'draft':
                 return 'bg-gray-100 text-gray-800 border-gray-200';
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            case 'reviewed':
+            case 'validated':
+                return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'finalized':
                 return 'bg-green-100 text-green-800 border-green-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -34,10 +34,10 @@ export function StatusBadge({ status }: StatusBadgeProps) {
         switch (status) {
             case 'draft':
                 return 'Borrador'; // UI en Español
-            case 'pending':
-                return 'Pendiente'; // UI en Español
-            case 'reviewed':
-                return 'Revisado'; // UI en Español
+            case 'validated':
+                return 'Validado'; // UI en Español
+            case 'finalized':
+                return 'Finalizado'; // UI en Español
             default:
                 return status;
         }

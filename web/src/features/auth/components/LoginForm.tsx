@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { useLogin } from '../hooks/useLogin'
 import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
-import { AuthException } from '@/domain/exceptions/AuthException'
+import { AuthException } from '../../../domain/exceptions/AuthException'
 
 export function LoginForm() {
   const navigate = useNavigate()
@@ -57,7 +57,7 @@ export function LoginForm() {
   const errorMessage = getErrorMessage()
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       {/* Email Field */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -67,9 +67,8 @@ export function LoginForm() {
           id="email"
           type="email"
           {...register('email')}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.email ? 'border-red-500' : 'border-gray-300'
-          }`}
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+            }`}
           placeholder="tu@email.com"
           disabled={isLoading}
         />
@@ -87,9 +86,8 @@ export function LoginForm() {
           id="password"
           type="password"
           {...register('password')}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.password ? 'border-red-500' : 'border-gray-300'
-          }`}
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+            }`}
           placeholder="••••••••"
           disabled={isLoading}
         />
@@ -109,11 +107,10 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className={`w-full py-2 px-4 rounded-md font-medium text-white transition-colors ${
-          isLoading
-            ? 'bg-blue-400 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
-        }`}
+        className={`w-full py-2 px-4 rounded-md font-medium text-white transition-colors ${isLoading
+          ? 'bg-blue-400 cursor-not-allowed'
+          : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+          }`}
       >
         {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
       </button>

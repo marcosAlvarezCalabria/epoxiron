@@ -670,6 +670,8 @@ describe('Item Entity', () => {
         linearMeters: 10,
         squareMeters: null,
         thickness: 3,
+        isHighThickness: true,
+        hasPrimer: false,
         price: 100,
         totalPrice: 500
       })

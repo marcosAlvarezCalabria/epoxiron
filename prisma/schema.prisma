@@ -79,6 +79,7 @@ model DeliveryNoteItem {
   unitPrice  Float
   totalPrice Float
   hasPrimer  Boolean @default(false)
+  isHighThickness Boolean @default(false)
 }
 
 enum DeliveryNoteStatus {

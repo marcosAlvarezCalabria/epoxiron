@@ -8,7 +8,7 @@ import App from './App.tsx'
 
 // 🎓 PRÁCTICA: Domain Layer
 // Ejecuta las prácticas de Domain (revisa la consola del navegador)
-import './domain/playground'
+// import './domain/playground'
 
 
 

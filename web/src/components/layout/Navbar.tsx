@@ -1,6 +1,6 @@
 
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useAuthStore } from '@/features/auth/stores/authStore'
+import { useAuthStore } from '../../features/auth/stores/authStore'
 
 export function Navbar() {
     const { user, logout } = useAuthStore()
@@ -42,8 +42,8 @@ export function Navbar() {
                             key={item.path}
                             onClick={() => navigate(item.path)}
                             className={`flex items-center gap-1 font-bold text-sm transition-colors ${isActive(item.path)
-                                    ? 'text-blue-500'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'text-blue-500'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             {item.label}
@@ -75,8 +75,8 @@ export function Navbar() {
                         key={item.path}
                         onClick={() => navigate(item.path)}
                         className={`flex flex-col items-center justify-center border-b-[3px] pb-[10px] pt-3 whitespace-nowrap transition-colors ${isActive(item.path)
-                                ? 'border-blue-600 text-blue-600'
-                                : 'border-transparent text-gray-400 hover:text-white'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-400 hover:text-white'
                             }`}
                     >
                         <p className="text-sm font-bold leading-normal tracking-[0.015em]">{item.label}</p>

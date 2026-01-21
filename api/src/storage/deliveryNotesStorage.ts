@@ -22,6 +22,7 @@ function toDomain(dbNote: any): DomainDeliveryNote {
       unitPrice: item.unitPrice,
       totalPrice: item.totalPrice,
       hasPrimer: item.hasPrimer,
+      isHighThickness: item.isHighThickness,
       measurements: {
         linearMeters: item.linearMeters,
         squareMeters: item.squareMeters,
@@ -115,6 +116,7 @@ export async function create(deliveryNote: DomainDeliveryNote): Promise<DomainDe
           unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
           hasPrimer: item.hasPrimer,
+          isHighThickness: item.isHighThickness,
           linearMeters: item.measurements?.linearMeters,
           squareMeters: item.measurements?.squareMeters,
           thickness: item.measurements?.thickness
@@ -161,6 +163,7 @@ export async function update(id: string, data: Partial<DomainDeliveryNote>): Pro
           unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
           hasPrimer: item.hasPrimer,
+          isHighThickness: item.isHighThickness,
           linearMeters: item.measurements?.linearMeters,
           squareMeters: item.measurements?.squareMeters,
           thickness: item.measurements?.thickness

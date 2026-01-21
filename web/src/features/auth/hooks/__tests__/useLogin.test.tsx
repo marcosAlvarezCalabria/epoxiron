@@ -3,8 +3,12 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useLogin } from '../useLogin'
 import { useAuthStore } from '../../stores/authStore'
-import * as authApi from '../../api/authApi'
+import { LoginUseCase } from '../../../../application/use-cases/LoginUseCase'
+import { AuthException } from '../../../../domain/exceptions/AuthException'
 import type { ReactNode } from 'react'
+
+// Mock LoginUseCase class module
+vi.mock('../../../../application/use-cases/LoginUseCase')
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -25,6 +29,10 @@ describe('useLogin', () => {
   beforeEach(() => {
     useAuthStore.getState().logout()
     vi.clearAllMocks()
+
+    // Setup default mock implementation for LogicUseCase
+    const MockedUseCase = vi.mocked(LoginUseCase)
+    MockedUseCase.prototype.execute = vi.fn() as any
   })
 
   it('debe retornar función login y estados iniciales', () => {
@@ -38,9 +46,10 @@ describe('useLogin', () => {
   })
 
   it('debe cambiar isLoading a true mientras hace login', async () => {
-    vi.spyOn(authApi, 'login').mockImplementation(
-      () => new Promise(resolve => setTimeout(resolve, 100))
-    )
+    const MockedUseCase = vi.mocked(LoginUseCase)
+      ; (MockedUseCase.prototype.execute as any).mockImplementation(
+        () => new Promise(resolve => setTimeout(resolve, 100))
+      )
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper()
@@ -49,7 +58,7 @@ describe('useLogin', () => {
     act(() => {
       result.current.login({
         email: 'test@test.com',
-        password: '123456'
+        password: 'password123'
       })
     })
 
@@ -58,17 +67,21 @@ describe('useLogin', () => {
     })
   })
 
-  it('debe guardar usuario en el store después de login exitoso', async () => {
-    const mockResponse = {
-      token: 'fake-token',
+  it('debe guardar usuario y token en el store después de login exitoso', async () => {
+    const mockOutput = {
       user: {
         id: '1',
         email: 'test@test.com',
         name: 'Test User'
-      }
+      } as any, // Cast to match User type partially or fully
+      token: {
+        getValue: () => 'fake-token'
+      } as any,
+      success: true
     }
 
-    vi.spyOn(authApi, 'login').mockResolvedValue(mockResponse)
+    const MockedUseCase = vi.mocked(LoginUseCase)
+      ; (MockedUseCase.prototype.execute as any).mockResolvedValue(mockOutput)
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper()
@@ -76,77 +89,28 @@ describe('useLogin', () => {
 
     result.current.login({
       email: 'test@test.com',
-      password: '123456'
+      password: 'password123'
     })
 
     await waitFor(() => {
-      expect(useAuthStore.getState().user).toEqual(mockResponse.user)
-    })
-  })
-
-  it('debe guardar token en el store después de login exitoso', async () => {
-    const mockResponse = {
-      token: 'fake-token',
-      user: {
-        id: '1',
-        email: 'test@test.com',
-        name: 'Test User'
-      }
-    }
-
-    vi.spyOn(authApi, 'login').mockResolvedValue(mockResponse)
-
-    const { result } = renderHook(() => useLogin(), {
-      wrapper: createWrapper()
-    })
-
-    result.current.login({
-      email: 'test@test.com',
-      password: '123456'
-    })
-
-    await waitFor(() => {
-      expect(useAuthStore.getState().token).toBe('fake-token')
-    })
-  })
-
-  it('debe cambiar isAuthenticated a true después de login exitoso', async () => {
-    const mockResponse = {
-      token: 'fake-token',
-      user: {
-        id: '1',
-        email: 'test@test.com',
-        name: 'Test User'
-      }
-    }
-
-    vi.spyOn(authApi, 'login').mockResolvedValue(mockResponse)
-
-    const { result } = renderHook(() => useLogin(), {
-      wrapper: createWrapper()
-    })
-
-    result.current.login({
-      email: 'test@test.com',
-      password: '123456'
-    })
-
-    await waitFor(() => {
+      expect(useAuthStore.getState().user).toEqual(mockOutput.user)
+      expect(useAuthStore.getState().getToken()).toBe('fake-token')
       expect(useAuthStore.getState().isAuthenticated).toBe(true)
     })
   })
 
   it('debe manejar error cuando el login falla', async () => {
-    const mockError = new Error('Credenciales incorrectas')
-    vi.spyOn(authApi, 'login').mockRejectedValue(mockError)
+    const mockError = new AuthException('INVALID_CREDENTIALS', 'Credenciales incorrectas')
+    const MockedUseCase = vi.mocked(LoginUseCase)
+      ; (MockedUseCase.prototype.execute as any).mockRejectedValue(mockError)
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper()
     })
 
     result.current.login({
-      email: 'wrong@test.com',
-      password: 'wrongpass'
+      email: 'test@test.com',
+      password: 'password123'
     })
 
     await waitFor(() => {
@@ -155,16 +119,17 @@ describe('useLogin', () => {
   })
 
   it('debe mantener isLoading en false después de error', async () => {
-    const mockError = new Error('Credenciales incorrectas')
-    vi.spyOn(authApi, 'login').mockRejectedValue(mockError)
+    const mockError = new Error('Gateway Error')
+    const MockedUseCase = vi.mocked(LoginUseCase)
+      ; (MockedUseCase.prototype.execute as any).mockRejectedValue(mockError)
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper()
     })
 
     result.current.login({
-      email: 'wrong@test.com',
-      password: 'wrongpass'
+      email: 'test@test.com',
+      password: 'password123'
     })
 
     await waitFor(() => {
@@ -173,16 +138,17 @@ describe('useLogin', () => {
   })
 
   it('no debe guardar usuario en el store si el login falla', async () => {
-    const mockError = new Error('Credenciales incorrectas')
-    vi.spyOn(authApi, 'login').mockRejectedValue(mockError)
+    const mockError = new Error('Fail')
+    const MockedUseCase = vi.mocked(LoginUseCase)
+      ; (MockedUseCase.prototype.execute as any).mockRejectedValue(mockError)
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper()
     })
 
     result.current.login({
-      email: 'wrong@test.com',
-      password: 'wrongpass'
+      email: 'test@test.com',
+      password: 'password123'
     })
 
     await waitFor(() => {

@@ -99,7 +99,10 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   }, [deliveryNote])
 
   // Estado del NUEVO item que se está creando (Formulario único)
+  // Estado del NUEVO item que se está creando (Formulario único)
   const [newItem, setNewItem] = useState<FormItem>(EMPTY_ITEM)
+  // Estado para controlar si estamos editando un item existente de la lista
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   const { data: customers } = useCustomers()
   const selectedCustomer = customers?.find(c => c.id === customerId)
@@ -171,13 +174,48 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
   const newItemTotal = calculateItemPrice(newItem) * (newItem.quantity || 0)
 
   const handleAddItem = () => {
-    if (!newItem.name || !newItem.quantity) return
+    if (!newItem.name) {
+      alert('Por favor, introduce un nombre para el item.')
+      return
+    }
+    if (!newItem.quantity || newItem.quantity <= 0) {
+      alert('Por favor, introduce una cantidad válida.')
+      return
+    }
 
-    setItems(prev => [...prev, newItem])
+    const calculatedPrice = calculateItemPrice(newItem)
+    if (calculatedPrice === 0) {
+      alert('El precio calculada es 0. Por favor revisa las tarifas o medidas.')
+      return
+    }
+
+    if (editingIndex !== null) {
+      // Update existing item
+      setItems(prev => {
+        const updated = [...prev]
+        updated[editingIndex] = newItem
+        return updated
+      })
+      setEditingIndex(null)
+    } else {
+      // Add new item
+      setItems(prev => [...prev, newItem])
+    }
+
     setNewItem(EMPTY_ITEM)
   }
 
+  const handleEditItem = (index: number) => {
+    setNewItem(items[index])
+    setEditingIndex(index)
+    // Optional: Scroll to form if needed
+  }
+
   const handleRemoveItem = (index: number) => {
+    if (editingIndex === index) {
+      setEditingIndex(null)
+      setNewItem(EMPTY_ITEM)
+    }
     setItems(prev => prev.filter((_, i) => i !== index))
   }
 
@@ -200,6 +238,18 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
     if (items.length === 0) {
       alert('El albarán debe tener al menos un item.')
       return
+    }
+
+    // UX: Check if there is data in the "New Item" form that hasn't been added
+    if (newItem.name.trim() !== '' || (newItem.quantity && newItem.quantity > 0)) {
+      const confirmDiscard = window.confirm(
+        'Tienes datos en el formulario de "Nuevo Item" sin añadir a la lista.\n\n' +
+        'Si continúas, estos datos se perderán.\n' +
+        '¿Quieres continuar sin añadir este item?'
+      )
+      if (!confirmDiscard) {
+        return
+      }
     }
 
     // Validation: Zero Prices
@@ -328,38 +378,61 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
               <h3 className="text-white font-medium">Items Añadidos ({items.length})</h3>
               <span className="text-green-400 font-bold">Total Est: €{estimatedTotal.toFixed(2)}</span>
             </div>
+            {/* Table Header */}
+            <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-gray-800/50 text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <div className="col-span-1 text-center">Cant.</div>
+              <div className="col-span-4">Descripción</div>
+              <div className="col-span-2">Color</div>
+              <div className="col-span-3">Medidas / Extras</div>
+              <div className="col-span-2 text-right">Precio</div>
+            </div>
+
             <div className="divide-y divide-gray-800">
               {items.map((item, index) => {
                 const p = calculateItemPrice(item)
                 return (
-                  <div key={index} className="p-4 flex items-center justify-between hover:bg-gray-800/30 transition-colors">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white">{item.quantity}x</span>
-                        <span className="text-gray-200">{item.name}</span>
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        {item.racColor && `RAL ${item.racColor}`}
-                        {item.specialColor && item.specialColor}
-                        {item.hasPrimer && ' + Imprimación'}
-                        {item.isHighThickness && ' + Grosor Esp.'}
-                      </div>
-                      <div className="text-xs text-gray-600 font-mono mt-0.5">
-                        {item.linearMeters && `${item.linearMeters}ml `}
-                        {item.squareMeters && `${item.squareMeters}m²`}
-                      </div>
+                  <div key={index} className="grid grid-cols-12 gap-2 px-4 py-3 items-center hover:bg-gray-800/30 transition-colors text-sm">
+                    {/* Quantity */}
+                    <div className="col-span-1 text-center font-bold text-white bg-gray-800 rounded py-1">
+                      {item.quantity}
                     </div>
-                    <div className="flex items-center gap-4">
+
+                    {/* Name */}
+                    <div className="col-span-4 text-white font-medium truncate">
+                      {item.name}
+                      {item.notes && <span className="block text-xs text-gray-500 italic truncate">{item.notes}</span>}
+                    </div>
+
+                    {/* Color */}
+                    <div className="col-span-2 text-gray-300 truncate text-xs">
+                      {item.racColor && <span className="block">RAL {item.racColor}</span>}
+                      {item.specialColor && <span className="block">{item.specialColor}</span>}
+                      {!item.racColor && !item.specialColor && <span className="text-gray-600">-</span>}
+                    </div>
+
+                    {/* Measurements & Extras */}
+                    <div className="col-span-3 text-xs text-gray-400 flex flex-wrap gap-1">
+                      {item.linearMeters && <span className="bg-blue-900/20 text-blue-300 px-1.5 rounded">{item.linearMeters}ml</span>}
+                      {item.squareMeters && <span className="bg-green-900/20 text-green-300 px-1.5 rounded">{item.squareMeters}m²</span>}
+                      {item.hasPrimer && <span className="bg-purple-900/20 text-purple-300 px-1.5 rounded" title="Imprimación">IMP</span>}
+                      {item.isHighThickness && <span className="bg-orange-900/20 text-orange-300 px-1.5 rounded" title="Grosor Especial">GR+</span>}
+                    </div>
+
+                    {/* Price & Action */}
+                    <div className="col-span-2 flex items-center justify-end gap-3 z-50">
                       <div className="text-right">
-                        <div className="text-white font-medium">€{(p * item.quantity).toFixed(2)}</div>
-                        <div className="text-xs text-gray-500">€{p.toFixed(2)}/ud</div>
+                        <div className="text-white font-bold">€{(p * item.quantity).toFixed(2)}</div>
+                        <div className="text-[10px] text-gray-500">€{p.toFixed(2)}/ud</div>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveItem(index)}
-                        className="text-red-400 hover:text-red-300 p-2 hover:bg-red-900/20 rounded"
+                        className="text-gray-500 hover:text-red-400 transition-colors"
+                        title="Eliminar item"
                       >
-                        ✕
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
                   </div>
@@ -371,10 +444,12 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
         {/* 4. Add New Item Form Section */}
         {selectedCustomer && (
-          <div className="bg-gray-900 rounded-lg border border-blue-900/30 p-5 shadow-lg">
-            <h3 className="text-blue-400 font-bold mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-blue-900/50 flex items-center justify-center text-xs">+</span>
-              Añadir Nuevo Item
+          <div className={`bg-gray-900 rounded-lg border p-5 shadow-lg ${editingIndex !== null ? 'border-amber-600/50 ring-1 ring-amber-600/30' : 'border-blue-900/30'}`}>
+            <h3 className={`font-bold mb-4 flex items-center gap-2 ${editingIndex !== null ? 'text-amber-500' : 'text-blue-400'}`}>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${editingIndex !== null ? 'bg-amber-900/50' : 'bg-blue-900/50'}`}>
+                {editingIndex !== null ? '✎' : '+'}
+              </span>
+              {editingIndex !== null ? 'Editar Item' : 'Añadir Nuevo Item'}
             </h3>
 
             <div className="space-y-4">
@@ -492,13 +567,27 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
                   <span className="text-gray-400">Total Item:</span>
                   <span className="ml-2 text-xl font-bold text-white">€{newItemTotal.toFixed(2)}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleAddItem}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                >
-                  Añadir a la lista
-                </button>
+                <div className="flex gap-2">
+                  {editingIndex !== null && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingIndex(null)
+                        setNewItem(EMPTY_ITEM)
+                      }}
+                      className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Cancelar Edición
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleAddItem}
+                    className={`${editingIndex !== null ? 'bg-amber-600 hover:bg-amber-700' : 'bg-green-600 hover:bg-green-700'} text-white px-6 py-2 rounded-lg font-medium transition-colors`}
+                  >
+                    {editingIndex !== null ? 'Actualizar Item' : 'Añadir a la lista'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -37,6 +37,8 @@ export interface DeliveryNoteProps {
   date: Date
   status: DeliveryNoteStatus
   items: Item[]
+  notes?: string
+  createdAt?: Date
 }
 
 export class DeliveryNote {
@@ -47,6 +49,8 @@ export class DeliveryNote {
   private readonly _date: Date
   private _status: DeliveryNoteStatus
   private _items: Item[]
+  private _notes?: string
+  private _createdAt: Date
 
   constructor(props: DeliveryNoteProps) {
     // Validations
@@ -69,6 +73,8 @@ export class DeliveryNote {
     this._date = props.date
     this._status = props.status
     this._items = props.items
+    this._notes = props.notes
+    this._createdAt = props.createdAt || new Date()
   }
 
   // Getters
@@ -92,12 +98,20 @@ export class DeliveryNote {
     return this._date
   }
 
+  get createdAt(): Date {
+    return this._createdAt
+  }
+
   get status(): DeliveryNoteStatus {
     return this._status
   }
 
   get items(): ReadonlyArray<Item> {
     return this._items
+  }
+
+  get notes(): string | undefined {
+    return this._notes
   }
 
   // Methods to manage items (aggregate)
@@ -258,6 +272,8 @@ export class DeliveryNote {
       items: this._items.map((i) => i.toJSON()),
       itemCount: this.itemCount(),
       totalAmount: this.calculateTotalAmount()?.getValue() ?? null,
+      notes: this._notes,
+      createdAt: this._createdAt.toISOString(),
       allHavePrice: this.allItemsHavePrice(),
       itemsWithoutPrice: this.itemsWithoutPrice().length,
     }
@@ -269,6 +285,7 @@ export class DeliveryNote {
     number: string
     customerId: string
     customerName: string
+    notes?: string
   }): DeliveryNote {
     return new DeliveryNote({
       id: params.id,
@@ -276,8 +293,10 @@ export class DeliveryNote {
       customerId: params.customerId,
       customerName: params.customerName,
       date: new Date(),
+      createdAt: new Date(),
       status: 'draft',
       items: [],
+      notes: params.notes
     })
   }
 }

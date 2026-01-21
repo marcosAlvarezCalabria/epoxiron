@@ -8,7 +8,7 @@
  * Dependencies: Infrastructure (repository)
  */
 
-import type { AuthRepository } from '@/domain/repositories/AuthRepository'
+import type { AuthRepository } from '../../domain/repositories/AuthRepository'
 
 export type LogoutOutput = {
   success: boolean

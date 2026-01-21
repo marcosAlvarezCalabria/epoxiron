@@ -1,0 +1,87 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/home/marcos/Desktop/epoxiron/web[39m
+
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Customer.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/api/__tests__/authApi.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Item.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/DeliveryNote.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/User.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/value-objects/Email.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/stores/__tests__/authStore.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/application/use-cases/__tests__/CreateDeliveryNoteUseCase.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Header.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1217[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 1024[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Button.stories.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1325[2mms[22m[39m
+   [33m[2m✓[22m[39m Primary [33m 940[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Page.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1392[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged Out [33m 1038[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 349[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1427[2mms[22m[39m
+   [33m[2m✓[22m[39m Default [33m 837[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/App.test.tsx[2m [ src/App.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "@/lib/apiClient" from "src/features/customers/api/customersApi.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/features/customers/api/customersApi.ts[39m:8:26
+[33m  1  |  import { apiClient } from "@/lib/apiClient";
+     |                             ^
+  2  |  export async function fetchCustomers() {
+  3  |    return apiClient("/customers", {[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m [ src/features/auth/components/__tests__/LoginForm.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "../hooks/useLogin" from "src/features/auth/components/__tests__/LoginForm.test.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/features/auth/components/__tests__/LoginForm.test.tsx[39m:16:0
+[33m  9  |  const __vi_import_5__ = await import("react-router-dom");
+  10 |  const __vi_import_6__ = await import("../../../../domain/exceptions/AuthException");
+  11 |  const __vi_import_7__ = await import("../hooks/useLogin");
+     |                                       ^
+  12 |  
+  13 |  import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx[2m [ src/features/auth/hooks/__tests__/useLogin.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "../../../infrastructure/repositories/AuthRepository" from "src/features/auth/hooks/__tests__/useLogin.test.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/features/auth/hooks/__tests__/useLogin.test.tsx[39m:6:0
+[33m  5  |  const __vi_import_3__ = await import("../useLogin");
+  6  |  const __vi_import_4__ = await import("../../stores/authStore");
+  7  |  const __vi_import_5__ = await import("../../../infrastructure/repositories/AuthRepository");
+     |                                       ^
+  8  |  
+  9  |  import { describe, it, expect, beforeEach, vi } from "vitest";[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (15)[39m
+[2m      Tests [22m [1m[32m177 passed[39m[22m[90m (177)[39m
+[2m   Start at [22m 07:19:05
+[2m   Duration [22m 11.02s[2m (transform 11.27s, setup 10.67s, import 10.88s, tests 5.71s, environment 21.02s)[22m
+

@@ -97,9 +97,9 @@ export function DailySummaryPage() {
     }
   }
 
-  const handleMarkAsCorrect = (noteId: string) => {
+  const handleMarkAsCorrect = (_noteId: string) => {
     // TODO: Implementar actualización de estado a 'correct'
-    console.log('Marcar como correcto:', noteId)
+    // console.log('Marcar como correcto:', noteId)
   }
 
   const getDatePreset = (preset: string) => {

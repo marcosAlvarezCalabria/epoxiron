@@ -1,0 +1,232 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/home/marcos/Desktop/epoxiron/web[39m
+
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/User.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/stores/__tests__/authStore.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Item.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/DeliveryNote.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 101[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/api/__tests__/authApi.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe guardar usuario en el store después de login exitoso
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe guardar usuario en el store después de login exitoso
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+ [31m❯[39m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx [2m([22m[2m19 tests[22m[2m | [22m[31m19 failed[39m[2m)[22m[32m 254[2mms[22m[39m
+[31m       [31m×[31m debe mostrar campo de email[39m[32m 82[2mms[22m[39m
+[31m       [31m×[31m debe mostrar campo de password[39m[32m 22[2mms[22m[39m
+[31m       [31m×[31m debe mostrar botón de submit[39m[32m 20[2mms[22m[39m
+[31m       [31m×[31m el campo de password debe ser tipo password[39m[32m 9[2mms[22m[39m
+[31m       [31m×[31m el campo de email debe ser tipo email[39m[32m 20[2mms[22m[39m
+[31m       [31m×[31m debe permitir escribir en el campo de email[39m[32m 11[2mms[22m[39m
+[31m       [31m×[31m debe permitir escribir en el campo de password[39m[32m 6[2mms[22m[39m
+[31m       [31m×[31m debe mostrar error si email está vacío[39m[32m 6[2mms[22m[39m
+[31m       [31m×[31m debe mostrar error si password está vacío[39m[32m 12[2mms[22m[39m
+[31m       [31m×[31m debe mostrar error si email no es válido[39m[32m 8[2mms[22m[39m
+[31m       [31m×[31m debe mostrar error si password es muy corta[39m[32m 7[2mms[22m[39m
+[31m       [31m×[31m debe llamar a login con los datos correctos[39m[32m 8[2mms[22m[39m
+[31m       [31m×[31m debe mostrar estado de carga mientras procesa[39m[32m 6[2mms[22m[39m
+[31m       [31m×[31m debe deshabilitar el botón mientras procesa[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m debe mostrar mensaje de error si login falla[39m[32m 5[2mms[22m[39m
+[31m       [31m×[31m debe limpiar errores al empezar a escribir[39m[32m 5[2mms[22m[39m
+[31m       [31m×[31m los campos deben tener labels asociados[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m los campos deben ser requeridos[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m debe mostrar errores con role alert para lectores de pantalla[39m[32m 5[2mms[22m[39m
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe guardar token en el store después de login exitoso
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Customer.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/application/use-cases/__tests__/CreateDeliveryNoteUseCase.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/value-objects/Email.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe cambiar isAuthenticated a true después de login exitoso
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe mantener isLoading en false después de error
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mno debe guardar usuario en el store si el login falla
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Email o contraseña incorrectos
+
+ [31m❯[39m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 3302[2mms[22m[39m
+     [32m✓[39m debe retornar función login y estados iniciales[32m 51[2mms[22m[39m
+     [32m✓[39m debe cambiar isLoading a true mientras hace login[32m 98[2mms[22m[39m
+[31m     [31m×[31m debe guardar usuario en el store después de login exitoso[39m[33m 1042[2mms[22m[39m
+[31m     [31m×[31m debe guardar token en el store después de login exitoso[39m[33m 1018[2mms[22m[39m
+[31m     [31m×[31m debe cambiar isAuthenticated a true después de login exitoso[39m[33m 1024[2mms[22m[39m
+     [32m✓[39m debe manejar error cuando el login falla[32m 18[2mms[22m[39m
+     [32m✓[39m debe mantener isLoading en false después de error[32m 23[2mms[22m[39m
+     [32m✓[39m no debe guardar usuario en el store si el login falla[32m 16[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Button.stories.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1072[2mms[22m[39m
+   [33m[2m✓[22m[39m Primary [33m 759[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Header.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1074[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 905[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Page.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1180[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged Out [33m 905[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1169[2mms[22m[39m
+   [33m[2m✓[22m[39m Default [33m 747[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/App.test.tsx[2m [ src/App.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "@/lib/apiClient" from "src/features/customers/api/customersApi.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/features/customers/api/customersApi.ts[39m:8:26
+[33m  1  |  import { apiClient } from "@/lib/apiClient";
+     |                             ^
+  2  |  export async function fetchCustomers() {
+  3  |    return apiClient("/customers", {[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/23]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 22 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mrenderizado inicial[2m > [22mdebe mostrar campo de email
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mrenderizado inicial[2m > [22mdebe mostrar campo de password
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mrenderizado inicial[2m > [22mdebe mostrar botón de submit
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mrenderizado inicial[2m > [22mel campo de password debe ser tipo password
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mrenderizado inicial[2m > [22mel campo de email debe ser tipo email
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22minteracción del usuario[2m > [22mdebe permitir escribir en el campo de email
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22minteracción del usuario[2m > [22mdebe permitir escribir en el campo de password
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mvalidación de formulario[2m > [22mdebe mostrar error si email está vacío
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mvalidación de formulario[2m > [22mdebe mostrar error si password está vacío
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mvalidación de formulario[2m > [22mdebe mostrar error si email no es válido
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22mvalidación de formulario[2m > [22mdebe mostrar error si password es muy corta
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22menvío de formulario[2m > [22mdebe llamar a login con los datos correctos
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22menvío de formulario[2m > [22mdebe mostrar estado de carga mientras procesa
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22menvío de formulario[2m > [22mdebe deshabilitar el botón mientras procesa
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22menvío de formulario[2m > [22mdebe mostrar mensaje de error si login falla
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22menvío de formulario[2m > [22mdebe limpiar errores al empezar a escribir
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22maccesibilidad[2m > [22mlos campos deben tener labels asociados
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22maccesibilidad[2m > [22mlos campos deben ser requeridos
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx[2m > [22mLoginForm[2m > [22maccesibilidad[2m > [22mdebe mostrar errores con role alert para lectores de pantalla
+[31m[1mError[22m: useNavigate() may be used only in the context of a <Router> component.[39m
+[90m [2m❯[22m invariant node_modules/react-router/dist/development/chunk-4WY6JWTD.mjs:[2m188:11[22m[39m
+[90m [2m❯[22m useNavigateUnstable node_modules/react-router/dist/development/chunk-4WY6JWTD.mjs:[2m5409:3[22m[39m
+[90m [2m❯[22m useNavigate node_modules/react-router/dist/development/chunk-4WY6JWTD.mjs:[2m5406:46[22m[39m
+[36m [2m❯[22m LoginForm src/features/auth/components/LoginForm.tsx:[2m19:20[22m[39m
+    [90m 17| [39m
+    [90m 18| [39m[35mexport[39m [35mfunction[39m [33mLoginForm[39m() {
+    [90m 19| [39m  [35mconst[39m navigate [33m=[39m [34museNavigate[39m()
+    [90m   | [39m                   [31m^[39m
+    [90m 20| [39m  [35mconst[39m { login[33m,[39m isLoading[33m,[39m isError[33m,[39m error } [33m=[39m [34museLogin[39m()
+    [90m 21| [39m
+[90m [2m❯[22m Object.react_stack_bottom_frame ../node_modules/react-dom/cjs/react-dom-client.development.js:[2m25904:20[22m[39m
+[90m [2m❯[22m renderWithHooks ../node_modules/react-dom/cjs/react-dom-client.development.js:[2m7662:22[22m[39m
+[90m [2m❯[22m updateFunctionComponent ../node_modules/react-dom/cjs/react-dom-client.development.js:[2m10166:19[22m[39m
+[90m [2m❯[22m beginWork ../node_modules/react-dom/cjs/react-dom-client.development.js:[2m11778:18[22m[39m
+[90m [2m❯[22m runWithFiberInDEV ../node_modules/react-dom/cjs/react-dom-client.development.js:[2m874:13[22m[39m
+[90m [2m❯[22m performUnitOfWork ../node_modules/react-dom/cjs/react-dom-client.development.js:[2m17641:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/23]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22museLogin[2m > [22mdebe guardar usuario en el store después de login exitoso
+[31m[1mAssertionError[22m: expected null to deeply equal { id: '1', …(2) }
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head />[31m
+  [36m<body>[31m
+    [36m<div />[31m
+  [36m</body>[31m
+[36m</html>[31m[39m
+
+[32m- Expected:[39m 
+{
+  "email": "test@test.com",
+  "id": "1",
+  "name": "Test User",
+}
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m src/features/auth/hooks/__tests__/useLogin.test.tsx:[2m83:44[22m[39m
+    [90m 81| [39m
+    [90m 82| [39m    [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m 83| [39m      [34mexpect[39m(useAuthStore[33m.[39m[34mgetState[39m()[33m.[39muser)[33m.[39m[34mtoEqual[39m(mockResponse[33m.[39muser)
+    [90m   | [39m                                           [31m^[39m
+    [90m 84| [39m    })
+    [90m 85| [39m  })
+[90m [2m❯[22m runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:[2m47:12[22m[39m
+[90m [2m❯[22m checkCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m124:77[22m[39m
+[90m [2m❯[22m Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m118:16[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/23]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22museLogin[2m > [22mdebe guardar token en el store después de login exitoso
+[31m[1mAssertionError[22m: expected null to be 'fake-token' // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head />[31m
+  [36m<body>[31m
+    [36m<div />[31m
+  [36m</body>[31m
+[36m</html>[31m[39m
+
+[32m- Expected:[39m 
+"fake-token"
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m src/features/auth/hooks/__tests__/useLogin.test.tsx:[2m109:45[22m[39m
+    [90m107| [39m
+    [90m108| [39m    [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m109| [39m      [34mexpect[39m(useAuthStore[33m.[39m[34mgetState[39m()[33m.[39mtoken)[33m.[39m[34mtoBe[39m([32m'fake-token'[39m)
+    [90m   | [39m                                            [31m^[39m
+    [90m110| [39m    })
+    [90m111| [39m  })
+[90m [2m❯[22m runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:[2m47:12[22m[39m
+[90m [2m❯[22m checkCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m124:77[22m[39m
+[90m [2m❯[22m Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m118:16[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/23]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22museLogin[2m > [22mdebe cambiar isAuthenticated a true después de login exitoso
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head />[31m
+  [36m<body>[31m
+    [36m<div />[31m
+  [36m</body>[31m
+[36m</html>[31m[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/features/auth/hooks/__tests__/useLogin.test.tsx:[2m135:55[22m[39m
+    [90m133| [39m
+    [90m134| [39m    [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m135| [39m      [34mexpect[39m(useAuthStore[33m.[39m[34mgetState[39m()[33m.[39misAuthenticated)[33m.[39m[34mtoBe[39m([35mtrue[39m)
+    [90m   | [39m                                                      [31m^[39m
+    [90m136| [39m    })
+    [90m137| [39m  })
+[90m [2m❯[22m runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:[2m47:12[22m[39m
+[90m [2m❯[22m checkCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m124:77[22m[39m
+[90m [2m❯[22m Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m118:16[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/23]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (15)[39m
+[2m      Tests [22m [1m[31m22 failed[39m[22m[2m | [22m[1m[32m182 passed[39m[22m[90m (204)[39m
+[2m   Start at [22m 07:14:08
+[2m   Duration [22m 9.22s[2m (transform 11.40s, setup 10.20s, import 14.20s, tests 8.45s, environment 17.49s)[22m
+

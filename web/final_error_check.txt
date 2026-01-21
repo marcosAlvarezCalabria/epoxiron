@@ -1,0 +1,88 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/home/marcos/Desktop/epoxiron/web[39m
+
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/value-objects/Email.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/User.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Item.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 82[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/DeliveryNote.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/stores/__tests__/authStore.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/domain/entities/__tests__/Customer.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe guardar usuario y token en el store después de login exitoso
+[22m[39m[Technical Error] TypeError: Cannot read properties of undefined (reading 'user')
+    at Object.onSuccess [90m(/home/marcos/Desktop/epoxiron/web/[39msrc/features/auth/hooks/useLogin.ts:32:22[90m)[39m
+    at Mutation.execute [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@tanstack/query-core[24m/build/modern/mutation.js:121:37[90m)[39m
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe manejar error cuando el login falla
+[22m[39m[Auth Error] INVALID_CREDENTIALS: Credenciales incorrectas
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mdebe mantener isLoading en false después de error
+[22m[39m[Technical Error] Error: Gateway Error
+    at [90m/home/marcos/Desktop/epoxiron/web/[39msrc/features/auth/hooks/__tests__/useLogin.test.tsx:122:23
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:919:26
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1244:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1210:10[90m)[39m
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1654:37
+    at Traces.$ [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4mvitest[24m/dist/chunks/test.DqQZzsWf.js:234:21[90m)[39m
+    at runTest [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1654:12[90m)[39m
+
+[90mstderr[2m | src/features/auth/hooks/__tests__/useLogin.test.tsx[2m > [22m[2museLogin[2m > [22m[2mno debe guardar usuario en el store si el login falla
+[22m[39m[Technical Error] Error: Fail
+    at [90m/home/marcos/Desktop/epoxiron/web/[39msrc/features/auth/hooks/__tests__/useLogin.test.tsx:141:23
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:919:26
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1244:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1210:10[90m)[39m
+    at [90mfile:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1654:37
+    at Traces.$ [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4mvitest[24m/dist/chunks/test.DqQZzsWf.js:234:21[90m)[39m
+    at runTest [90m(file:///home/marcos/Desktop/epoxiron/web/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1654:12[90m)[39m
+
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/hooks/__tests__/useLogin.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 340[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/components/__tests__/LoginForm.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 3157[2mms[22m[39m
+       [33m[2m✓[22m[39m debe mostrar botón de submit [33m 635[2mms[22m[39m
+       [33m[2m✓[22m[39m debe permitir escribir en el campo de email [33m 370[2mms[22m[39m
+       [33m[2m✓[22m[39m debe mostrar error si password está vacío [33m 341[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/application/use-cases/__tests__/CreateDeliveryNoteUseCase.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/features/auth/api/__tests__/authApi.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Header.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1556[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 1295[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Button.stories.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1702[2mms[22m[39m
+   [33m[2m✓[22m[39m Primary [33m 1187[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/stories/Page.stories.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1713[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged Out [33m 1274[2mms[22m[39m
+   [33m[2m✓[22m[39m Logged In [33m 420[2mms[22m[39m
+ [32m✓[39m [30m[45m storybook (chromium) [49m[39m src/features/auth/components/LoginForm.stories.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1489[2mms[22m[39m
+   [33m[2m✓[22m[39m Default [33m 941[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/App.test.tsx[2m [ src/App.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "@/features/auth/stores/authStore" from "src/components/layout/Navbar.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/marcos/Desktop/epoxiron/web/src/components/layout/Navbar.tsx[39m:3:29
+[33m  1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+  2  |  import { useNavigate, useLocation } from "react-router-dom";
+  3  |  import { useAuthStore } from "@/features/auth/stores/authStore";
+     |                                ^
+  4  |  export function Navbar() {
+  5  |    const { user, logout } = useAuthStore();[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29647:43[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29644:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27767:18[22m[39m
+[90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27825:32[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27793:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m29445:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m23316:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+[2m      Tests [22m [1m[32m200 passed[39m[22m[90m (200)[39m
+[2m   Start at [22m 07:43:50
+[2m   Duration [22m 11.09s[2m (transform 17.94s, setup 13.45s, import 21.89s, tests 10.38s, environment 18.77s)[22m
+

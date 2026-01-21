@@ -102,8 +102,8 @@ export async function createDeliveryNote(req: Request, res: Response) {
       if (rate) {
         // 1. Check for special pieces FIRST (doesn't require measurements)
         const specialPiece = rate.specialPieces?.find(p =>
-          (item.name && p.name.toLowerCase() === item.name.toLowerCase()) ||
-          (item.description && p.name.toLowerCase() === item.description.toLowerCase())
+          (item.name && p.name.trim().toLowerCase() === item.name.trim().toLowerCase()) ||
+          (item.description && p.name.trim().toLowerCase() === item.description.trim().toLowerCase())
         )
 
         if (specialPiece) {

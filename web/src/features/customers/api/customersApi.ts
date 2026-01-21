@@ -5,7 +5,7 @@
  * All requests automatically include JWT token
  */
 
-import { apiClient } from '@/lib/apiClient'
+import { apiClient } from '../../../lib/apiClient'
 import type { Customer, CreateCustomerRequest, UpdateCustomerRequest } from '../types/Customer'
 
 export async function fetchCustomers(): Promise<Customer[]> {

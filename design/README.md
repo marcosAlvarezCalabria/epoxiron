@@ -84,10 +84,6 @@ Diseño específico de cada pantalla de la aplicación
    - Validación de precio
    - Descripción y unidad
 
-9. **[Listar Tarifas](screens/09-listar-tarifas.md)** 💵
-   - Tabla con búsqueda
-   - Paginación
-   - Acciones por fila
 
 ---
 

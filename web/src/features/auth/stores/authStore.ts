@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthStore>()(
       name: 'auth-storage',
       storage: {
         getItem: (name) => {
-          const str = localStorage.getItem(name)
+          const str = window.localStorage.getItem(name)
           if (!str) return null
 
           try {
@@ -124,9 +124,9 @@ export const useAuthStore = create<AuthStore>()(
           // User.ts has toJSON().
           // Token.ts needs toJSON() to be safe? 
           // Or we just rely on default.
-          localStorage.setItem(name, JSON.stringify(value))
+          window.localStorage.setItem(name, JSON.stringify(value))
         },
-        removeItem: (name) => localStorage.removeItem(name),
+        removeItem: (name) => window.localStorage.removeItem(name),
       }
     }
   )
