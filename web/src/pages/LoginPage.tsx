@@ -5,6 +5,9 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, type LoginFormData } from '../features/auth/schemas/loginSchema'
 import { useAuthStore } from '../features/auth/stores/authStore'
 import { login as loginApi } from '../features/auth/api/authApi'
 import { User } from '../domain/entities/User'
@@ -12,42 +15,44 @@ import { Email } from '../domain/value-objects/Email'
 import { Token } from '../domain/value-objects/Token'
 
 export function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [validatiorError, setValidationError] = useState('')
 
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur', // Immediate feedback on blur
+  })
+
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
-    setError('')
+    setValidationError('')
 
     try {
-      // Call the real backend API
-      const response = await loginApi({ email, password })
+      const response = await loginApi({ email: data.email, password: data.password })
 
-      // Transform API response to Domain Entities (Construction: Raw materials -> Structure)
       const userEmail = new Email(response.user.email)
       const token = new Token(response.token)
 
       const user = new User({
-        id: response.user.id || 'temp-id', // Ensure ID exists
+        id: response.user.id || 'temp-id',
         email: userEmail,
         name: response.user.name,
         role: ((response.user as any).role) || 'user'
       })
 
-      // Save user and token in authStore
       setAuth(user, token)
-
       navigate('/dashboard')
     } catch (err) {
-      setError('Email o contraseña incorrectos')
+      setValidationError('Email o contraseña incorrectos')
       console.error('Login error:', err)
     } finally {
       setIsLoading(false)

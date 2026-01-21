@@ -24,7 +24,7 @@ import { Toaster } from 'react-hot-toast';
 function App() {
   return (
     <BrowserRouter>
-      <Toaster />
+      <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route

@@ -11,6 +11,8 @@ import { useCreateDeliveryNote, useUpdateDeliveryNote } from '../hooks/useDelive
 import type { DeliveryNote, CreateDeliveryNoteRequest, DeliveryNoteItem } from '../types/DeliveryNote'
 import { Measurements } from '../../../domain/value-objects/Measurements'
 import { RAL_COLORS } from '@/constants/ralColors'
+import toast from 'react-hot-toast'
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal'
 
 interface DeliveryNoteFormProps {
   deliveryNote?: DeliveryNote
@@ -175,17 +177,17 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
   const handleAddItem = () => {
     if (!newItem.name) {
-      alert('Por favor, introduce un nombre para el item.')
+      toast.error('Por favor, introduce un nombre para el item')
       return
     }
     if (!newItem.quantity || newItem.quantity <= 0) {
-      alert('Por favor, introduce una cantidad válida.')
+      toast.error('Por favor, introduce una cantidad válida')
       return
     }
 
     const calculatedPrice = calculateItemPrice(newItem)
     if (calculatedPrice === 0) {
-      alert('El precio calculada es 0. Por favor revisa las tarifas o medidas.')
+      toast.error('El precio calculado es 0. Por favor revisa las tarifas o medidas')
       return
     }
 
@@ -221,54 +223,30 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
 
   const estimatedTotal = items.reduce((sum, item) => sum + (calculateItemPrice(item) * item.quantity), 0)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Modal State
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    isDestructive?: boolean
+    onConfirm: () => void
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => { }
+  })
 
-    // Validation: Customer & Date
-    if (!customerId) {
-      alert('Por favor, selecciona un Cliente.')
-      return
-    }
-    if (!date) {
-      alert('Por favor, selecciona una Fecha.')
-      return
-    }
+  const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }))
 
-    // Validation: Items
-    if (items.length === 0) {
-      alert('El albarán debe tener al menos un item.')
-      return
-    }
-
-    // UX: Check if there is data in the "New Item" form that hasn't been added
-    if (newItem.name.trim() !== '' || (newItem.quantity && newItem.quantity > 0)) {
-      const confirmDiscard = window.confirm(
-        'Tienes datos en el formulario de "Nuevo Item" sin añadir a la lista.\n\n' +
-        'Si continúas, estos datos se perderán.\n' +
-        '¿Quieres continuar sin añadir este item?'
-      )
-      if (!confirmDiscard) {
-        return
-      }
-    }
-
-    // Validation: Zero Prices
-    const zeroPriceItems = items.filter(i => calculateItemPrice(i) === 0)
-    if (zeroPriceItems.length > 0) {
-      const confirmZero = window.confirm(
-        `Hay ${zeroPriceItems.length} items con precio 0.\n¿Estás seguro de que quieres continuar?`
-      )
-      if (!confirmZero) return
-    }
-
+  // --- Logic for Saving ---
+  const processSave = async () => {
     if (isLoading) return
 
     try {
-      // ... (item mapping)
       const processedItems: Omit<DeliveryNoteItem, 'id'>[] = items.map(item => {
         const calculatedPrice = calculateItemPrice(item)
         return {
-          // ... (existing item map)
           name: item.name,
           description: item.name,
           quantity: item.quantity,
@@ -280,8 +258,8 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           },
           racColor: item.racColor,
           specialColor: item.specialColor,
-          unitPrice: calculatedPrice, // Ensure price is sent
-          totalPrice: calculatedPrice * item.quantity, // Ensure total is sent
+          unitPrice: calculatedPrice,
+          totalPrice: calculatedPrice * item.quantity,
           notes: item.notes,
           hasPrimer: item.hasPrimer,
           isHighThickness: item.isHighThickness
@@ -293,7 +271,7 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           id: deliveryNote.id,
           data: {
             customerId,
-            date: new Date(date).toISOString(), // Use selected date
+            date: new Date(date).toISOString(),
             items: processedItems.map((item, index) => ({
               ...item,
               id: deliveryNote.items[index]?.id || `new-${index}`,
@@ -301,22 +279,81 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
             notes: notes.trim() || undefined
           }
         })
+        toast.success('Albarán actualizado correctamente')
         onSuccess(result.id)
       } else {
         const createData: CreateDeliveryNoteRequest = {
           customerId,
-          date: new Date(date).toISOString(), // Use selected date
+          date: new Date(date).toISOString(),
           items: processedItems,
           notes: notes.trim() || undefined
         }
 
         const result = await createDeliveryNote.mutateAsync(createData)
+        toast.success('Albarán creado correctamente')
         onSuccess(result.id)
       }
     } catch (error) {
       console.error('Error creating/updating delivery note:', error)
-      alert('Ocurrió un error al guardar el albarán.')
+      toast.error('Ocurrió un error al guardar el albarán')
     }
+  }
+
+  const checkZeroPricesAndSave = () => {
+    // Validation: Zero Prices
+    const zeroPriceItems = items.filter(i => calculateItemPrice(i) === 0)
+    if (zeroPriceItems.length > 0) {
+      setModalConfig({
+        isOpen: true,
+        title: 'Items con precio 0€',
+        message: `Hay ${zeroPriceItems.length} items con precio 0. ¿Estás seguro de que quieres continuar?`,
+        isDestructive: false,
+        onConfirm: () => {
+          closeModal()
+          processSave()
+        }
+      })
+      return
+    }
+
+    processSave()
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Validation: Customer & Date
+    if (!customerId) {
+      toast.error('Por favor, selecciona un Cliente')
+      return
+    }
+    if (!date) {
+      toast.error('Por favor, selecciona una Fecha')
+      return
+    }
+
+    // Validation: Items
+    if (items.length === 0) {
+      toast.error('El albarán debe tener al menos un item')
+      return
+    }
+
+    // UX: Check if there is data in the "New Item" form that hasn't been added
+    if (newItem.name.trim() !== '' || (newItem.quantity && newItem.quantity > 0)) {
+      setModalConfig({
+        isOpen: true,
+        title: 'Item sin guardar',
+        message: 'Tienes datos en el formulario de "Nuevo Item" sin añadir a la lista. Si continúas, estos datos se perderán.',
+        isDestructive: true,
+        onConfirm: () => {
+          closeModal()
+          checkZeroPricesAndSave()
+        }
+      })
+      return
+    }
+
+    checkZeroPricesAndSave()
   }
 
   return (
@@ -605,6 +642,14 @@ export function DeliveryNoteForm({ deliveryNote, isEditing = false, onSuccess, o
           </button>
         </div>
       </form>
+      <ConfirmationModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={closeModal}
+        isDestructive={modalConfig.isDestructive}
+      />
     </div>
   )
 }

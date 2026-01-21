@@ -12,7 +12,7 @@ Componentes compartidos utilizados en 2 o más pantallas (`src/shared/`)
    - FAB flotante en esquina inferior derecha
    - Calculadora con operaciones básicas
    - Copiar resultado al clipboard
-   - **Usado en:** Dashboard, Menú, Albaranes, Clientes, Tarifas
+   - **Usado en:** Dashboard, Menú, Albaranes, Clientes
 
 2. **[Breadcrumbs](global/breadcrumbs.md)** 🧭
    - Navegación jerárquica
@@ -24,7 +24,7 @@ Componentes compartidos utilizados en 2 o más pantallas (`src/shared/`)
    - Sistema de paginación con truncamiento
    - 25/50/100 registros por página
    - Responsive (vertical en móvil, horizontal en desktop)
-   - **Usado en:** Listar Albaranes, Listar Clientes, Listar Tarifas
+   - **Usado en:** Listar Albaranes, Listar Clientes
 
 4. **[Modal de Confirmación de Eliminación](global/delete-confirmation.md)** 🗑️
    - Confirmación antes de eliminar
@@ -36,7 +36,7 @@ Componentes compartidos utilizados en 2 o más pantallas (`src/shared/`)
    - Validación on blur (campos individuales)
    - Validación on submit (formulario completo)
    - Mensajes de error claros y accionables
-   - **Usado en:** Todos los formularios (Login, Albarán, Cliente, Tarifa)
+   - **Usado en:** Todos los formularios (Login, Albarán, Cliente)
 
 ---
 
@@ -79,10 +79,7 @@ Diseño específico de cada pantalla de la aplicación
    - Paginación
    - Acciones por fila
 
-8. **[Tarifa (Crear/Editar)](screens/08-tarifa.md)** 💰
-   - Formulario dual (crear/editar)
-   - Validación de precio
-   - Descripción y unidad
+
 
 
 ---
@@ -129,8 +126,7 @@ design/
     ├── 05-listar-albaranes.md
     ├── 06-cliente.md
     ├── 07-listar-clientes.md
-    ├── 08-tarifa.md
-    └── 09-listar-tarifas.md
+
 ```
 
 ---

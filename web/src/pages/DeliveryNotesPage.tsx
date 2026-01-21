@@ -5,12 +5,20 @@
 import { useDeliveryNotes } from '../features/delivery-notes/hooks/useDeliveryNotes'
 import { useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/layout/Navbar'
-import { useState } from 'react'
+import { Pagination } from '@/components/ui/Pagination'
+import { useState, useEffect } from 'react'
 
 export function DeliveryNotesPage() {
   const navigate = useNavigate()
   const { data: deliveryNotes, isLoading } = useDeliveryNotes()
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
+
+  // Reset page when filtering or changing items per page
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, itemsPerPage])
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -56,6 +64,12 @@ export function DeliveryNotesPage() {
     note.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (note.number || '').toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentNotes = filteredNotes.slice(indexOfFirstItem, indexOfLastItem)
+  const totalItems = filteredNotes.length
 
   return (
     <div className="bg-gray-900 font-sans text-gray-200 min-h-screen">
@@ -103,68 +117,80 @@ export function DeliveryNotesPage() {
 
         {/* Delivery Notes Table */}
         <div className="px-4 overflow-x-auto">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm flex flex-col">
 
             {isLoading ? (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-8 text-center text-gray-400 flex-grow">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
                 Cargando albaranes...
               </div>
             ) : filteredNotes.length > 0 ? (
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-black/20">
-                  <tr>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nº</th>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Fecha</th>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Cant. Total</th>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold text-right">Importe</th>
-                    <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {filteredNotes.map((note) => (
-                    <tr
-                      key={note.id}
-                      className="hover:bg-white/5 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/delivery-notes/${note.id}`)}
-                    >
-                      <td className="px-4 py-4 font-bold text-white">{note.number || note.id}</td>
-                      <td className="px-4 py-4 text-gray-300">
-                        {new Date(note.date).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit'
-                        })}
-                      </td>
-                      <td className="px-4 py-4 text-gray-200">{note.customerName}</td>
-                      <td className="px-4 py-4">{getStatusBadge(note.status)}</td>
-                      <td className="px-4 py-4 text-center text-gray-200">
-                        {note.items.reduce((sum, item) => sum + item.quantity, 0)}
-                      </td>
-                      <td className="px-4 py-4 text-right font-bold text-white">
-                        {(note.totalAmount || 0).toFixed(2)}€
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation() // Evitar que se active el click de la fila
-                            navigate(`/delivery-notes/${note.id}`)
-                          }}
-                          className="p-2 text-blue-600 hover:bg-blue-600/20 rounded-lg transition-colors"
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-black/20">
+                      <tr>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold">Nº</th>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold">Fecha</th>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold">Cliente</th>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold">Estado</th>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Cant. Total</th>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold text-right">Importe</th>
+                        <th className="px-4 py-3 text-gray-400 text-sm font-bold text-center">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {currentNotes.map((note) => (
+                        <tr
+                          key={note.id}
+                          className="hover:bg-white/5 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/delivery-notes/${note.id}`)}
                         >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <td className="px-4 py-4 font-bold text-white">{note.number || note.id}</td>
+                          <td className="px-4 py-4 text-gray-300">
+                            {new Date(note.date).toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            })}
+                          </td>
+                          <td className="px-4 py-4 text-gray-200">{note.customerName}</td>
+                          <td className="px-4 py-4">{getStatusBadge(note.status)}</td>
+                          <td className="px-4 py-4 text-center text-gray-200">
+                            {note.items.reduce((sum, item) => sum + item.quantity, 0)}
+                          </td>
+                          <td className="px-4 py-4 text-right font-bold text-white">
+                            {(note.totalAmount || 0).toFixed(2)}€
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation() // Evitar que se active el click de la fila
+                                navigate(`/delivery-notes/${note.id}`)
+                              }}
+                              className="p-2 text-blue-600 hover:bg-blue-600/20 rounded-lg transition-colors"
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                />
+              </>
             ) : (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-8 text-center text-gray-400 flex-grow">
                 {searchTerm ? `No se encontraron resultados para "${searchTerm}"` : 'No hay albaranes registrados.'}
               </div>
             )}

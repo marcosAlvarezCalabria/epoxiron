@@ -25,6 +25,7 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
   })
 
   const onSubmit = (data: LoginFormData) => {
@@ -67,13 +68,15 @@ export function LoginForm() {
           id="email"
           type="email"
           {...register('email')}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors ${errors.email ? 'border-red-500 focus:ring-red-500 bg-red-50 text-red-900' : 'border-gray-300 focus:ring-blue-500'
             }`}
           placeholder="tu@email.com"
           disabled={isLoading}
+          aria-describedby={errors.email ? 'email-error' : undefined}
+          aria-invalid={errors.email ? 'true' : 'false'}
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">{errors.email.message}</p>
         )}
       </div>
 
@@ -86,13 +89,15 @@ export function LoginForm() {
           id="password"
           type="password"
           {...register('password')}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors ${errors.password ? 'border-red-500 focus:ring-red-500 bg-red-50 text-red-900' : 'border-gray-300 focus:ring-blue-500'
             }`}
           placeholder="••••••••"
           disabled={isLoading}
+          aria-describedby={errors.password ? 'password-error' : undefined}
+          aria-invalid={errors.password ? 'true' : 'false'}
         />
         {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+          <p id="password-error" className="mt-1 text-sm text-red-600" role="alert">{errors.password.message}</p>
         )}
       </div>
 
