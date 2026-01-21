@@ -84,11 +84,11 @@ export function LoginPage() {
             Iniciar sesión
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
             {/* Error Message */}
-            {error && (
+            {validatiorError && (
               <div className="bg-red-900/20 border border-red-800/30 text-red-400 px-4 py-3 rounded-xl text-sm">
-                {error}
+                {validatiorError}
               </div>
             )}
 
@@ -100,13 +100,15 @@ export function LoginPage() {
                 </p>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...register('email')}
                   disabled={isLoading}
-                  className="flex w-full min-w-0 flex-1 rounded-xl text-white focus:outline-0 focus:ring-2 focus:ring-blue-600/40 border border-gray-700 bg-gray-900 focus:border-blue-600 h-14 placeholder:text-gray-500 p-[15px] text-base font-normal transition-all disabled:opacity-50"
+                  className={`flex w-full min-w-0 flex-1 rounded-xl text-white focus:outline-0 focus:ring-2 border bg-gray-900 h-14 placeholder:text-gray-500 p-[15px] text-base font-normal transition-all disabled:opacity-50 ${errors.email
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/40 bg-red-900/10'
+                    : 'border-gray-700 focus:border-blue-600 focus:ring-blue-600/40'
+                    }`}
                   placeholder="nombre@empresa.com"
                 />
+                {errors.email && <p className="text-red-400 text-xs mt-1 ml-1">{errors.email.message}</p>}
               </label>
             </div>
 
@@ -119,11 +121,12 @@ export function LoginPage() {
                 <div className="relative flex w-full items-stretch">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    {...register('password')}
                     disabled={isLoading}
-                    className="flex w-full min-w-0 flex-1 rounded-xl text-white focus:outline-0 focus:ring-2 focus:ring-blue-600/40 border border-gray-700 bg-gray-900 focus:border-blue-600 h-14 placeholder:text-gray-500 p-[15px] pr-12 text-base font-normal transition-all disabled:opacity-50"
+                    className={`flex w-full min-w-0 flex-1 rounded-xl text-white focus:outline-0 focus:ring-2 border bg-gray-900 h-14 placeholder:text-gray-500 p-[15px] pr-12 text-base font-normal transition-all disabled:opacity-50 ${errors.password
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/40 bg-red-900/10'
+                      : 'border-gray-700 focus:border-blue-600 focus:ring-blue-600/40'
+                      }`}
                     placeholder="••••••••"
                   />
                   <button
