@@ -8,20 +8,15 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginFormData } from '../features/auth/schemas/loginSchema'
-import { useAuthStore } from '../features/auth/stores/authStore'
-import { login as loginApi } from '../features/auth/api/authApi'
-import { User } from '../domain/entities/User'
-import { Email } from '../domain/value-objects/Email'
-import { Token } from '../domain/value-objects/Token'
+import { useLogin } from '../features/auth/hooks/useLogin'
 
 export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [validatiorError, setValidationError] = useState('')
 
   const navigate = useNavigate()
-  const { setAuth } = useAuthStore()
+  const { login, isLoading } = useLogin()
 
   const {
     register,
@@ -29,34 +24,32 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    mode: 'onBlur', // Immediate feedback on blur
+    mode: 'onBlur',
   })
 
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
+  const onSubmit = (data: LoginFormData) => {
     setValidationError('')
 
-    try {
-      const response = await loginApi({ email: data.email, password: data.password })
-
-      const userEmail = new Email(response.user.email)
-      const token = new Token(response.token)
-
-      const user = new User({
-        id: response.user.id || 'temp-id',
-        email: userEmail,
-        name: response.user.name,
-        role: ((response.user as any).role) || 'user'
-      })
-
-      setAuth(user, token)
-      navigate('/dashboard')
-    } catch (err) {
-      setValidationError('Email o contraseña incorrectos')
-      console.error('Login error:', err)
-    } finally {
-      setIsLoading(false)
-    }
+    login(
+      { email: data.email, password: data.password },
+      {
+        onSuccess: () => {
+          navigate('/dashboard')
+        },
+        onError: (err: any) => { // Type 'any' for now, useLogin handles specific types internally or we inspect here
+          // Ideally useLogin hook exposes a typed error or we check instanceof here
+          // But useLogin implementation just logs it. We need to display it.
+          // Let's check what useLogin exposes.
+          // mutation.error is available.
+          // But inside onError callback, we get the error object.
+          if (err.message) {
+            setValidationError(err.message)
+          } else {
+            setValidationError('Error al iniciar sesión')
+          }
+        }
+      }
+    )
   }
 
   return (

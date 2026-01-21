@@ -67,11 +67,11 @@ export function DailySummaryPage() {
 
   const stats = {
     total: todayNotes.length,
-    borradores: todayNotes.filter(n => n.status === 'draft').length,
-    validados: todayNotes.filter(n => n.status === 'validated').length,
-    finalizados: todayNotes.filter(n => n.status === 'finalized').length,
-    correctos: todayNotes.filter(n => n.status === 'finalized').length,
-    sinPrecios: todayNotes.filter(n => n.items?.some(item => !item.totalPrice || item.totalPrice === 0)).length
+    borradores: todayNotes.filter(note  => note.status === 'draft').length,
+    validados: todayNotes.filter(note => note.status === 'validated').length,
+    finalizados: todayNotes.filter(note => note.status === 'finalized').length,
+    correctos: todayNotes.filter(note => note.status === 'finalized').length,
+    sinPrecios: todayNotes.filter(note => note.items?.some(item => !item.totalPrice || item.totalPrice === 0)).length
   }
 
   const getCustomerName = (customerId: string) => {
